@@ -7,11 +7,11 @@ const PatientProfile = () => {
         <PatientLayout>
             <div className="flex flex-col lg:flex-row p-6 gap-6 mt-10 items-stretch">
                 
-                <div className="w-full lg:w-5/12 p-4">
+                <div className="w-full lg:w-5/12 ">
                     {/* Image and Details */}
-                    <div className="flex justify-between mb-4 bg-white shadow-md rounded-md p-5 border border-gray-300 ">
+                    <div className="flex justify-between mb-4 bg-white shadow-md rounded-md p-6 border border-gray-300 ">
                         <div className="w-36 h-40 bg-gray-200 rounded-md">
-                            <img src="" alt="Profile" className="w-full h-full object-cover" />
+                            <img src="https://cdn3d.iconscout.com/3d/premium/thumb/boy-avatar-3d-icon-download-in-png-blend-fbx-gltf-file-formats--boys-male-man-pack-avatars-icons-5187865.png?f=webp" alt="Profile" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex flex-col justify-center w-8/12 space-y-2">
                             <h1 className="text-xl font-bold">Sankalpa Shrestha</h1>
@@ -38,7 +38,7 @@ const PatientProfile = () => {
                     {/* Insurance Information */}
                     <div className="bg-white  p-6 shadow-md rounded-md border border-gray-300">
                         <h1 className="text-2xl font-bold mb-2 text-teal-700">Insurance Information</h1>
-                        <div className="space-y-2 ">
+                        <div className="space-y-2  mb-4">
                             <p className="text-gray-500">
                                 Insurance ID: <span className="font-semibold">2512-9652-1452</span>
                             </p>
@@ -58,19 +58,19 @@ const PatientProfile = () => {
                     <h1 className="text-xl font-bold mb-4">Medical Background</h1>
                     {/* Medical Records */}
                     <div className="space-y-2 flex-grow">
-                        <div className="bg-teal-50 p-4 rounded-md">
+                        <div className="bg-teal-50 p-4 rounded-md border-teal-300 border">
                             <p className="font-semibold">Disease Name:</p>
                             <p className="text-gray-600">Description or related information</p>
                         </div>
-                        <div className="bg-teal-50 p-4 rounded-md">
+                        <div className="bg-teal-50 p-4 rounded-md border-teal-300 border">
                             <p className="font-semibold">Disease Name:</p>
                             <p className="text-gray-600">Description or related information</p>
                         </div>
-                        <div className="bg-teal-50 p-4 rounded-md">
+                        <div className="bg-teal-50 p-4 rounded-md border-teal-300 border">
                             <p className="font-semibold">Disease Name:</p>
                             <p className="text-gray-600">Description or related information</p>
                         </div>
-                        <div className="bg-teal-50 p-4 rounded-md">
+                        <div className="bg-teal-50 p-4 rounded-md border-teal-300 border">
                             <p className="font-semibold">Disease Name:</p>
                             <p className="text-gray-600">Description or related information</p>
                         </div>
