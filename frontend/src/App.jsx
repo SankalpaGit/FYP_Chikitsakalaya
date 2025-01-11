@@ -15,6 +15,7 @@ import RegisterForm from "./pages/patients/RegisterForm";
 import HomePage from "./pages/patients/HomePage";
 import SetFreeTime from "./pages/doctors/SetFreeTime";
 import ToDoList from "./pages/doctors/ToDoList";
+import PatientProfile from "./pages/patients/PatientProfile";
 
 function App() {
 
@@ -37,7 +38,7 @@ function App() {
         <ProtectedRoute>
           <DoctorApproval />
         </ProtectedRoute>} />
-      <Route path="/" element={<LandingPage />} />
+      
       <Route path="/admin" element={<Credential />} />
       < Route path="/admin/user/doctor" element={<DoctorUser />} />
       < Route path="/admin/user/patient" element={<PatientUser />} />
@@ -46,8 +47,10 @@ function App() {
       <Route path="/login" element={<LoginForm />} />
       <Route path="/register" element={<RegisterForm />} />
       <Route path='/home' element={<HomePage />} />
+      < Route path='/profile' element={<PatientProfile/>} />
       
-      {/* 404 page when path not found */}
+      {/* 404 page and landing page */}
+      <Route path="/" element={<LandingPage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
 

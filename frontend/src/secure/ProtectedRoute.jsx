@@ -1,63 +1,38 @@
-// src/secure/ProtectedRoute.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
   const navigate = useNavigate();
   const [redirect, setRedirect] = useState(false);
 
-  const isAuthenticated = () => {
+  const isAuthenticated = useMemo(() => {
     const token = localStorage.getItem("token");
     const tokenExpiry = parseInt(localStorage.getItem("tokenExpiry"), 10);
-
-    if (token && tokenExpiry && tokenExpiry > Date.now()) {
-      return true;
-    }
-
-    localStorage.removeItem("token");
-    localStorage.removeItem("tokenExpiry");
-    return false;
-  };
+    return token && tokenExpiry > Date.now();
+  }, []);
 
   useEffect(() => {
-    let timer, redirectTimer;
-
-    if (isAuthenticated()) {
-      timer = setTimeout(() => {
-        // Display alert with custom message
-        window.alert("Session expired. You will be redirected shortly.");
-
-        // Wait for 2 seconds before redirecting
-        redirectTimer = setTimeout(() => {
-          localStorage.removeItem("token");
-          localStorage.removeItem("tokenExpiry");
-          localStorage.setItem("sessionExpired", "true");
-          setRedirect(true);
-        }, 1000); // 1 seconds
-      }, 10 * 6 * 10000); // 10 min for session expiration
-    } else {
+    if (!isAuthenticated) {
       navigate("/admin");
+      return;
     }
 
-    return () => {
-      clearTimeout(timer);
-      clearTimeout(redirectTimer);
-    };
-  }, [navigate]);
+    const timer = setTimeout(() => {
+      window.alert("Session expired. You will be redirected shortly.");
+      setTimeout(() => {
+        localStorage.clear();
+        setRedirect(true);
+      }, 1000);
+    }, 10 * 60 * 1000); // 10 minutes
 
-  if (redirect) {
+    return () => clearTimeout(timer);
+  }, [isAuthenticated, navigate]);
+
+  if (!isAuthenticated || redirect) {
     return <Navigate to="/admin" />;
   }
 
-  if (!isAuthenticated()) {
-    return <Navigate to="/admin" />;
-  }
-
-  return (
-    <>
-      {children}
-    </>
-  );
+  return <>{children}</>;
 };
 
 export default ProtectedRoute;

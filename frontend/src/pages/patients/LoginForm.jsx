@@ -1,26 +1,26 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('/api/auth/login', { email, password });
+      const response = await axios.post('http://localhost:5000/api/login', { email, password });
       localStorage.setItem('token', response.data.token);
       setMessage('Login successful!');
-      window.location.href = '/dashboard';
+      navigate('/home');  // Redirect to dashboard after login
     } catch (error) {
+      console.error('Login error:', error);  // Log error details to console
       setMessage('Login failed');
     }
   };
-
-  const handleGoogleLogin = () => {
-    window.location.href = '/auth/google';
-  };
+  
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
@@ -50,12 +50,6 @@ function LoginForm() {
             Login
           </button>
         </form>
-        <button
-          onClick={handleGoogleLogin}
-          className="mt-4 w-full bg-red-500 text-white font-semibold py-2 rounded-md hover:bg-red-600"
-        >
-          Login with Google
-        </button>
         <p className="text-center mt-4 text-gray-600">{message}</p>
       </div>
     </div>
