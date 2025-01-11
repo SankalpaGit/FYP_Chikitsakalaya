@@ -1,45 +1,43 @@
-// routes/patientAuth.js
-
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Patient = require('../models/Patient'); 
 const router = express.Router();
 
-// Register
+// Register Route (Registration API)
 router.post('/register', async (req, res) => {
   const { email, password, firstName, lastName } = req.body;
-  
   try {
     // Check if email already exists
-    const existingPatient = await Patient.findOne({ where: { email } });
-    if (existingPatient) return res.status(400).json({ message: 'Email already in use' });
+    const existingUser = await Patient.findOne({ where: { email } });
+    if (existingUser) return res.status(400).json({ message: 'Email already in use' });
 
-    // Hash the password
+    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create patient
-    const patient = await Patient.create({
+    // Create user
+    const newUser = await Patient.create({
       email,
       password: hashedPassword,
       firstName,
-      lastName
+      lastName,
+      isVerified: true, // Automatically mark user as verified (no email verification)
     });
 
-    res.status(201).json({ message: 'Registration successful', patient });
+    res.status(201).json({ message: 'Registration successful' });
   } catch (error) {
-    res.status(500).json({ message: 'Error registering patient', error });
+    res.status(500).json({ message: 'Error registering user', error });
   }
 });
 
-// Login
+// Login Route
 router.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Find patient
+    // Find user
     const patient = await Patient.findOne({ where: { email } });
-    if (!patient || !patient.password) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!patient) return res.status(400).json({ message: 'Invalid credentials' });
 
     // Compare password
     const isMatch = await bcrypt.compare(password, patient.password);

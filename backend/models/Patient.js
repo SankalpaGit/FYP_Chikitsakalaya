@@ -48,6 +48,18 @@ const Patient = sequelize.define('Patient', {
     type: DataTypes.STRING, // Store URL of the profile image
     allowNull: true,
   },
+  isVerified: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  otp: {
+    type: DataTypes.STRING,
+    allowNull: true, // Will be null after verification
+  },
+  otpExpiration: {
+    type: DataTypes.DATE,
+    allowNull: true, // To handle OTP expiration
+  },
 }, {
   tableName: 'patients',
   timestamps: true, // Sequelize will automatically manage createdAt and updatedAt fields

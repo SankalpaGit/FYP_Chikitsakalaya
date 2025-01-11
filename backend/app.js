@@ -1,6 +1,5 @@
 const express = require('express');
 const dotenv = require('dotenv');
-const session = require('express-session');
 const passport = require('passport');
 const cors = require('cors'); 
 const sequelize = require('./config/database'); // Import the configured sequelize instance
@@ -26,17 +25,6 @@ const app = express();
 app.use(cors());  // Enable CORS for all routes and origins
 
 app.use(express.json());
-
-// Configure session middleware (required for Passport with Google OAuth)
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-}));
-
-// Initialize Passport and session handling
-app.use(passport.initialize());
-app.use(passport.session());
 
 // Use of the route
 app.use('/api', doctorRoutes); // Prefix with '/api' or any base URL 
