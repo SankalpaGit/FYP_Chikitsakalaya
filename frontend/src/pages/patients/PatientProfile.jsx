@@ -1,12 +1,12 @@
 import React from 'react';
-import { FaEnvelope, FaMapMarkerAlt, FaPhoneAlt, FaMale, FaBirthdayCake, FaEye } from 'react-icons/fa';
+import { FaEnvelope, FaMapMarkerAlt, FaPhoneAlt, FaMale, FaBirthdayCake, FaEye, FaEdit } from 'react-icons/fa';
 import PatientLayout from '../../layouts/PatientLayout';
 
 const PatientProfile = () => {
     return (
         <PatientLayout>
             <div className="flex flex-col lg:flex-row p-6 gap-6 mt-10 items-stretch">
-                
+
                 <div className="w-full lg:w-5/12 ">
                     {/* Image and Details */}
                     <div className="flex justify-between mb-4 bg-white shadow-md rounded-md p-6 border border-gray-300 ">
@@ -14,7 +14,11 @@ const PatientProfile = () => {
                             <img src="https://cdn3d.iconscout.com/3d/premium/thumb/boy-avatar-3d-icon-download-in-png-blend-fbx-gltf-file-formats--boys-male-man-pack-avatars-icons-5187865.png?f=webp" alt="Profile" className="w-full h-full object-cover" />
                         </div>
                         <div className="flex flex-col justify-center w-8/12 space-y-2">
-                            <h1 className="text-xl font-bold">Sankalpa Shrestha</h1>
+                            <div className='flex items-center justify-between'>
+                                <h1 className="text-xl font-bold">Sankalpa Shrestha</h1>
+                                <FaEdit />
+                            </div>
+
                             <p className="flex items-center text-gray-600">
                                 <FaEnvelope className="mr-2" /> joshisankalpa@gmail.com
                             </p>
@@ -37,7 +41,10 @@ const PatientProfile = () => {
 
                     {/* Insurance Information */}
                     <div className="bg-white  p-6 shadow-md rounded-md border border-gray-300">
-                        <h1 className="text-2xl font-bold mb-2 text-teal-700">Insurance Information</h1>
+                        <div className='flex justify-between items-center'>
+                            <h1 className="text-2xl font-bold mb-2 text-teal-700">Insurance Information</h1>
+                            <FaEdit />
+                        </div>
                         <div className="space-y-2  mb-4">
                             <p className="text-gray-500">
                                 Insurance ID: <span className="font-semibold">2512-9652-1452</span>
@@ -46,7 +53,7 @@ const PatientProfile = () => {
                                 Validity Date: <span className="font-semibold">2025-06-22</span>
                             </p>
                         </div>
-                        <button className="w-full bg-teal-700 text-white font-semibold rounded-md flex items-center justify-center gap-2 p-3 hover:bg-teal-600">
+                        <button className="w-full bg-orange-500 text-white font-semibold rounded-md flex items-center justify-center gap-2 p-3 hover:bg-teal-600">
                             <FaEye />
                             <span>View Insurance Paper</span>
                         </button>
@@ -55,7 +62,10 @@ const PatientProfile = () => {
 
                 {/* Right Section - Medical Background */}
                 <div className="flex-grow bg-white shadow-md p-5 rounded-md flex flex-col h-fit border border-gray-300">
-                    <h1 className="text-xl font-bold mb-4">Medical Background</h1>
+                    <div className='flex justify-between items-center'>
+                        <h1 className="text-xl font-bold mb-4">Medical Background</h1>
+                        <FaEdit />
+                    </div>
                     {/* Medical Records */}
                     <div className="space-y-2 flex-grow">
                         <div className="bg-teal-50 p-4 rounded-md border-teal-300 border">

@@ -10,7 +10,7 @@ const Hero = () => {
         muted
         className="absolute inset-0 w-full h-full object-cover z-0"
     >
-        <source src="https://videocdn.cdnpk.net/videos/9ba3a666-ae64-418c-bf34-19da0831bab8/horizontal/previews/clear/large.mp4?token=exp=1736501265~hmac=cb98dc0a43b0bbd11375db961c098e01b49fcf685ef8b1177b15f72b80e73774" type="video/mp4" />
+        <source src="https://videocdn.cdnpk.net/videos/47ad7623-8ea4-4f29-a1b1-8147f25122e4/horizontal/previews/clear/large.mp4?token=exp=1736738536~hmac=3d38adc88e143b1a689cab484d1765ceae89891114fd888eb5f594652232bb84" type="video/mp4" />
         Your browser does not support the video tag.
     </video>
 

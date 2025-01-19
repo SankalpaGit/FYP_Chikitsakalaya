@@ -16,6 +16,7 @@ import HomePage from "./pages/patients/HomePage";
 import SetFreeTime from "./pages/doctors/SetFreeTime";
 import ToDoList from "./pages/doctors/ToDoList";
 import PatientProfile from "./pages/patients/PatientProfile";
+import DoctorProfile from "./pages/doctors/DoctorProfile";
 
 function App() {
 
@@ -28,6 +29,7 @@ function App() {
       <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
       <Route path="/doctor/schedule" element={<SetFreeTime/>} />
       <Route path="/doctor/tasks" element={<ToDoList/>} />
+      <Route path="/doctor/profile" element={<DoctorProfile />} />
 
       {/* route setup for admin user */}
       <Route path="/admin/dashboard" element={
