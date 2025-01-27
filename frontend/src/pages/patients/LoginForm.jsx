@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { FcGoogle } from 'react-icons/fc';
 
 function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
+  const [messageColor, setMessageColor] = useState('text-red-600');
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -13,19 +15,28 @@ function LoginForm() {
     try {
       const response = await axios.post('http://localhost:5000/api/login', { email, password });
       localStorage.setItem('token', response.data.token);
-      setMessage('Login successful!');
-      navigate('/home');  // Redirect to dashboard after login
+      setMessage('Login successfuly');
+      setMessageColor('text-green-600');
+      setTimeout(() => {
+        setMessage('');
+        navigate('/home');
+      }, 2000);
     } catch (error) {
-      console.error('Login error:', error);  // Log error details to console
+      console.error('Login error:', error);
       setMessage('Login failed');
+      setMessageColor('text-red-600');
+      setTimeout(() => setMessage(''), 2000);
     }
   };
-  
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
-        <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
+    <div className="flex flex-col md:flex-row items-center justify-evenly min-h-screen bg-white p-4">
+      <div className="w-5/12 flex justify-center">
+        <img src="/patients/auth.png" alt="Login"  />
+      </div>
+      <div className="w-5/12 max-w-md bg-white shadow-lg rounded-lg p-6 border-2 border-gray-100">
+        <h2 className="text-2xl font-bold text-center ">Login</h2>
+        <p className={`text-center mt-2 ${messageColor}`}>{message}</p>
         <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="email"
@@ -49,8 +60,14 @@ function LoginForm() {
           >
             Login
           </button>
+          <button
+            type="button"
+            className="w-full flex items-center justify-center bg-gray-200 text-gray-700 font-semibold py-2 rounded-md hover:bg-gray-300"
+          >
+            <FcGoogle className="mr-2 text-xl" /> Sign in with Google
+          </button>
         </form>
-        <p className="text-center mt-4 text-gray-600">{message}</p>
+        <p className="text-center mt-4 text-gray-600">Don't have an account? <a href="/register" className="text-teal-600 hover:underline">Register now</a></p>
       </div>
     </div>
   );
