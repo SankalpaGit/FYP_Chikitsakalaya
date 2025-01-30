@@ -1,10 +1,22 @@
-// models to store registration data for doctor before getting approved
+// models/RegisterDoctor.js
+
+// This model store the doctor registration before getting accepted (approved) by the admin
 
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database'); // Adjust the path based on your project structure
 
 // Define the RegisterDoctor model
 const RegisterDoctor = sequelize.define('RegisterDoctor', {
+  // First Name
+  firstName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  // Last Name
+  lastName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   // Email (Gmail)
   email: {
     type: DataTypes.STRING,
@@ -19,7 +31,7 @@ const RegisterDoctor = sequelize.define('RegisterDoctor', {
     type: DataTypes.STRING,
     allowNull: false,
     validate: {
-      len: [6, 100], // Minimum password length is 6
+      len: [6, 555], // Minimum password length is 6
     },
   },
   // Licence Number
@@ -28,7 +40,7 @@ const RegisterDoctor = sequelize.define('RegisterDoctor', {
     allowNull: false,
     unique: true,
     validate: {
-      len: [8, 20], // Adjust the length as per your requirements
+      len: [8, 30], // Length of license number should be between 8 and 30
     },
   },
   // Licence Document (file path stored in the database)

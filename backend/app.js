@@ -23,7 +23,7 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());  // Enable CORS for all routes and origins
+app.use(cors({origin: 'http://localhost:5173'}));  // Enable CORS for all routes and origins
 
 app.use(express.json());
 
