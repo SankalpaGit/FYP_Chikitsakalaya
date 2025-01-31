@@ -26,6 +26,7 @@ const app = express();
 app.use(cors({origin: 'http://localhost:5173'}));  // Enable CORS for all routes and origins
 
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 // Use of the route
 app.use('/api', doctorRoutes); // Prefix with '/api' or any base URL 
