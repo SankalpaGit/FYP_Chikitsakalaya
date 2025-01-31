@@ -1,4 +1,3 @@
-// src/components/DoctorApproval.jsx
 import React, { useEffect, useState } from 'react';
 import { FaEye, FaExclamationTriangle, FaCheck, FaTimes } from 'react-icons/fa';
 import AdminLayout from '../../layouts/AdminLayout';
@@ -29,8 +28,10 @@ const DoctorApproval = () => {
     loadDoctors();
   }, []);
 
-  const handleViewDocument = (document) => {
-    setCurrentDocument(document);
+  const handleViewDocument = (document, licenceNumber) => {
+    setCurrentDocument({ document, licenceNumber });
+    console.log(document);
+    
     setModalOpen(true);
   };
 
@@ -125,7 +126,7 @@ const DoctorApproval = () => {
                     <td className="border px-6 py-4">{doctor.licenceNumber}</td>
                     <td className="border px-6 py-4 text-center">
                       <button
-                        onClick={() => handleViewDocument(doctor.licenceDocument)}
+                        onClick={() => handleViewDocument(doctor.licenceDocument, doctor.licenceNumber)}
                         className="text-blue-600 flex items-center justify-center mx-auto"
                       >
                         <FaEye className="mr-1" />
@@ -159,23 +160,34 @@ const DoctorApproval = () => {
         )}
 
         {modalOpen && (
-          <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-4 rounded shadow-lg max-w-lg w-full">
-              <h2 className="text-xl font-semibold mb-4">Licence Document</h2>
-              <img
-                src={`http://localhost:5000/${currentDocument}`}
-                alt="Licence Document"
-                className="w-full h-auto"
-              />
+          <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50 transition-all duration-500 ease-out">
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-4xl w-full transform scale-100 transition-all ease-out duration-500">
               <button
                 onClick={closeModal}
-                className="mt-4 bg-red-500 text-white px-4 py-2 rounded"
+                className="absolute top-4 right-4 text-red-500 text-2xl cursor-pointer hover:rotate-180 transition-transform"
               >
-                Close
+                <FaTimes />
               </button>
+
+              <div className="text-center mb-6">
+                <h2 className="text-3xl font-semibold text-gray-800 mb-4">Licence Document</h2>
+                <p className="text-lg text-gray-600 mb-4">
+                  Licence Number: <span className="font-bold">{currentDocument?.licenceNumber}</span>
+                </p>
+                <div className="flex justify-center items-center">
+                  <img
+                    src={`http://localhost:5000/${currentDocument?.document?.replace(/^uploads\//, '')}`}
+                    alt="Licence Document"
+                    className="max-w-full h-auto rounded-lg shadow-md"
+                    style={{ maxHeight: '500px', objectFit: 'contain' }}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         )}
+
+
       </div>
     </AdminLayout>
   );
