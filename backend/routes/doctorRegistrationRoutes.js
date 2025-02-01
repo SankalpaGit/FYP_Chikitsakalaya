@@ -1,20 +1,24 @@
-const express = require('express');
+// routes/doctorRegistrationRoutes.js
+
+// Import required modules and aliases them as required
+const express = require('express'); 
 const router = express.Router();
-const upload = require('../config/multer');
-const RegisterDoctor = require('../models/RegisterDoctor');
+const upload = require('../config/multer'); 
+const RegisterDoctor = require('../models/RegisterDoctor'); 
 const Doctor = require('../models/Doctor');
-const hashPassword = require('../utils/hashPassword');
+const hashPassword = require('../utils/hashPassword'); 
 const generateToken = require('../utils/jwtToken');
-const verifyToken = require('../middlewares/authMiddleware');
-const bcrypt = require('bcrypt');
+const verifyToken = require('../middlewares/authMiddleware');  
+const bcrypt = require('bcrypt');  
+const jwt = require('jsonwebtoken'); 
+const nodemailer = require('nodemailer'); 
 
 // Nodemailer setup
-const nodemailer = require('nodemailer');
-const transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({ //creating the nodemailer transporter
   service: 'gmail',
   auth: {
     user: 'joshisankalpa2@gmail.com', 
-    pass: 'pcee bzmf shst yjuh',  
+    pass: 'pcee bzmf shst yjuh',  // app password
   },
 });
 
@@ -154,7 +158,6 @@ router.put('/doctor/approve/:id', verifyToken, async (req, res) => {
   }
 });
 
-
 // PUT route to reject a doctor (admin)
 router.put('/doctor/reject/:id', verifyToken, async (req, res) => {
   try {
@@ -190,7 +193,7 @@ router.put('/doctor/reject/:id', verifyToken, async (req, res) => {
   }
 });
 
-// GET route to list all doctors (for admin to view)
+// GET route to list all doctors (admin)
 router.get('/doctors/all', async (req, res) => {
   try {
     const doctors = await RegisterDoctor.findAll();
@@ -201,7 +204,7 @@ router.get('/doctors/all', async (req, res) => {
   }
 });
 
-// GET route to list all approved doctors (for admin to view)
+// GET route to list all approved doctors (admin)
 router.get('/doctors/approved', async (req, res) => {
   try {
     const approvedDoctors = await Doctor.findAll();
@@ -209,6 +212,40 @@ router.get('/doctors/approved', async (req, res) => {
   } catch (error) {
     console.error('Error fetching approved doctors:', error);
     res.status(500).json({ error: 'Error fetching approved doctors' });
+  }
+});
+
+// POST route to login doctor
+router.post('/doctor/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    // Find doctor by email
+    const doctor = await Doctor.findOne({ where: { email } });
+
+    if (!doctor) {
+      return res.status(404).json({ error: 'Doctor not found' });
+    }
+
+    // Check if the password matches
+    const isMatch = await bcrypt.compare(password, doctor.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Invalid credentials' });
+    }
+
+    // If the password matches, generate JWT token
+    const token = jwt.sign(
+      { doctorId: doctor.id, email: doctor.email },
+      process.env.JWT_SECRET, // Your secret key
+      { expiresIn: '1h' } // Token expiration time (1 hour)
+    );
+
+    // Return the token in response
+    res.json({ message: 'Login successful', token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
   }
 });
 

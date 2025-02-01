@@ -1,8 +1,9 @@
 // routes/userProfileRoutes.js 
 
+// This routes is the specific implementation for the OCR Based User Profile
+
 const express = require('express'); // import express from express
 const upload = require('../config/multer'); // import multer from config as upload
-
 const router = express.Router(); // alias express Router as router
 
 // post routes for the uploading the user report 
