@@ -10,6 +10,8 @@ const RegisterDoctor = require('./models/RegisterDoctor');
 const Admin = require('./models/Admin'); 
 const Doctor = require('./models/Doctor'); 
 const Patient = require('./models/Patient'); 
+const PatientReport = require('./models/PatientReport');
+const index = require('./models/index');
 
 // imports of the all routes file
 const doctorRoutes = require('./routes/doctorRegistrationRoutes'); 
