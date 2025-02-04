@@ -1,3 +1,5 @@
+// config/tesseractConfig.js
+
 const Tesseract = require('tesseract.js');
 
 const extractTextFromImage = async (imagePath) => {
@@ -17,12 +19,7 @@ const extractTextFromImage = async (imagePath) => {
 // Function to process extracted text
 const processExtractedText = (text) => {
   const data = {
-    personal: {},
-    medical: {
-      diagnoses: [],
-      tests: [],
-      medications: [],
-    },
+    personal: {}
   };
 
   // Extract Personal Info
@@ -43,21 +40,6 @@ const processExtractedText = (text) => {
   data.personal.gender = genderMatch ? genderMatch[1].trim() : null;
   data.personal.phone = phoneMatch ? phoneMatch[0] : null;
   data.personal.address = addressMatch ? addressMatch[1].trim() : null;
-
-  // Extract Medical Data
-  const diagnosisMatches = text.match(/Diagnosis:\s*(.+)/gi);
-  const testsMatches = text.match(/Tests:\s*(.+)/gi);
-  const medicationsMatches = text.match(/Medications:\s*(.+)/gi);
-
-  if (diagnosisMatches) {
-    data.medical.diagnoses = diagnosisMatches.map(d => d.replace('Diagnosis:', '').trim());
-  }
-  if (testsMatches) {
-    data.medical.tests = testsMatches.map(t => t.replace('Tests:', '').trim());
-  }
-  if (medicationsMatches) {
-    data.medical.medications = medicationsMatches.map(m => m.replace('Medications:', '').trim());
-  }
 
   return data;
 };
