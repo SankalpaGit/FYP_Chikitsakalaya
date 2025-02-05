@@ -1,8 +1,6 @@
-// models/Diagnosis.js
-
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const PatientReport = require('./PatientReport');
+const Patient = require('./Patient');
 
 const Diagnosis = sequelize.define('Diagnosis', {
   id: {
@@ -10,11 +8,11 @@ const Diagnosis = sequelize.define('Diagnosis', {
     primaryKey: true,
     autoIncrement: true,
   },
-  reportId: {
+  patientId: { // 🔄 Changed from reportId to patientId
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: PatientReport,
+      model: Patient,
       key: 'id',
     },
     onDelete: 'CASCADE',
