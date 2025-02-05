@@ -5,7 +5,7 @@ const Patient = require('../models/Patient');
 const router = express.Router();
 
 // Register Route (Registration API)
-router.post('/register', async (req, res) => {
+router.post('/register', async (req, res) => { 
   const { email, password, firstName, lastName } = req.body;
   try {
     // Check if email already exists

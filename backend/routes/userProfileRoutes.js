@@ -21,8 +21,9 @@ router.post('/upload/Report', upload.single('report'), async (req, res) => {
             return res.status(401).json({ success: false, message: 'Unauthorized: No token provided' });
         }
 
-        // Verify the token and get the user ID
+        // Verify the token 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        //  get the user ID
         const patient = await Patient.findByPk(decoded.id);
 
         if (!patient) {

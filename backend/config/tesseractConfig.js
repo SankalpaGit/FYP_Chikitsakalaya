@@ -1,6 +1,6 @@
 // config/tesseractConfig.js
 
-const Tesseract = require('tesseract.js');
+const Tesseract = require('tesseract.js'); //importing the tesseract
 
 const extractTextFromImage = async (imagePath) => {
   try {
@@ -8,7 +8,6 @@ const extractTextFromImage = async (imagePath) => {
       logger: (m) => console.log(m), // Logs OCR progress
     });
 
-    console.log('Extracted Text:', text); // Debugging
     return processExtractedText(text); // Process extracted text
   } catch (error) {
     console.error('Error extracting text:', error);
@@ -36,7 +35,8 @@ const processExtractedText = (text) => {
     data.personal.lastName = nameParts.slice(1).join(' ') || null;
   }
 
-  data.personal.dob = dobMatch ? dobMatch[1].trim() : null;
+  // checking if data title matches else null
+  data.personal.dob = dobMatch ? dobMatch[1].trim() : null; 
   data.personal.gender = genderMatch ? genderMatch[1].trim() : null;
   data.personal.phone = phoneMatch ? phoneMatch[0] : null;
   data.personal.address = addressMatch ? addressMatch[1].trim() : null;
