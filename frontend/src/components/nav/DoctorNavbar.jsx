@@ -31,7 +31,7 @@ const DoctorNavbar = () => {
 
     return (
         <div className="flex justify-between items-center bg-custom-bg p-4 shadow-md">
-           <img src="/projects/naming.png" alt="" srcset="" className='w-40'/>
+           <img src="/projects/naming.png" alt="" className='w-40'/>
 
             {/* Right Section: Notification and Profile */}
             <div className="flex items-center space-x-8 w-1/3 justify-end">
