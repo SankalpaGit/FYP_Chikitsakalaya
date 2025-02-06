@@ -60,6 +60,10 @@ const Patient = sequelize.define('Patient', {
     type: DataTypes.DATE,
     allowNull: true, // To handle OTP expiration
   },
+   isProfileComplete: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false, // New field to track profile completion
+  },
 }, {
   tableName: 'patients',
   timestamps: true, // Sequelize will automatically manage createdAt and updatedAt fields
