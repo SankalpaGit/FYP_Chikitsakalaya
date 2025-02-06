@@ -22,6 +22,7 @@ router.post('/register', async (req, res) => {
       firstName,
       lastName,
       isVerified: true, // Automatically mark user as verified (no email verification)
+      isProfileComplete: false,
     });
 
     res.status(201).json({ message: 'Registration successful' });
@@ -45,7 +46,11 @@ router.post('/login', async (req, res) => {
 
     // Generate JWT
     const token = jwt.sign({ id: patient.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ message: 'Login successful', token });
+    res.json({ 
+      message: 'Login successful', 
+      token ,
+      isProfileComplete : patient.isProfileComplete,
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error logging in', error });
   }

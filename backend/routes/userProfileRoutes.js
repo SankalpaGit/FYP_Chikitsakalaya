@@ -1,6 +1,6 @@
 // routes/userProfileRoutes.js 
 
-// This routes is the specific implementation for the OCR Based User Profile
+
 const express = require('express');
 const upload = require('../config/multer');
 const extractTextFromImage = require('../config/tesseractConfig');
@@ -9,30 +9,39 @@ const jwt = require('jsonwebtoken');
 const { PatientReport } = require('../models');
 const router = express.Router();
 
+//  POST routes for the OCR Based User Profile ( personal profile done , medical profile is yet to be)
 router.post('/upload/Report', upload.single('report'), async (req, res) => {
     if (!req.file) {
         return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
 
     try {
-        // Extract token from request headers
-        const token = req.headers.authorization?.split(' ')[1]; // "Bearer <token>"
+        // Extract and verify token
+        const token = req.headers.authorization?.split(' ')[1];
         if (!token) {
             return res.status(401).json({ success: false, message: 'Unauthorized: No token provided' });
         }
 
-        // Verify the token 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        //  get the user ID
-        const patient = await Patient.findByPk(decoded.id);
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return res.status(403).json({ success: false, message: 'Invalid or expired token' });
+        }
 
+        const patient = await Patient.findByPk(decoded.id);
         if (!patient) {
             return res.status(404).json({ success: false, message: 'Patient not found' });
         }
 
-        // Process OCR (Only Personal Info for Now)
+        // Process OCR (Extract personal info)
         const extractedData = await extractTextFromImage(req.file.path);
         const { personal } = extractedData;
+
+        // Validate extracted data
+        if (!personal || !personal.firstName || !personal.lastName) {
+            return res.status(422).json({ success: false, message: 'Incomplete or invalid data extracted' });
+        }
 
         // Update patient info (only if empty)
         await patient.update({
@@ -44,18 +53,106 @@ router.post('/upload/Report', upload.single('report'), async (req, res) => {
             address: patient.address || personal.address,
         });
 
-        // Create the patient report linked to this user
+        // Update profile completion status
+        const isComplete = patient.firstName && patient.lastName && patient.dateOfBirth && patient.gender && patient.phone && patient.address;
+        if (isComplete && !patient.isProfileComplete) {
+            await patient.update({ isProfileComplete: true });
+        }
+
+        // Store report
         const report = await PatientReport.create({
             patientId: patient.id,
             reportFilePath: req.file.path,
         });
 
-        res.json({ success: true, patient, report });
+        res.json({ success: true, message: 'Profile updated via OCR', patient, report });
     } catch (error) {
         console.error('Error processing OCR:', error);
-        res.status(500).json({ success: false, message: 'Error extracting data', error: error.message });
+        res.status(500).json({ success: false, message: 'Server error processing OCR', error: error.message });
     }
 });
+
+
+
+// POST route for manual profile update ( personal profile)
+router.put('/updateProfile', async (req, res) => {
+    try {
+        // Extract and verify token
+        const token = req.headers.authorization?.split(' ')[1]; 
+        if (!token) {
+            return res.status(401).json({ success: false, message: 'Unauthorized: No token provided' });
+        }
+
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return res.status(403).json({ success: false, message: 'Invalid or expired token' });
+        }
+
+        const patient = await Patient.findByPk(decoded.id);
+        if (!patient) {
+            return res.status(404).json({ success: false, message: 'Patient not found' });
+        }
+
+        // Extract data
+        const { dateOfBirth, gender, phone, address, profileImage } = req.body;
+
+        // Update patient data (overwrite values if provided)
+        await patient.update({
+            dateOfBirth: dateOfBirth || patient.dateOfBirth,
+            gender: gender || patient.gender,
+            phone: phone || patient.phone,
+            address: address || patient.address,
+            profileImage: profileImage || patient.profileImage,
+        });
+
+        // Check profile completeness
+        const isComplete = patient.firstName && patient.lastName && patient.dateOfBirth && patient.gender && patient.phone && patient.address;
+        if (isComplete && !patient.isProfileComplete) {
+            await patient.update({ isProfileComplete: true });
+        }
+
+        res.json({ success: true, message: 'Profile updated successfully', patient });
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        res.status(500).json({ success: false, message: 'Error updating profile', error: error.message });
+    }
+});
+
+
+
+router.get('/getProfile', async (req, res) => {
+    try {
+        // Extract and verify token
+        const token = req.headers.authorization?.split(' ')[1]; 
+        if (!token) {
+            return res.status(401).json({ success: false, message: 'Unauthorized: No token provided' });
+        }
+
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return res.status(403).json({ success: false, message: 'Invalid or expired token' });
+        }
+
+        const patient = await Patient.findByPk(decoded.id, {
+            attributes: { exclude: ['password', 'otp', 'otpExpiration'] }, // Hide sensitive fields
+        });
+
+        if (!patient) {
+            return res.status(404).json({ success: false, message: 'Patient not found' });
+        }
+
+        res.json({ success: true, patient });
+    } catch (error) {
+        console.error('Error fetching profile:', error);
+        res.status(500).json({ success: false, message: 'Server error fetching profile', error: error.message });
+    }
+});
+
+
 
 
 module.exports = router;
