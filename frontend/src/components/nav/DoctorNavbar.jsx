@@ -58,8 +58,9 @@ const DoctorNavbar = () => {
                     <ProfileModel
                         isOpen={isProfileOpen}
                         onClose={toggleProfilePopup}
-                        profileImage="https://via.placeholder.com/50"
-                        name="John Doe"
+                        profileImage="https://img.freepik.com/free-psd/3d-render-female-doctor-wearing-glasses-white-coat-stethoscope-around-her-neck-she-has-dark-hair-friendly-expression_632498-32065.jpg?t=st=1739009508~exp=1739013108~hmac=4e40512c23e5649a8bf41c898d1eb3483f05b5ed01bba633fdd16cc61aea3a65&w=740"
+                        name="Dr. Himani Ghimire"
+                        gmail="himani.ghimire@gmail.com"
                         onEdit={handleEdit}
                         onLogout={handleLogout}
                     />
