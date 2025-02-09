@@ -34,53 +34,6 @@ const Doctor = sequelize.define('Doctor', {
     type: DataTypes.STRING, // Will store the filename/path of the uploaded certificate
     allowNull: false,
   },
-  phoneNumber: {
-    type: DataTypes.STRING,
-    allowNull: true,
-    unique: true,
-  },
-  speciality: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  experience: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    validate: {
-      min: 0,
-    },
-  },
-  hospitalAffiliation: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  consultationFee: {
-    type: DataTypes.FLOAT,
-    allowNull: true,
-    validate: {
-      min: 0,
-    },
-  },
-  address: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  city: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  state: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  zipCode: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  country: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
   isApproved: {
     type: DataTypes.BOOLEAN,
     defaultValue: false, // Admin approval status

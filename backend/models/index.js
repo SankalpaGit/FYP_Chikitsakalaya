@@ -6,6 +6,8 @@ const PatientReport = require('./PatientReport');
 const Diagnosis = require('./Diagnosis');
 const Test = require('./Test');
 const Medication = require('./Medication');
+const Doctor = require('./Doctor');
+const DoctorDetail = require('./DoctorDetail');
 
 // ✅ Define Relationships
 
@@ -25,6 +27,11 @@ Test.belongsTo(Patient, { foreignKey: 'patientId' });
 Patient.hasMany(Medication, { foreignKey: 'patientId', onDelete: 'CASCADE' });
 Medication.belongsTo(Patient, { foreignKey: 'patientId' });
 
+// Establish the association
+Doctor.hasOne(DoctorDetail, { foreignKey: 'doctorId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
+DoctorDetail.belongsTo(Doctor, { foreignKey: 'doctorId' });
+
+
 
 // ✅ Export Models
 module.exports = {
@@ -34,4 +41,6 @@ module.exports = {
   Diagnosis,
   Test,
   Medication,
+  Doctor,
+  DoctorDetail,
 };
