@@ -6,7 +6,7 @@ import { FaPrescriptionBottleMedical } from "react-icons/fa6";
 
 const DoctorSidebar = () => {
   return (
-    <div className="flex flex-col w-20 h-screen bg-white shadow-md">
+    <div className="flex flex-col w-20 h-screen bg-white shadow-md fixed">
       <div className="flex items-center justify-center px-4 py-3">
         <img src="/projects/logo.png" alt="Logo" className="w-14 h-auto" /> {/* Increased logo size */}
       </div>

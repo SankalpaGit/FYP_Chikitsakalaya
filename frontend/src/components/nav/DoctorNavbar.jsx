@@ -30,14 +30,14 @@ const DoctorNavbar = () => {
     };
 
     return (
-        <div className="flex justify-between items-center bg-custom-bg p-4 shadow-md">
+        <div className="flex justify-between items-center bg-custom-bg p-4 shadow-md fixed w-full z-50">
            <img src="/projects/naming.png" alt="" className='w-40'/>
 
             {/* Right Section: Notification and Profile */}
-            <div className="flex items-center space-x-8 w-1/3 justify-end">
+            <div className="flex  w-72 space-x-24 items-center">
                 {/* Notification Icon with Badge */}
                 <div className="relative cursor-pointer">
-                    <FaBell className="text-3xl text-gray-600" onClick={toggleNotificationPopup} />
+                    <FaBell className="text-4xl text-gray-600" onClick={toggleNotificationPopup} />
                     <span className="absolute top-0 right-0 bg-red-500 text-xs text-white rounded-full px-1">
                         {notifications.length} {/* Update this based on actual notifications */}
                     </span>
@@ -52,7 +52,7 @@ const DoctorNavbar = () => {
                 {/* Profile Section */}
                 <div className="relative">
                     <FaUserCircle
-                        className="text-3xl text-gray-600 cursor-pointer"
+                        className="text-4xl text-gray-600 cursor-pointer"
                         onClick={toggleProfilePopup}
                     />
                     <ProfileModel
