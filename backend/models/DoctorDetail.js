@@ -1,6 +1,6 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const Doctor = require('./Doctor'); // Import the existing Doctor model
+const Doctor = require('./Doctor'); // Import Doctor model
 
 const DoctorDetail = sequelize.define('DoctorDetail', {
   id: {
@@ -61,8 +61,12 @@ const DoctorDetail = sequelize.define('DoctorDetail', {
     allowNull: true,
   },
   profilePicture: {
-    type: DataTypes.STRING, // Will store the filename/path of the uploaded profile picture
+    type: DataTypes.STRING, // Stores the filename/path of the uploaded profile picture
     allowNull: true,
+  },
+  isComplete: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false, // Indicates if profile is fully completed
   },
 }, {
   timestamps: true,
