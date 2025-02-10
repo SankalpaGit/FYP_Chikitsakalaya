@@ -6,8 +6,6 @@ const DoctorEditProfile = () => {
     const [basicInfo, setBasicInfo] = useState({
         firstName: '',
         lastName: '',
-        licenseNumber: '',
-        certificate: '',
     });
 
     const [detailInfo, setDetailInfo] = useState({
@@ -47,14 +45,6 @@ const DoctorEditProfile = () => {
         });
     };
 
-    const handleCertificateChange = (e) => {
-        const file = e.target.files[0];
-        setBasicInfo({
-            ...basicInfo,
-            certificate: file,
-        });
-    };
-
     return (
         <DoctorLayout>
             <div className="w-11/12 p-6 -mt-8 bg-white">
@@ -89,18 +79,7 @@ const DoctorEditProfile = () => {
                             />
                         </div>
 
-                        <div className="input-card relative">
-                            <label className="text-sm font-medium text-gray-700">License Number</label>
-                            <input
-                                type="text"
-                                name="licenseNumber"
-                                value={basicInfo.licenseNumber}
-                                onChange={handleBasicChange}
-                                className="border border-gray-200 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-teal-500"
-                                placeholder="ABCD1234"
-                            />
-                        </div>
-
+                       
                         <div className="input-card relative">
                             <label className="text-sm font-medium text-gray-700">Speciality</label>
                             <input
@@ -174,7 +153,7 @@ const DoctorEditProfile = () => {
                         </div>
 
                         <div className="input-card relative">
-                            <label className="text-sm font-medium text-gray-700">State</label>
+                            <label className="text-sm font-medium text-gray-700">Province</label>
                             <input
                                 type="text"
                                 name="state"
@@ -182,18 +161,6 @@ const DoctorEditProfile = () => {
                                 onChange={handleDetailChange}
                                 className="border border-gray-200 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-teal-500"
                                 placeholder="NY"
-                            />
-                        </div>
-
-                        <div className="input-card relative">
-                            <label className="text-sm font-medium text-gray-700">Zip Code</label>
-                            <input
-                                type="text"
-                                name="zipCode"
-                                value={detailInfo.zipCode}
-                                onChange={handleDetailChange}
-                                className="border border-gray-200 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-teal-500"
-                                placeholder="10001"
                             />
                         </div>
 
@@ -212,35 +179,6 @@ const DoctorEditProfile = () => {
 
                     {/* Right Section for Image Upload */}
                     <div className="space-y-6">
-                        <div className="relative">
-                            <label className="text-sm font-medium text-gray-700">Certificate</label>
-                            <div className="relative w-10/12 " >
-                                {basicInfo.certificate ? (
-                                    <img
-                                        src={URL.createObjectURL(basicInfo.certificate)}
-                                        alt="Certificate"
-                                        className="w-full h-full object-cover rounded-lg shadow-md"
-                                    />
-                                ) : (
-                                    <img
-                                        src="https://cdn.venngage.com/template/thumbnail/small/5bdeb833-5514-4c2d-9d67-b269371bb924.webp"
-                                        alt="Default Certificate"
-                                        className="w-full h-full object-cover rounded-lg shadow-md"
-                                    />
-                                )}
-                                {/* Camera Icon for Upload */}
-                                <label className="absolute bottom-4 right-4 bg-white p-3 rounded-full shadow-md cursor-pointer flex items-center justify-center">
-                                    <FaCamera className="text-gray-600" size={20} />
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        className="hidden"
-                                        onChange={handleCertificateChange}
-                                    />
-                                </label>
-                            </div>
-                        </div>
-
                         <div className="relative">
                             <label className="text-sm font-medium text-gray-700">Profile Picture</label>
                             <div className="relative w-6/12 border-2 rounded-md border-gray-300">
@@ -272,7 +210,7 @@ const DoctorEditProfile = () => {
 
                         {/* Save Button */}
                         <div className=''>
-                        <button className=" bg-orange-500 mt-10 text-white px-6 py-3 rounded-lg text-lg float-right">
+                        <button className=" bg-orange-500 mt-10 text-white px-6  py-3 rounded-lg text-lg ">
                                 Save Changes
                             </button>
                         </div>         
