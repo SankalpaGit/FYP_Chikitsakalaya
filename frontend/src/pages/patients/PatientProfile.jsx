@@ -6,7 +6,7 @@ import PatientLayout from '../../layouts/PatientLayout';
 
 const PatientProfile = () => {
     const [isProfileComplete, setIsProfileComplete] = useState(false);
-    const [showPopup, setShowPopup] = useState(false);
+    const [showPopup, setShowPopup] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [patient, setPatient] = useState(null);
     const [profileImage, setProfileImage] = useState("https://cdn3d.iconscout.com/3d/premium/thumb/boy-avatar-3d-icon-download-in-png-blend-fbx-gltf-file-formats--boys-male-man-pack-avatars-icons-5187865.png?f=webp");
