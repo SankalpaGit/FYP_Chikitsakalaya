@@ -204,16 +204,6 @@ router.get('/doctors/all', async (req, res) => {
   }
 });
 
-// GET route to list all approved doctors (admin)
-router.get('/doctors/approved', async (req, res) => {
-  try {
-    const approvedDoctors = await Doctor.findAll();
-    res.json(approvedDoctors);
-  } catch (error) {
-    console.error('Error fetching approved doctors:', error);
-    res.status(500).json({ error: 'Error fetching approved doctors' });
-  }
-});
 
 // POST route to login doctor
 router.post('/doctor/login', async (req, res) => {

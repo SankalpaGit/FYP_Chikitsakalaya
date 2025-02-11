@@ -19,6 +19,7 @@ const adminLoginRoute = require('./routes/adminRoutes')
 const googleOAuthRoute = require('./routes/googleOAuthRoutes')
 const patientAuthRoute = require('./routes/patientAuthRoutes')
 const userProfileRoute = require('./routes/userProfileRoutes')
+const doctorProfileRoute = require('./routes/doctorProfileRoutes')
 
 // configuration of the dotenv variable
 dotenv.config();
@@ -36,6 +37,7 @@ app.use('/api', adminLoginRoute)
 app.use('/api', googleOAuthRoute)
 app.use('/api', patientAuthRoute)
 app.use('/api', userProfileRoute)
+app.use('/api', doctorProfileRoute)
 
 // Authenticate and sync models
 
