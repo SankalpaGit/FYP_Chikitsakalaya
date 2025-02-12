@@ -22,14 +22,14 @@ const ProfileModel = ({ isOpen, profileImage, name, gmail, onLogout }) => {
     if (localStorage.getItem('token')) {
       // Remove the token from localStorage
       localStorage.removeItem('token');
-  
+
       // Navigate to the login page
       navigate('/doctor/login');
     } else {
       console.log('Logout Clicked but token not found');
     }
   };
-  
+
 
   const handleComplainBoxClick = () => {
     navigate('/contact');  // Navigate to the contact page
@@ -37,7 +37,7 @@ const ProfileModel = ({ isOpen, profileImage, name, gmail, onLogout }) => {
 
   return (
     <div className="absolute top-10 right-0 bg-white border border-gray-300 p-6 rounded-lg shadow-md w-96 z-50">
-      
+
       {/* Profile Section */}
       <div className="flex items-center w-full gap-4 mb-4 hover:bg-gray-50 cursor-pointer" onClick={handleProfileClick}>
         <img
