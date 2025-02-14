@@ -6,7 +6,7 @@ const PatientLayout = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow container mx-auto pt-10 mt-10">
+      <main className="flex-grow w-full pt-8 mt-10">
         {children}
       </main>
       <Footer />
