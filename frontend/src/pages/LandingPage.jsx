@@ -1,5 +1,4 @@
 
-import Hero from '../components/others/Hero';
 import NavBar from '../components/nav/NavBar';
 import Footer from '../components/nav/Footer';
 import AboutUs from '../components/others/AboutUs';
@@ -7,11 +6,12 @@ import Testemonial from '../components/others/Testemonial';
 import ContactUI from '../components/others/ContactUI';
 const LandingPage = () => {
 
-
+    // this will be used as the about us page  
+    
     return (
         <div className="font-sans">
             {/* Hero Section */}
-            <Hero />
+          
             <NavBar />
             <AboutUs/>
 

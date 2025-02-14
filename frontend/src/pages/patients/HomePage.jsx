@@ -1,88 +1,85 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { AiOutlineSearch, AiOutlineCheckCircle } from "react-icons/ai";
 import { FaRegPaperPlane } from "react-icons/fa";
 import { BsFillCalendarCheckFill } from "react-icons/bs";
 import PatientLayout from "../../layouts/PatientLayout";
 
+const steps = [
+    { icon: <AiOutlineSearch />, title: "Search Doctor", description: "Easily search for the best doctor based on specialty, ratings, and availability." },
+    { icon: <FaRegPaperPlane />, title: "Send Appointment Request", description: "select suitable date and time, then submit your appointment request for approval." },
+    { icon: <BsFillCalendarCheckFill />, title: "Secure Your Appointment", description: "Confirm your appointment by completing the necessary payment." },
+    { icon: <AiOutlineCheckCircle />, title: "Seamless Experience", description: "Join your online consultation or visit the clinic for expert care and prescriptions." },
+
+];
+
 const HomePage = () => {
-    const steps = [
-        { id: 1, name: "Search", icon: <AiOutlineSearch size={30} />, desc: "Find doctors by specialty, name, or location." },
-        { id: 2, name: "Select", icon: <AiOutlineCheckCircle size={30} />, desc: "Choose the best doctor based on reviews and availability." },
-        { id: 3, name: "Send", icon: <FaRegPaperPlane size={30} />, desc: "Send an appointment request for approval." },
-        { id: 4, name: "Set", icon: <BsFillCalendarCheckFill size={30} />, desc: "Confirm and set your appointment date." }
-    ];
-
-    const tips = [
-        "Drinking water before a checkup can improve accuracy in tests!",
-        "Regular checkups help detect diseases early and improve treatment outcomes.",
-        "Booking appointments online saves time and ensures availability.",
-        "Virtual consultations are great for follow-ups and minor health concerns."
-    ];
-
-    const [tipOfTheDay, setTipOfTheDay] = useState("");
-
-    useEffect(() => {
-        setTipOfTheDay(tips[Math.floor(Math.random() * tips.length)]);
-    }, []);
-
     return (
         <PatientLayout>
-            {/* Hero Section */}
-            <div className="flex justify-center items-center h-[60vh] w-full relative">
-                <img
-                    src="https://img.freepik.com/free-vector/telemedicine-cartoon-header-title-horizontal-composition-with-heartbeat-stethoscope-online-medical-advice-tablet-smartphone-illustration_1284-65729.jpg?t=st=1739460692~exp=1739464292~hmac=e6df731813e8760a0ba3d4abf6e0a3f7ba4ed4d76117c73a298a5118f76c7bfc&w=1380"
-                    alt="Doctors"
-                    className="w-full h-full object-cover object-bottom"
-                />
-                <div className="absolute top-0 left-0 w-full h-full bg-gray-100 bg-opacity-5"></div>
 
-                {/* Search Bar */}
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[60%] mt-24">
-                    <div className="flex items-center bg-white rounded-full shadow-2xl px-4 border-4 border-teal-700">
+            {/* Hero Section */}
+            <section className="relative flex justify-center items-center h-[75vh] w-full">
+                <video
+                    src="./home/hero.mp4"
+                    autoPlay
+                    muted
+                    loop
+                    className="w-full h-full object-cover "
+                />
+                <div className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50"></div>
+
+                {/* Text + Search Bar */}
+                <div className="absolute top-[50%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] md:w-[70%] lg:w-[60%] text-center px-4">
+                    {/* Tagline */}
+                    <h1 className="text-white text-3xl md:text-5xl font-extrabold drop-shadow-lg leading-tight">
+                        We promise to digitalize Nepal's <br /> <span className="text-orange-400 mt-4 block">HealthCare</span>
+                    </h1>
+                    <p className="text-white text-lg md:text-xl font-medium mt-5 drop-shadow-md">
+                        Chikitsakalaya is here to transform healthcare through digital innovation.
+                    </p>
+
+                    {/* Search Bar */}
+                    <div className="mt-12 flex items-center bg-white rounded-full shadow-2xl px-4 border-4 border-teal-700">
                         <input
                             type="text"
                             placeholder="Search doctor by name, specialty..."
-                            className="w-full p-4 text-lg text-gray-700 bg-transparent border-none focus:ring-0 outline-none rounded-full focus:font-bold placeholder:font-normal"
+                            className="w-full p-4 text-lg text-gray-700 bg-transparent border-none focus:ring-0 outline-none rounded-full focus:font-semibold placeholder:font-normal"
                         />
                         <button className="p-3 bg-teal-600 text-white rounded-full transition-all hover:scale-110 hover:bg-teal-700 focus:outline-none">
                             <AiOutlineSearch size={24} />
                         </button>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            {/* 4S Booking Steps */}
-            <div className="flex flex-col items-center my-10">
-                <h2 className="text-2xl font-semibold mb-4">How It Works - The 4S Process</h2>
-                <div className="flex justify-center gap-6 md:gap-10">
-                    {steps.map((step) => (
-                        <div key={step.id} className="flex flex-col items-center">
-                            <div className="relative group">
-                                <div className="p-4 bg-teal-600 text-white rounded-full">{step.icon}</div>
-                                <div className="absolute bottom-[-2.5rem] text-center bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-all">
-                                    {step.desc}
+
+
+
+            <section className="px-6 md:px-16 py-16 flex flex-col md:flex-row items-center ">
+                {/* Left Side: Image (Hidden on Mobile) */}
+                <div className="hidden md:flex w-7/12 justify-center">
+                    <img
+                        src="./patients/image.png"
+                        alt="Doctor Consultation"
+                        className="w-[80%] md:w-[70%] lg:w-[60%] "
+                    />
+                </div>
+
+                {/* Right Side: Steps */}
+                <div className="w-full md:w-5/12 mt-8 md:mt-0 md:ml-8 ">
+                    <h2 className="text-3xl sm:text-4xl font-bold text-teal-700 mb-6 ">How Chikitsakalaya works</h2>
+                    <ul className="space-y-6">
+                        {steps.map((step, index) => (
+                            <li key={index} className="flex items-start space-x-4">
+                                <div className="text-teal-600 text-3xl">{step.icon}</div>
+                                <div>
+                                    <h3 className="text-xl font-semibold text-teal-700">{step.title}</h3>
+                                    <p className="text-gray-600 text-sm">{step.description}</p>
                                 </div>
-                            </div>
-                            <p className="mt-2 text-sm font-medium">{step.name}</p>
-                        </div>
-                    ))}
+                            </li>
+                        ))}
+                    </ul>
                 </div>
-            </div>
-
-            {/* Tip of the Day & Payment Partners */}
-            <div className="bg-gray-100 py-6">
-                <div className="max-w-4xl mx-auto text-center">
-                    <h3 className="text-xl font-semibold mb-2">💡 Tip of the Day</h3>
-                    <p className="text-gray-700 italic">{tipOfTheDay}</p>
-                </div>
-
-                {/* Payment Partners */}
-                <div className="flex justify-center gap-6 mt-6">
-                    <img src="/payments/paypal.png" alt="PayPal" className="w-20 h-auto" />
-                    <img src="/payments/stripe.png" alt="Stripe" className="w-20 h-auto" />
-                    <img src="/payments/visa.png" alt="Visa" className="w-20 h-auto" />
-                </div>
-            </div>
+            </section>
         </PatientLayout>
     );
 };

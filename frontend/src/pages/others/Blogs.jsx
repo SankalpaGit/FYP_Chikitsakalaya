@@ -1,6 +1,7 @@
 import React from 'react'
 
-const Contact = () => {
+const Blogs = () => {
+    // for the static blog
   return (
     <div>
       
@@ -8,4 +9,4 @@ const Contact = () => {
   )
 }
 
-export default Contact
+export default Blogs
