@@ -50,11 +50,11 @@ function App() {
       {/* route setup for patient user */}
       <Route path="/login" element={<LoginForm />} />
       <Route path="/register" element={<RegisterForm />} />
-      <Route path='/home' element={<HomePage />} />
+      <Route path='/' element={<HomePage />} />
       < Route path='/profile' element={<PatientProfile/>} />
       
       {/* 404 page and landing page */}
-      <Route path="/" element={<LandingPage />} />
+      <Route path="/about" element={<LandingPage />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
 
