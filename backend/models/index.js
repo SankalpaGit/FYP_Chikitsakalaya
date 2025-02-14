@@ -28,8 +28,8 @@ Patient.hasMany(Medication, { foreignKey: 'patientId', onDelete: 'CASCADE' });
 Medication.belongsTo(Patient, { foreignKey: 'patientId' });
 
 // Establish the association
-Doctor.hasOne(DoctorDetail, { foreignKey: 'doctorId', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
-DoctorDetail.belongsTo(Doctor, { foreignKey: 'doctorId' });
+Doctor.hasOne(DoctorDetail, { foreignKey: 'doctorId', onDelete: 'CASCADE', onUpdate: 'CASCADE' , as: 'doctorDetail' });
+DoctorDetail.belongsTo(Doctor, { foreignKey: 'doctorId' , as: 'doctorDetail' });
 
 
 
