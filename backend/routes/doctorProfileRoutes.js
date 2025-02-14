@@ -86,6 +86,7 @@ router.post("/doctor/update", authenticate, upload.single('profilePicture'), upl
 
 
 // Combined route to fetch both basic and detailed doctor information
+// this is not api of getting the doctor detail by specific id.
 router.get("/doctor/view", authenticate, async (req, res) => {
     try {
         // Extract and verify token

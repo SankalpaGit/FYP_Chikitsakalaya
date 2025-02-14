@@ -73,7 +73,6 @@ router.post('/upload/Report', upload.single('report'), async (req, res) => {
 });
 
 
-
 // POST route for manual profile update ( personal profile)
 router.put('/updateProfile', async (req, res) => {
     try {
@@ -119,8 +118,6 @@ router.put('/updateProfile', async (req, res) => {
         res.status(500).json({ success: false, message: 'Error updating profile', error: error.message });
     }
 });
-
-
 
 router.get('/getProfile', async (req, res) => {
     try {
