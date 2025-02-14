@@ -21,6 +21,7 @@ const patientAuthRoute = require('./routes/patientAuthRoutes')
 const userProfileRoute = require('./routes/userProfileRoutes')
 const doctorProfileRoute = require('./routes/doctorProfileRoutes')
 const userListingRoute = require('./routes/userListingRoutes')
+const searchDoctorRoute = require('./routes/searchDoctorRoutes')
 
 // configuration of the dotenv variable
 dotenv.config();
@@ -40,6 +41,7 @@ app.use('/api', patientAuthRoute)
 app.use('/api', userProfileRoute)
 app.use('/api', doctorProfileRoute)
 app.use('/api', userListingRoute)
+app.use('/api', searchDoctorRoute)
 
 // Authenticate and sync models
 
