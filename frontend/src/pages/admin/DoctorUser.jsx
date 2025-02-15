@@ -13,7 +13,7 @@ const DoctorUser = () => {
         const fetchApprovedDoctors = async () => {
             try {
                 setLoading(true);
-                const response = await axios.get('http://localhost:5000/api/doctors/approved');
+                const response = await axios.get('http://localhost:5000/api/accepted/doctors/all');
                 setDoctors(response.data);
             } catch (err) {
                 setError('Failed to load approved doctors');

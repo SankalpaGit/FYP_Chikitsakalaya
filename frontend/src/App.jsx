@@ -1,7 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import Signup from "./pages/doctors/Signup";
 import Login from "./pages/doctors/Login";
-import LandingPage from "./pages/LandingPage";
 import NotFound from "./pages/NotFound";
 import Dashboard from "./pages/admin/Dashboard";
 import Credential from "./pages/admin/Credential";
@@ -18,6 +17,7 @@ import ToDoList from "./pages/doctors/ToDoList";
 import PatientProfile from "./pages/patients/PatientProfile";
 import DoctorProfile from "./pages/doctors/DoctorProfile";
 import DoctorEditProfile from "./pages/doctors/DoctorEditProfile";
+import About from "./pages/others/About";
 
 
 function App() {
@@ -54,7 +54,7 @@ function App() {
       < Route path='/profile' element={<PatientProfile />} />
 
       {/* 404 page and landing page */}
-      <Route path="/about" element={<LandingPage />} />
+      <Route path="/about" element={<About />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
 

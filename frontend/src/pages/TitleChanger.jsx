@@ -15,14 +15,14 @@ const TitleChanger = () => {
       case "/profile":
         title = "Profile";
         break;
-      case "/report":
-        title = "Reports - Chikitsakalaya";
+      case "/about":
+        title = "Chikitsakalaya | About Us";
         break;
       case "/prescription":
         title = "Prescription - Chikitsakalaya";
         break;
       default:
-        title = "Chikitsakalaya";
+        title = "Chikitsakalaya | Home";
         break;
     }
 
