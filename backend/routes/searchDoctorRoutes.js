@@ -1,63 +1,56 @@
-// routes/doctorSearchRoutes.js
-
 const express = require('express');
 const router = express.Router();
-const { Doctor, DoctorDetail } = require('../models'); // Assuming index.js exports both models
+const { Doctor, DoctorDetail } = require('../models');
 const { Op } = require('sequelize');
 
 router.get('/search/doctors', async (req, res) => {
     try {
-        const { firstName, lastName, speciality } = req.query;
+        const { query, minFee, maxFee, city, state, minExp, maxExp } = req.query;
+        const whereClause = { isApproved: true };
+        const doctorDetailWhere = {};
 
-        // Build the search query conditions
-        const searchConditions = {
-            where: { isApproved: true },
+        // Search logic (matches first name, last name, or specialty)
+        if (query) {
+            whereClause[Op.or] = [
+                { firstName: { [Op.like]: `%${query}%` } },
+                { lastName: { [Op.like]: `%${query}%` } },
+                { '$doctorDetail.speciality$': { [Op.like]: `%${query}%` } }
+            ];
+        }
+
+        // Consultation Fee Filter
+        if (minFee || maxFee) {
+            doctorDetailWhere.consultationFee = {};
+            if (minFee) doctorDetailWhere.consultationFee[Op.gte] = parseFloat(minFee);
+            if (maxFee) doctorDetailWhere.consultationFee[Op.lte] = parseFloat(maxFee);
+        }
+
+        // City & State Filter
+        if (city) doctorDetailWhere.city = { [Op.like]: `%${city}%` };
+        if (state) doctorDetailWhere.state = { [Op.like]: `%${state}%` };
+
+        // Experience Filter
+        if (minExp || maxExp) {
+            doctorDetailWhere.experience = {};
+            if (minExp) doctorDetailWhere.experience[Op.gte] = parseInt(minExp);
+            if (maxExp) doctorDetailWhere.experience[Op.lte] = parseInt(maxExp);
+        }
+
+        let doctors = await Doctor.findAll({
+            where: whereClause,
             attributes: ['id', 'firstName', 'lastName', 'email', 'licenseNumber', 'certificate', 'createdAt', 'updatedAt'],
             include: [
                 {
                     model: DoctorDetail,
                     as: 'doctorDetail',
                     attributes: ['speciality', 'experience', 'consultationFee', 'hospitalAffiliation', 'address', 'city', 'state', 'zipCode', 'country', 'profilePicture', 'isComplete'],
-                    where: {} // Start with an empty condition for DoctorDetail
+                    where: doctorDetailWhere
                 }
-            ]
-        };
-
-        // Add search conditions based on the query parameters
-        if (firstName) {
-            searchConditions.where.firstName = {
-                [Op.iLike]: `%${firstName}%`  // Case-insensitive matching
-            };
-        }
-
-        if (lastName) {
-            searchConditions.where.lastName = {
-                [Op.iLike]: `%${lastName}%`  // Case-insensitive matching
-            };
-        }
-
-        if (speciality) {
-            searchConditions.include[0].where.speciality = {
-                [Op.iLike]: `%${speciality}%`  // Case-insensitive matching
-            };
-        }
-
-        // Fetch the filtered doctors
-        const doctors = await Doctor.findAll(searchConditions);
-
-        // Group doctors by ID to ensure only the latest record for each doctor
-        const doctorMap = new Map();
-
-        doctors.forEach(doctor => {
-            if (!doctorMap.has(doctor.id) || new Date(doctor.updatedAt) > new Date(doctorMap.get(doctor.id).updatedAt)) {
-                doctorMap.set(doctor.id, doctor);
-            }
+            ],
+            order: [['updatedAt', 'DESC']]
         });
 
-        // Convert map values to array and send response
-        const latestDoctors = Array.from(doctorMap.values());
-
-        res.status(200).json({ success: true, data: latestDoctors });
+        res.status(200).json({ success: true, data: doctors });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Server error' });
