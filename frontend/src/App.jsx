@@ -19,6 +19,7 @@ import PatientProfile from "./pages/patients/PatientProfile";
 import DoctorProfile from "./pages/doctors/DoctorProfile";
 import DoctorEditProfile from "./pages/doctors/DoctorEditProfile";
 
+
 function App() {
 
   return (
@@ -28,8 +29,8 @@ function App() {
       <Route path="/doctor" element={<Signup />} />
       <Route path="/doctor/login" element={<Login />} />
       <Route path="/doctor/dashboard" element={<DoctorDashboard />} />
-      <Route path="/doctor/schedule" element={<SetFreeTime/>} />
-      <Route path="/doctor/tasks" element={<ToDoList/>} />
+      <Route path="/doctor/schedule" element={<SetFreeTime />} />
+      <Route path="/doctor/tasks" element={<ToDoList />} />
       <Route path="/doctor/profile" element={<DoctorProfile />} />
       <Route path="/doctor/profile/edit" element={<DoctorEditProfile />} />
 
@@ -42,7 +43,6 @@ function App() {
         <ProtectedRoute>
           <DoctorApproval />
         </ProtectedRoute>} />
-      
       <Route path="/admin" element={<Credential />} />
       < Route path="/admin/user/doctor" element={<DoctorUser />} />
       < Route path="/admin/user/patient" element={<PatientUser />} />
@@ -51,8 +51,8 @@ function App() {
       <Route path="/login" element={<LoginForm />} />
       <Route path="/register" element={<RegisterForm />} />
       <Route path='/' element={<HomePage />} />
-      < Route path='/profile' element={<PatientProfile/>} />
-      
+      < Route path='/profile' element={<PatientProfile />} />
+
       {/* 404 page and landing page */}
       <Route path="/about" element={<LandingPage />} />
       <Route path="*" element={<NotFound />} />
