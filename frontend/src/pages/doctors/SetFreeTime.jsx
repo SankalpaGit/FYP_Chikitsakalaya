@@ -1,195 +1,138 @@
 import React, { useState } from "react";
-import { FaClock, FaHourglassEnd, FaHourglassStart } from "react-icons/fa";
+import { FaClock, FaPlus, FaTrash } from "react-icons/fa";
 import DoctorLayout from "../../layouts/DoctorLayout";
 
 const SetFreeTime = () => {
-    const [date, setDate] = useState("");
+    const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+    const [weeklySchedule, setWeeklySchedule] = useState(
+        Object.fromEntries(daysOfWeek.map(day => [day, []]))
+    );
+    const [selectedDay, setSelectedDay] = useState("Sunday");
+    const [viewDay, setViewDay] = useState("Sunday");
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
-    const [freeTimes, setFreeTimes] = useState([]);
-    const [viewUpcoming, setViewUpcoming] = useState(false); // State to toggle upcoming free times
+    const [showModal, setShowModal] = useState(false);
+    const [pendingSlot, setPendingSlot] = useState(null);
 
-    // Convert 24-hour time to 12-hour format
     const convertTo12Hour = (time) => {
         const [hours, minutes] = time.split(":").map(Number);
         const suffix = hours >= 12 ? "PM" : "AM";
-        const formattedHours = hours % 12 || 12; // Convert 0 to 12 for midnight
+        const formattedHours = hours % 12 || 12;
         return `${formattedHours}:${minutes.toString().padStart(2, "0")} ${suffix}`;
     };
 
-    // Calculate total time in hours and minutes
-    const calculateTotalTime = (start, end) => {
-        const startDate = new Date(`2024-01-01T${start}`);
-        const endDate = new Date(`2024-01-01T${end}`);
-        const totalMinutes = Math.floor((endDate - startDate) / (1000 * 60));
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-        return { hours, minutes };
+    
+    const handleStartTimeChange = (e) => {
+        const time = e.target.value;
+        setStartTime(time);
+        const [hours, minutes] = time.split(":").map(Number);
+        const newEndTime = new Date(2024, 0, 1, hours, minutes + 60).toTimeString().slice(0, 5);
+        setEndTime(newEndTime);
     };
 
-    const handleSave = () => {
-        if (date && startTime && endTime) {
-            const { hours, minutes } = calculateTotalTime(startTime, endTime);
-
-            if (hours >= 0 && minutes >= 0) {
-                setFreeTimes([
-                    ...freeTimes,
-                    {
-                        date,
-                        startTime: convertTo12Hour(startTime),
-                        endTime: convertTo12Hour(endTime),
-                        total: `${hours > 0 ? `${hours} hr ` : ""}${minutes > 0 ? `${minutes} min` : ""
-                            }`,
-                    },
-                ]);
-                setStartTime("");
-                setEndTime("");
-            } else {
-                alert("End time must be after start time.");
-            }
-        } else {
-            alert("Please fill in all fields.");
+    const addSlot = () => {
+        if (startTime && endTime) {
+            setPendingSlot({ startTime, endTime });
+            setShowModal(true);
         }
     };
 
-    const today = new Date().toISOString().split("T")[0]; // Today's date in YYYY-MM-DD format
-    const todayFreeTimes = freeTimes.filter((ft) => ft.date === today);
-    const upcomingFreeTimes = freeTimes.filter((ft) => ft.date > today);
+    const confirmAddSlot = (repeatForWeek) => {
+        let updatedSchedule = { ...weeklySchedule };
+        if (repeatForWeek) {
+            daysOfWeek.forEach(day => {
+                updatedSchedule[day] = [
+                    ...updatedSchedule[day],
+                    {
+                        startTime: convertTo12Hour(pendingSlot.startTime),
+                        endTime: convertTo12Hour(pendingSlot.endTime),
+                    },
+                ];
+            });
+        } else {
+            updatedSchedule[selectedDay] = [
+                ...updatedSchedule[selectedDay],
+                {
+                    startTime: convertTo12Hour(pendingSlot.startTime),
+                    endTime: convertTo12Hour(pendingSlot.endTime),
+                },
+            ];
+        }
+        setWeeklySchedule(updatedSchedule);
+        setShowModal(false);
+        setPendingSlot(null);
+        setStartTime("");
+        setEndTime("");
+    };
+
+    const removeSlot = (day, index) => {
+        setWeeklySchedule({
+            ...weeklySchedule,
+            [day]: weeklySchedule[day].filter((_, i) => i !== index),
+        });
+    };
 
     return (
         <DoctorLayout>
-            <div className="w-11/12 m-auto mt-8">
-                <div className="flex gap-10">
-                    {/* Form Section (40%) */}
-                    <div className="w-2/5 bg-white border-2 border-gray-200 shadow-sm  rounded-lg p-6">
-                        <h1 className="text-2xl text-gray-700 font-bold mb-6">Set Your Consultation Hours</h1>
-                        <div className="mb-4">
-                            <label className="block text-gray-700 font-medium mb-2">Date</label>
-                            <input
-                                type="date"
-                                className="w-full border-gray-300 border rounded-md p-2"
-                                value={date}
-                                onChange={(e) => setDate(e.target.value)}
-                            />
+            <div className="w-11/12 m-auto mt-8 flex gap-10">
+                <div className="w-2/5 bg-white border-2 border-gray-200 shadow-sm rounded-lg p-6">
+                    <h1 className="text-2xl text-gray-700 font-bold mb-6">Set Consultation Hours</h1>
+                    <label className="block text-gray-700 font-medium mb-2">Select Day</label>
+                    <select className="w-full border-gray-300 border rounded-md p-2 mb-4" value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)}>
+                        {daysOfWeek.map(day => <option key={day} value={day}>{day}</option>)}
+                    </select>
+                    <label className="block text-gray-700 font-medium mb-2">Start Time</label>
+                    <input type="time" className="w-full border-gray-300 border rounded-md p-2 mb-4" value={startTime} onChange={handleStartTimeChange} />
+                    <label className="block text-gray-700 font-medium mb-2">End Time</label>
+                    <input type="time" className="w-full border-gray-300 border rounded-md p-2 mb-4" value={endTime} onChange={(e) => setEndTime(e.target.value)} />
+                    <button className="w-full bg-orange-500 text-white font-medium py-2 rounded-md hover:bg-orange-600 transition duration-200 flex items-center justify-center gap-2" onClick={addSlot}>
+                        <FaPlus /> Add Time Slot
+                    </button>
+                </div>
+
+                <div className="w-3/5 bg-white border-2 border-gray-200 shadow-sm rounded-lg p-6">
+                    <div className="flex justify-between  w-full">
+                        <div className="w-5/12 ">
+                            <h1 className="text-2xl text-gray-700 font-bold mb-6">Consultation Schedule</h1>
                         </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700 font-medium mb-2">
-                                Start Time
-                            </label>
-                            <input
-                                type="time"
-                                className="w-full border-gray-300 border rounded-md p-2"
-                                value={startTime}
-                                onChange={(e) => setStartTime(e.target.value)}
-                            />
+                        <div className="flex w-4/12 justify-between items-center">
+                            <label className="block text-gray-700 font-medium mb-2 items-center">View Slots for</label>
+                            <select className="w-5/12 border-gray-300 border rounded-md p-2 mb-4 items-center" value={viewDay} onChange={(e) => setViewDay(e.target.value)}>
+                                {daysOfWeek.map(day => <option key={day} value={day}>{day}</option>)}
+                            </select>
                         </div>
-                        <div className="mb-4">
-                            <label className="block text-gray-700 font-medium mb-2">End Time</label>
-                            <input
-                                type="time"
-                                className="w-full border-gray-300 border rounded-md p-2"
-                                value={endTime}
-                                onChange={(e) => setEndTime(e.target.value)}
-                            />
-                        </div>
-                        <button
-                            className="w-full bg-orange-500 text-white font-medium py-2 rounded-md hover:bg-orange-600 transition duration-200"
-                            onClick={handleSave}
-                        >
-                            Save Consultation Hours
-                        </button>
                     </div>
 
-                    {/* Display Section (50%) */}
-                    <div className="w-3/5 bg-white border-2 border-gray-200 shadow-sm rounded-lg p-6">
-                        <h1 className="text-2xl text-gray-700 font-bold mb-6">Consultation Hours</h1>
 
-                        {/* Today's Free Times */}
-                        {!viewUpcoming && (
-                            <>
-                                <h2 className="text-xl font-semibold mb-4 text-gray-600">Today's Consultation Hours</h2>
-                                <div className="h-64 overflow-y-auto space-y-2">
-                                    {todayFreeTimes.length > 0 ? (
-                                        todayFreeTimes.map((time, index) => (
-                                            <div
-                                                key={index}
-                                                className="text-sm font-medium text-gray-700 flex justify-between items-center border-b pb-2"
-                                            >
-                                                <span className="flex items-center gap-2">
-                                                    <FaHourglassStart className="text-gray-500" />
-                                                    <span className="text-gray-800">Start:</span> {time.startTime}
-                                                </span>
-                                                <span className="flex items-center gap-2">
-                                                    <FaHourglassEnd className="text-gray-500" />
-                                                    <span className="text-gray-800">End:</span> {time.endTime}
-                                                </span>
-                                                <span className="flex items-center gap-2">
-                                                    <FaClock className="text-gray-500" />
-                                                    <span className="text-gray-800">Total:</span> {time.total}
-                                                </span>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-orange-700">No consultation hours set for today.</p>
-                                    )}
-                                </div>
-                                {upcomingFreeTimes.length > 0 && (
-                                    <button
-                                        className="mt-4 w-full bg-orange-200 text-gray-700 font-medium py-2 rounded-md hover:bg-orange-300 transition duration-200"
-                                        onClick={() => setViewUpcoming(true)}
-                                    >
-                                        View upcoming Consultation Hours
-                                    </button>
-                                )}
-                            </>
-                        )}
-
-                        {/* Upcoming Free Times */}
-                        {viewUpcoming && (
-                            <>
-                                <h2 className="text-xl font-semibold mt-6 mb-4 text-teal-600">
-                                    Upcoming consultation hour
-                                </h2>
-                                <div className="h-64 overflow-y-auto space-y-2">
-                                    {upcomingFreeTimes.length > 0 ? (
-                                        upcomingFreeTimes.map((time, index) => (
-                                            <div
-                                                key={index}
-                                                className="text-sm font-medium text-gray-700 flex justify-between items-center border-b pb-2"
-                                            >
-                                                <span className="flex items-center gap-2">
-                                                    <FaHourglassStart className="text-gray-500" />
-                                                    <span className="text-gray-800">Date:</span> {time.date}
-                                                </span>
-                                                <span className="flex items-center gap-2">
-                                                    <FaHourglassStart className="text-gray-500" />
-                                                    <span className="text-gray-800">Start:</span> {time.startTime}
-                                                </span>
-                                                <span className="flex items-center gap-2">
-                                                    <FaHourglassEnd className="text-gray-500" />
-                                                    <span className="text-gray-800">End:</span> {time.endTime}
-                                                </span>
-                                                <span className="flex items-center gap-2">
-                                                    <FaClock className="text-gray-500" />
-                                                    <span className="text-gray-800">Total:</span> {time.total}
-                                                </span>
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="text-gray-600">No upcoming consultation hours set.</p>
-                                    )}
-                                </div>
-                                <button
-                                    className="mt-4 w-full bg-orange-200 text-gray-700 font-medium py-2 rounded-md hover:bg-orange-300 transition duration-200"
-                                    onClick={() => setViewUpcoming(false)}
-                                >
-                                    Back to Today's Consultation Hours
+                    <ul className="space-y-2">
+                        <p>Schedule for {viewDay}</p>
+                        {weeklySchedule[viewDay]?.length ? weeklySchedule[viewDay].map((slot, index) => (
+                            
+                            <li key={index} className="flex justify-between items-center bg-gray-100 p-3 rounded-md">
+                                <span className="flex items-center gap-2">
+                                    <FaClock className="text-gray-500" />
+                                    {slot.startTime} - {slot.endTime}
+                                </span>
+                                <button className="text-red-500 hover:text-red-700" onClick={() => removeSlot(viewDay, index)}>
+                                    <FaTrash />
                                 </button>
-                            </>
-                        )}
-                    </div>
+                            </li>
+                        )) : <p className="text-gray-500">No slots set for {viewDay}.</p>}
+                    </ul>
                 </div>
             </div>
+            {showModal && (
+                <div className="fixed inset-0 flex items-center justify-center ">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                        <h2 className="text-lg font-semibold mb-4">Repeat Time Slot?</h2>
+                        <p>Would you like to repeat this time for the whole week (Sunday to Friday)?</p>
+                        <div className="flex justify-end gap-4 mt-4">
+                            <button className="bg-gray-400 text-white px-4 py-2 rounded-md" onClick={() => confirmAddSlot(false)}>No</button>
+                            <button className="bg-orange-500 text-white px-4 py-2 rounded-md" onClick={() => confirmAddSlot(true)}>Yes</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </DoctorLayout>
     );
 };

@@ -10,7 +10,7 @@ const TitleChanger = () => {
     // Change title based on the route
     switch (location.pathname) {
       case "/login":
-        title = "login - Chikitsakalaya";
+        title = "Chikitsakalaya | Login";
         break;
       case "/profile":
         title = "Profile";
@@ -21,6 +21,16 @@ const TitleChanger = () => {
       case "/prescription":
         title = "Prescription - Chikitsakalaya";
         break;
+
+      case "/doctor/schedule":
+        title = "Your Schedule";
+        break;
+        case "/doctor/dashboard":
+          title = "Doctor Dashboard";
+          break;
+        case "/doctor/tasks":
+          title = "Tasks List";
+          break;
       default:
         title = "Chikitsakalaya | Home";
         break;
