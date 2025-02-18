@@ -163,4 +163,20 @@ router.get('/show/time-slot', async (req, res) => {
     }
 });
 
+// Get available time slots for a specific doctor
+router.get('/show/time-slot/:doctorId', async (req, res) => {
+    const { doctorId } = req.params;
+    try {
+        const doctor = await Doctor.findByPk(doctorId);
+        if (!doctor) {
+            return res.status(404).json({ success: false, message: "Doctor not found" });
+        }
+
+        const timeSlots = await TimeSlot.findAll({ where: { doctorId } });
+        return res.status(200).json({ success: true, timeSlots });
+    } catch (err) {
+        return res.status(500).json({ success: false, message: 'Server error', error: err.message });
+    }
+});
+
 module.exports = router;
