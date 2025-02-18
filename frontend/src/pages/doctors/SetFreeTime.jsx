@@ -14,7 +14,7 @@ const SetFreeTime = () => {
     const [endTime, setEndTime] = useState("");
     const [showModal, setShowModal] = useState(false);
     const [pendingSlot, setPendingSlot] = useState(null);
-    
+
     const API_URL = "http://localhost:5000/api"; // Change this if your API is hosted elsewhere
 
     // Fetch existing time slots from the backend
@@ -74,20 +74,20 @@ const SetFreeTime = () => {
         let slotsToSend = repeatForWeek
             ? daysOfWeek.map(day => ({ day, startTime, endTime }))
             : [{ day: selectedDay, startTime, endTime }];
-    
+
         console.log("🚀 Sending slots:", JSON.stringify(slotsToSend, null, 2)); // Debug log
-    
+
         try {
             const token = localStorage.getItem("token");
             const response = await axios.post(`${API_URL}/add/time-slot`, slotsToSend, {
-                headers: { 
+                headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json"
                 },
             });
-    
+
             console.log("✅ API response:", response.data); // Debug log
-    
+
             if (response.data.success) {
                 let updatedSchedule = { ...weeklySchedule };
                 slotsToSend.forEach(slot => {
@@ -101,23 +101,23 @@ const SetFreeTime = () => {
         } catch (error) {
             console.error("❌ Error adding time slot:", error.response?.data || error.message);
         }
-    
+
         setShowModal(false);
         setPendingSlot(null);
         setStartTime("");
         setEndTime("");
     };
-    
-    
 
-    // Remove slot both locally and from the backend
+
+
     const removeSlot = async (day, index) => {
         try {
             const token = localStorage.getItem("token");
             const slot = weeklySchedule[day][index];
-            await axios.delete(`${API_URL}/doctor/remove-time-slot`, {
+
+            await axios.delete(`${API_URL}/remove/time-slot`, {
                 headers: { Authorization: `Bearer ${token}` },
-                data: { day, startTime: slot.startTime, endTime: slot.endTime },
+                data: { day, startTime: slot.startTime, endTime: slot.endTime } // Corrected request body placement
             });
 
             setWeeklySchedule({
@@ -128,6 +128,7 @@ const SetFreeTime = () => {
             console.error("Error removing time slot:", error);
         }
     };
+
 
     return (
         <DoctorLayout>
@@ -170,33 +171,33 @@ const SetFreeTime = () => {
                     </ul>
                 </div>
                 {showModal && (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-        <div className="bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-xl font-bold">Confirm Time Slot</h2>
-            <p>Do you want to repeat this slot for the whole week?</p>
-            <div className="flex gap-4 mt-4">
-                <button
-                    className="bg-green-500 text-white px-4 py-2 rounded-md"
-                    onClick={() => confirmAddSlot(true)}
-                >
-                    Yes, Repeat for Week
-                </button>
-                <button
-                    className="bg-blue-500 text-white px-4 py-2 rounded-md"
-                    onClick={() => confirmAddSlot(false)}
-                >
-                    No, Only for {selectedDay}
-                </button>
-                <button
-                    className="bg-red-500 text-white px-4 py-2 rounded-md"
-                    onClick={() => setShowModal(false)}
-                >
-                    Cancel
-                </button>
-            </div>
-        </div>
-    </div>
-)}
+                    <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+                        <div className="bg-white p-6 rounded-lg shadow-lg">
+                            <h2 className="text-xl font-bold">Confirm Time Slot</h2>
+                            <p>Do you want to repeat this slot for the whole week?</p>
+                            <div className="flex gap-4 mt-4">
+                                <button
+                                    className="bg-green-500 text-white px-4 py-2 rounded-md"
+                                    onClick={() => confirmAddSlot(true)}
+                                >
+                                    Yes, Repeat for Week
+                                </button>
+                                <button
+                                    className="bg-blue-500 text-white px-4 py-2 rounded-md"
+                                    onClick={() => confirmAddSlot(false)}
+                                >
+                                    No, Only for {selectedDay}
+                                </button>
+                                <button
+                                    className="bg-red-500 text-white px-4 py-2 rounded-md"
+                                    onClick={() => setShowModal(false)}
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
             </div>
         </DoctorLayout>
