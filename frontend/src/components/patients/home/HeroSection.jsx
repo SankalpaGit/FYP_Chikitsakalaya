@@ -1,14 +1,22 @@
 import React, { useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
+import axios from "axios";
 
 const HeroSection = ({ onSearch }) => {
     const [searchQuery, setSearchQuery] = useState("");
 
-    const handleSearch = () => {
+    const handleSearch = async () => {
         if (searchQuery.trim() !== "") {
-            onSearch(); // Trigger the state update in HomePage
-            console.log('presswed');
-            
+            try {
+                const response = await axios.get("http://localhost:5000/api/search/doctors", {
+                    params: { query: searchQuery }
+                });
+                console.log("Search Response:", response.data); // Log response to console
+
+                onSearch(); // Trigger the state update in HomePage
+            } catch (error) {
+                console.error("Search API Error:", error);
+            }
         }
     };
 
