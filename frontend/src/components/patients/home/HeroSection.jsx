@@ -12,13 +12,15 @@ const HeroSection = ({ onSearch }) => {
                     params: { query: searchQuery }
                 });
                 console.log("Search Response:", response.data); // Log response to console
-
-                onSearch(); // Trigger the state update in HomePage
+    
+                // Pass the doctors array inside `response.data.data`
+                onSearch(response.data.data); // Pass the actual data array
             } catch (error) {
                 console.error("Search API Error:", error);
             }
         }
     };
+    
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter") {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import PatientLayout from "../../layouts/PatientLayout";
 import HeroSection from "../../components/patients/home/HeroSection";
 import HCW from "../../components/patients/home/HCW";
@@ -11,16 +11,22 @@ const HomePage = () => {
     const [noResultsMessage, setNoResultsMessage] = useState(false);
 
     const handleSearch = (results) => {
+        console.log("Search Results:", results); // Check the received data
+
         // Ensure results is always an array
         const validResults = Array.isArray(results) ? results : [];
 
         setIsSearched(true);
         setSearchResults(validResults);
 
+        // Log state after update
+        console.log("Updated searchResults state:", validResults);
+
         // Show "No doctors found" message if results are empty
         if (validResults.length === 0) {
             setNoResultsMessage(true);
-            setTimeout(() => setNoResultsMessage(false), 10000); // Hide after 10 seconds
+        } else {
+            setNoResultsMessage(false);
         }
     };
 
