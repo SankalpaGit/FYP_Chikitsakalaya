@@ -36,6 +36,7 @@ router.get('/search/doctors', async (req, res) => {
             if (maxExp) doctorDetailWhere.experience[Op.lte] = parseInt(maxExp);
         }
 
+        // Fetch all doctors matching the query
         let doctors = await Doctor.findAll({
             where: whereClause,
             attributes: ['id', 'firstName', 'lastName', 'email', 'licenseNumber', 'certificate', 'createdAt', 'updatedAt'],
@@ -47,10 +48,20 @@ router.get('/search/doctors', async (req, res) => {
                     where: doctorDetailWhere
                 }
             ],
-            order: [['updatedAt', 'DESC']]
+            order: [['updatedAt', 'DESC']] // Order by latest updated doctor
         });
 
-        res.status(200).json({ success: true, data: doctors });
+        // Filter out duplicate doctor IDs, keeping only the latest updated record
+        const uniqueDoctors = Object.values(
+            doctors.reduce((acc, doctor) => {
+                if (!acc[doctor.id] || new Date(doctor.updatedAt) > new Date(acc[doctor.id].updatedAt)) {
+                    acc[doctor.id] = doctor;
+                }
+                return acc;
+            }, {})
+        );
+
+        res.status(200).json({ success: true, data: uniqueDoctors });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Server error' });
