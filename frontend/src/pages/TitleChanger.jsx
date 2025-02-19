@@ -21,6 +21,9 @@ const TitleChanger = () => {
       case "/prescription":
         title = "Prescription - Chikitsakalaya";
         break;
+      case "/appointment/:doctorId":
+        title = "Appointment - Chikitsakalaya";
+        break;
 
       case "/doctor/schedule":
         title = "Your Schedule";

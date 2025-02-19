@@ -2,23 +2,28 @@ import React, { useState } from 'react';
 import { FaHospital, FaUserMd, FaClipboardList, FaFlag, FaAddressCard, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
 import { CiHospital1 } from "react-icons/ci";
 import { GrUserExpert } from "react-icons/gr";
+import { useNavigate } from "react-router-dom";
+
 
 const DisplaySearched = ({ searchResults }) => {
     const [activeDoctor, setActiveDoctor] = useState(null);
     const [activeTab, setActiveTab] = useState(null);
+    const navigate = useNavigate();
 
     const defaultProfilePic = "https://cdn3d.iconscout.com/3d/premium/thumb/doctor-avatar-3d-icon-download-in-png-blend-fbx-gltf-file-formats--medical-medicine-profession-pack-people-icons-8179550.png?f=webp";
 
     const toggleTab = (doctorId, tab) => {
-        if (activeDoctor === doctorId) {
-            // If the same doctor is clicked, toggle the tab
-            setActiveTab(activeTab === tab ? null : tab);
+        if (activeDoctor === doctorId && activeTab === tab) {
+            // If clicking the same tab again, close everything
+            setActiveDoctor(null);
+            setActiveTab(null);
         } else {
-            // If a different doctor is clicked, open the 'details' tab by default
+            // Open the section and set the active tab
             setActiveDoctor(doctorId);
             setActiveTab(tab);
         }
     };
+    
 
     return (
         <div className='w-8/12 bg-white shadow-lg border-2 rounded-2xl border-gray-300 px-6 py-6 h-fit'>
@@ -48,7 +53,10 @@ const DisplaySearched = ({ searchResults }) => {
                                 </div>
                             </div>
                             <div className='w-2/12 flex flex-col items-center h-44'>
-                                <button className='bg-orange-600 py-3 px-3 text-white rounded-md mt-6'>
+                            <button
+                                    className='bg-orange-600 py-3 px-3 text-white rounded-md mt-6'
+                                    onClick={() => navigate(`/appointment/${doctor.id}`)}
+                                >
                                     Book Now
                                 </button>
                                 <p
@@ -60,7 +68,7 @@ const DisplaySearched = ({ searchResults }) => {
                             </div>
                         </div>
 
-                        {/* Expandable Details */}
+                        {/* below is Expandable Details */}
                         {activeDoctor === doctor.id && (
                             <div className="h-fit bg-white w-full p-5">
                                 <div className="h-0.5 w-full bg-gray-300 my-5"></div>

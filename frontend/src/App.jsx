@@ -18,6 +18,7 @@ import PatientProfile from "./pages/patients/PatientProfile";
 import DoctorProfile from "./pages/doctors/DoctorProfile";
 import DoctorEditProfile from "./pages/doctors/DoctorEditProfile";
 import About from "./pages/others/About";
+import AppointmentForm from "./pages/patients/AppointmentForm";
 
 
 function App() {
@@ -52,6 +53,7 @@ function App() {
       <Route path="/register" element={<RegisterForm />} />
       <Route path='/' element={<HomePage />} />
       < Route path='/profile' element={<PatientProfile />} />
+      <Route path='/appointment/:doctorId' element={<AppointmentForm />} />
 
       {/* 404 page and landing page */}
       <Route path="/about" element={<About />} />
