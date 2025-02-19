@@ -2,7 +2,7 @@
 
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const Appointment = require('./appointment');
+const Appointment = require('./Appointment');
 
 const Payment = sequelize.define('Payment', {
   id: {
@@ -19,7 +19,7 @@ const Payment = sequelize.define('Payment', {
     defaultValue: 'pending',
   },
   paymentMethod: {
-    type: DataTypes.ENUM('credit_card', 'debit_card', 'upi', 'net_banking'),
+    type: DataTypes.ENUM('stripe'), // Only Stripe for now
     allowNull: false,
   },
   appointmentId: {

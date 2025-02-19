@@ -19,13 +19,13 @@ const Appointment = sequelize.define('Appointment', {
     type: DataTypes.TIME,
     allowNull: false,
   },
-  status: {
-    type: DataTypes.ENUM('pending', 'accepted', 'rejected', 'completed', 'cancelled'),
-    defaultValue: 'pending',
-  },
   appointmentType: {
     type: DataTypes.ENUM('online', 'physical'),
     allowNull: false,
+  },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: true,
   },
   doctorId: {
     type: DataTypes.UUID,
