@@ -19,6 +19,7 @@ import DoctorProfile from "./pages/doctors/DoctorProfile";
 import DoctorEditProfile from "./pages/doctors/DoctorEditProfile";
 import About from "./pages/others/About";
 import AppointmentForm from "./pages/patients/AppointmentForm";
+import DisplayAppointment from "./pages/patients/DisplayAppointment";
 
 
 function App() {
@@ -54,8 +55,9 @@ function App() {
       <Route path='/' element={<HomePage />} />
       < Route path='/profile' element={<PatientProfile />} />
       <Route path='/appointment/:doctorId' element={<AppointmentForm />} />
+      <Route path='/appointments' element={<DisplayAppointment/>} />
 
-      {/* 404 page and landing page */}
+      {/* Project Related*/}
       <Route path="/about" element={<About />} />
       <Route path="*" element={<NotFound />} />
     </Routes>

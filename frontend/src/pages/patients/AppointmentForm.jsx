@@ -113,7 +113,7 @@ const AppointmentForm = () => {
     return (
         <PatientLayout>
             <div className='flex flex-col md:flex-row w-9/12 m-auto justify-evenly gap-6'>
-                <div className="w-full md:w-5/12 border-2 border-gray-200 bg-white p-6 rounded-lg shadow-md mb-10 mt-5">
+                <div className="w-full md:w-5/12 border-2 border-gray-300 bg-white p-6 rounded-lg shadow-md mb-10 mt-5">
                     <h2 className="text-2xl font-bold mb-6 text-center text-teal-800">Book an Appointment</h2>
 
                     <div className="mb-4">
@@ -165,16 +165,16 @@ const AppointmentForm = () => {
 
                 {/* Rules Section */}
                 <div className="w-full md:w-5/12 flex flex-col justify-center">
-                    <h3 className="text-2xl font-semibold text-teal-800 mb-6 text-center md:text-left">How to Fill the Form</h3>
-                    <ul className="space-y-6 text-gray-700">
+                    <h3 className="text-3xl font-bold text-teal-800 mb-10 text-center md:text-left">How to Fill the Form 😕 ?</h3>
+                    <ul className="space-y-9 text-gray-700">
                         <li className="flex items-start gap-3">
-                            <MdDateRange className="w-6 h-6 text-orange-600" /> Select a date that matches the doctor's availability.
+                            <MdDateRange className="w-6 h-6 text-orange-600" /> First select your prefered date.
                         </li>
                         <li className="flex items-start gap-3">
-                            <IoTimeSharp className="w-6 h-6 text-orange-600" /> Choose a time slot from the available options.
+                            <IoTimeSharp className="w-6 h-6 text-orange-600" /> Choose a time slot available for choosen date.
                         </li>
                         <li className="flex items-start gap-3">
-                            <FaClipboardList className="w-6 h-6 text-orange-600" /> Select the appointment type: Physical or Online.
+                            <FaClipboardList className="w-6 h-6 text-orange-600" /> Select your prefered appointment option.
                         </li>
                         <li className="flex items-start gap-3">
                             <ImParagraphCenter className="w-6 h-6 text-orange-600" /> Provide a brief reason for your appointment.
