@@ -38,7 +38,7 @@ const Appointment = sequelize.define('Appointment', {
     onDelete: 'CASCADE',
   },
   patientId: {
-    type: DataTypes.UUID,
+    type: DataTypes.INTEGER, // ✅ Change to INTEGER
     allowNull: false,
     references: { model: Patient, key: 'id' },
     onDelete: 'CASCADE',

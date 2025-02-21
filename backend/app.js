@@ -9,7 +9,7 @@ require('./config/passportConfig'); // Initialize Passport strategies
 const RegisterDoctor = require('./models/RegisterDoctor'); 
 const Admin = require('./models/Admin'); 
 const Doctor = require('./models/Doctor'); 
-const Patient = require('./models/Patient'); 
+const Patient = require('./models/patient'); 
 const PatientReport = require('./models/PatientReport');
 const TimeSlot = require('./models/TimeSlot');
 const index = require('./models/index');
@@ -24,6 +24,7 @@ const doctorProfileRoute = require('./routes/doctorProfileRoutes')
 const userListingRoute = require('./routes/userListingRoutes')
 const searchDoctorRoute = require('./routes/searchDoctorRoutes')
 const doctorTimeSlotRoute = require('./routes/doctotTimeSlotRoutes')
+const appointmentRoute = require('./routes/appointmenrRoutes')
 
 // configuration of the dotenv variable
 dotenv.config();
@@ -45,6 +46,7 @@ app.use('/api', doctorProfileRoute)
 app.use('/api', userListingRoute)
 app.use('/api', searchDoctorRoute)
 app.use('/api', doctorTimeSlotRoute)
+app.use('/api', appointmentRoute)
 
 // Authenticate and sync models
 
