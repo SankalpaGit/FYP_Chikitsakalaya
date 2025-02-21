@@ -17,6 +17,8 @@ const AppointmentForm = () => {
     const [errorMessage, setErrorMessage] = useState("");
     const [appointmentType, setAppointmentType] = useState("physical");
     const [description, setDescription] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [successMessage, setSuccessMessage] = useState("");
 
     useEffect(() => {
         const fetchTimeSlots = async () => {
@@ -51,9 +53,66 @@ const AppointmentForm = () => {
         }
     };
 
+    const handleConfirmAppointment = async () => {
+        if (!selectedDate || !selectedSlot) {
+            setErrorMessage("Please select a date and time slot.");
+            return;
+        }
+
+        setLoading(true);
+        setErrorMessage("");
+        setSuccessMessage("");
+
+        try {
+            const token = localStorage.getItem("token"); // Assuming the token is stored in localStorage
+
+            const selectedSlotData = availableSlots.find(slot => slot.id === selectedSlot);
+            if (!selectedSlotData) {
+                setErrorMessage("Invalid time slot selected.");
+                setLoading(false);
+                return;
+            }
+
+            const appointmentData = {
+                doctorId,
+                date: selectedDate,
+                StartTime: selectedSlotData.startTime,
+                EndTime: selectedSlotData.endTime,
+                appointmentType,
+                description
+            };
+
+            const response = await axios.post(
+                "http://localhost:5000/api/doctor/appointment/create",
+                appointmentData,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+
+            if (response.data.success) {
+                setSuccessMessage("Appointment booked successfully!");
+                setSelectedDate("");
+                setSelectedSlot(null);
+                setDescription("");
+                setAppointmentType("physical");
+            } else {
+                setErrorMessage(response.data.message || "Failed to book appointment.");
+            }
+        } catch (error) {
+            console.error("Error booking appointment:", error);
+            setErrorMessage("Server error: Could not book appointment.");
+        }
+
+        setLoading(false);
+    };
+
     return (
         <PatientLayout>
-            <div className='flex flex-col md:flex-row w-9/12   m-auto justify-evenly gap-6 '>
+            <div className='flex flex-col md:flex-row w-9/12 m-auto justify-evenly gap-6'>
                 <div className="w-full md:w-5/12 border-2 border-gray-200 bg-white p-6 rounded-lg shadow-md mb-10 mt-5">
                     <h2 className="text-2xl font-bold mb-6 text-center text-teal-800">Book an Appointment</h2>
 
@@ -63,6 +122,7 @@ const AppointmentForm = () => {
                     </div>
 
                     {errorMessage && <p className="text-red-500 text-center mb-4">{errorMessage}</p>}
+                    {successMessage && <p className="text-green-500 text-center mb-4">{successMessage}</p>}
 
                     {availableSlots.length > 0 && (
                         <div className="mb-4">
@@ -94,7 +154,13 @@ const AppointmentForm = () => {
                         <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="w-full p-3 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-600" rows="3" placeholder="Describe your reason for the appointment..."></textarea>
                     </div>
 
-                    <button className="w-full p-3 bg-teal-800 text-white font-semibold rounded-lg hover:bg-teal-900 transition">Confirm Appointment</button>
+                    <button
+                        onClick={handleConfirmAppointment}
+                        className="w-full p-3 bg-teal-800 text-white font-semibold rounded-lg hover:bg-teal-900 transition"
+                        disabled={loading}
+                    >
+                        {loading ? "Booking..." : "Confirm Appointment"}
+                    </button>
                 </div>
 
                 {/* Rules Section */}
