@@ -5,6 +5,7 @@
 /backend/package.json
 
 /frontend/node_modules
+frontend/.env
 /backend/node_modules
 
 # Ignore .env in the backend directory
