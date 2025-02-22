@@ -20,6 +20,7 @@ import DoctorEditProfile from "./pages/doctors/DoctorEditProfile";
 import About from "./pages/others/About";
 import AppointmentForm from "./pages/patients/AppointmentForm";
 import DisplayAppointment from "./pages/patients/DisplayAppointment";
+import PaymentHome from "./pages/patients/PaymentHome";
 
 
 function App() {
@@ -56,6 +57,7 @@ function App() {
       < Route path='/profile' element={<PatientProfile />} />
       <Route path='/appointment/:doctorId' element={<AppointmentForm />} />
       <Route path='/appointments' element={<DisplayAppointment/>} />
+      <Route path='/payment/:appointmentID' element={<PaymentHome />} />
 
       {/* Project Related*/}
       <Route path="/about" element={<About />} />

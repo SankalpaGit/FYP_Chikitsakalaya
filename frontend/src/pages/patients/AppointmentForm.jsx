@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams , useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import PatientLayout from '../../layouts/PatientLayout';
 import { MdDateRange } from "react-icons/md";
@@ -9,6 +9,7 @@ import { ImParagraphCenter } from "react-icons/im";
 import { GiConfirmed } from "react-icons/gi";
 
 const AppointmentForm = () => {
+    const navigate = useNavigate()
     const { doctorId } = useParams();
     const [timeSlots, setTimeSlots] = useState([]);
     const [selectedDate, setSelectedDate] = useState("");
@@ -94,16 +95,22 @@ const AppointmentForm = () => {
             );
 
             if (response.data.success) {
+                const appointmentID = response.data.appointment.id;
                 setSuccessMessage("Appointment booked successfully!");
                 setSelectedDate("");
                 setSelectedSlot(null);
                 setDescription("");
                 setAppointmentType("physical");
+
+                setTimeout(() => {
+                    navigate(`/payment/${appointmentID}`);
+                }, 2000);
+               
             } else {
                 setErrorMessage(response.data.message || "Failed to book appointment.");
             }
         } catch (error) {
-            console.error("Error booking appointment:", error);
+            console.error("Error booking appointment:", error.response?.data || error);
             setErrorMessage("Server error: Could not book appointment.");
         }
 
