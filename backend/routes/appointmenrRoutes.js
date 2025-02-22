@@ -1,10 +1,10 @@
 const express = require("express");
-const  Appointment  = require("../models/Appointment"); // Ensure Appointment model is correctly imported
+const  Appointment  = require("../models/Appointment"); // Import Appointment model
 const { Patient, Doctor } = require("../models"); // Import Doctor model
 const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize"); // Import Op for Sequelize comparisons
 
-const router = express.Router(); // ✅ Fix incorrect 'router()' to 'Router()'
+const router = express.Router(); 
 
 router.post("/doctor/appointment/create", async (req, res) => {
     // 🔐 Extract Token from Headers
@@ -28,32 +28,37 @@ router.post("/doctor/appointment/create", async (req, res) => {
     }
 
     try {
-        // 📌 Extract Data from Request
+        // Extract Data from Request
         const { doctorId, date, StartTime, EndTime, appointmentType, description } = req.body;
         const patientId = req.user.id; // Extracted from token
 
-        // 🔍 Validate Required Fields
+        // Validate Required Fields
         if (!doctorId || !date || !StartTime || !EndTime || !appointmentType || !description) {
             return res.status(400).json({ success: false, message: "All fields are required." });
         }
 
-        // 🔍 Check if Doctor Exists
+        // Check if Doctor Exists
         const doctor = await Doctor.findByPk(doctorId);
         if (!doctor) {
             return res.status(404).json({ success: false, message: "Doctor not found." });
         }
 
-        // 🔍 Check if Appointment Slot is Already Taken (Checking Overlapping Slots)
+        // Check if Appointment Slot is Already Taken
         const existingAppointment = await Appointment.findOne({
             where: {
                 doctorId,
                 date,
                 [Op.or]: [
-                    { StartTime: { [Op.between]: [StartTime, EndTime] } },
-                    { EndTime: { [Op.between]: [StartTime, EndTime] } }
+                    {
+                        [Op.and]: [
+                            { StartTime: { [Op.lte]: EndTime } },
+                            { EndTime: { [Op.gte]: StartTime } }
+                        ]
+                    }
                 ]
             }
         });
+        
 
         if (existingAppointment) {
             return res.status(409).json({ success: false, message: "Time slot already booked." });
@@ -74,6 +79,7 @@ router.post("/doctor/appointment/create", async (req, res) => {
 
     } catch (err) {
         console.error("Server Error:", err);
+        console.error("Error Details:", err.message);
         return res.status(500).json({ success: false, message: "Server error: Could not create appointment", error: err.message });
     }
 });
