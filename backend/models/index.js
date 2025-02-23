@@ -1,7 +1,7 @@
 const sequelize = require('../config/database');
 
 // Import models
-const Patient = require('./patient');
+const Patient = require('./Patient');
 const PatientReport = require('./PatientReport');
 const Diagnosis = require('./Diagnosis');
 const Test = require('./Test');

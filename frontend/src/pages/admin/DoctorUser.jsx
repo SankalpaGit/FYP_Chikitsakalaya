@@ -14,16 +14,17 @@ const DoctorUser = () => {
             try {
                 setLoading(true);
                 const response = await axios.get('http://localhost:5000/api/accepted/doctors/all');
-                setDoctors(response.data);
+                setDoctors(response.data.data); // Ensure only the array is set
             } catch (err) {
                 setError('Failed to load approved doctors');
             } finally {
                 setLoading(false);
             }
         };
-
+    
         fetchApprovedDoctors();
     }, []);
+    
 
     if (loading) return <p>Loading approved doctors...</p>;
     if (error) return <p className="text-red-500">{error}</p>;
@@ -38,7 +39,7 @@ const DoctorUser = () => {
                             <th className="w-1/12 px-4 py-2 border border-gray-300">ID</th>
                             <th className="w-2/12 px-4 py-2 border border-gray-300">Email</th>
                             <th className="w-2/12 px-4 py-2 border border-gray-300">License Number</th>
-                            <th className="w-3/12 px-4 py-2 border border-gray-300">Status</th>
+                            <th className="w-3/12 px-4 py-2 border border-gray-300">Speciality</th>
                             <th className="w-3/12 px-4 py-2 border border-gray-300">Date Approved</th>
                         </tr>
                     </thead>
@@ -49,7 +50,7 @@ const DoctorUser = () => {
                                     <td className="border px-4 py-2">{index + 1}</td>
                                     <td className="border px-4 py-2">{doctor.email}</td>
                                     <td className="border px-4 py-2">{doctor.licenseNumber}</td>
-                                    <td className="border px-4 py-2">{doctor.status}</td>
+                                    <td className="border px-4 py-2">{doctor.doctorDetail.speciality}</td>
                                     <td className="border px-4 py-2">
                                         {new Date(doctor.updatedAt).toLocaleDateString()}
                                     </td>

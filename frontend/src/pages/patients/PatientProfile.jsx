@@ -27,18 +27,34 @@ const PatientProfile = () => {
                 const response = await axios.get('http://localhost:5000/api/getProfile', {
                     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
                 });
+
                 if (response.data.success) {
-                    setPatient(response.data.patient);
-                    setIsProfileComplete(response.data.patient.isProfileComplete);
-                    setProfileImage(response.data.patient.profileImage || profileImage);
-                    setFormData(response.data.patient);
+                    const patientData = response.data.patient || {};
+
+                    setPatient(patientData);
+                    setIsProfileComplete(patientData.isProfileComplete);
+                    setProfileImage(patientData.profileImage || profileImage);
+
+                    // Ensure all fields have default values
+                    setFormData({
+                        firstName: patientData.firstName || '',
+                        lastName: patientData.lastName || '',
+                        email: patientData.email || '',
+                        address: patientData.address || '',
+                        phone: patientData.phone || '',
+                        gender: patientData.gender || '',
+                        dateOfBirth: patientData.dateOfBirth || '',
+                        profileImage: patientData.profileImage || null,
+                    });
                 }
             } catch (error) {
                 console.error('Error fetching profile:', error);
             }
         };
+
         fetchProfile();
     }, []);
+
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
@@ -55,27 +71,41 @@ const PatientProfile = () => {
     const handleProfileUpdate = async () => {
         try {
             const formDataToSend = new FormData();
-            Object.keys(formData).forEach(key => {
-                formDataToSend.append(key, formData[key]);
+            
+            // Ensure all form fields are appended properly
+            Object.entries(formData).forEach(([key, value]) => {
+                if (value) {
+                    formDataToSend.append(key, value);
+                }
             });
-
+    
+            // Log FormData for debugging
+            for (let pair of formDataToSend.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+    
             const response = await axios.put('http://localhost:5000/api/updateProfile', formDataToSend, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
-                    'Content-Type': 'multipart/form-data'
-                }
+                    'Content-Type': 'multipart/form-data',
+                },
             });
+    
             if (response.data.success) {
                 setPatient(response.data.patient);
                 setIsProfileComplete(response.data.patient.isProfileComplete);
-                setProfileImage(response.data.patient.profileImage);
+                setProfileImage(response.data.patient.profileImage || profileImage);
                 setShowModal(false);
+                console.log('Profile updated successfully:', response.data);
+            } else {
+                console.error('Failed to update profile:', response.data.message);
             }
         } catch (error) {
-            console.error('Error updating profile:', error);
+            console.error('Error updating profile:', error.response?.data || error.message);
         }
     };
-
+    
+    
     return (
         <PatientLayout>
             {/* Profile Completion Popup */}
@@ -122,46 +152,62 @@ const PatientProfile = () => {
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-6 rounded-lg shadow-lg w-96">
                         <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
-                        <input 
-                            type="text" 
-                            placeholder="First Name" 
-                            value={formData.firstName} onChange={(e) => setFormData({ ...formData, firstName: e.target.value })} 
-                            className="w-full mb-2 p-2 border rounded focus:ring-teal-600 focus:ring-2 focus:outline-none focus:text-teal-600 focus:font-semibold" 
-                        />
-                        <input 
-                            type="text" 
-                            placeholder="Last Name" 
-                            value={formData.lastName} onChange={(e) => setFormData({ ...formData, lastName: e.target.value })} 
-                            className="w-full mb-2 p-2 border rounded focus:ring-teal-600 focus:ring-2 focus:outline-none focus:text-teal-600 focus:font-semibold" 
-                        />
-                        <input 
-                            type="text" 
-                            value={formData.email} 
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })} 
-                            className="w-full mb-2 p-2 border rounded focus:ring-teal-600 focus:ring-2 focus:outline-none focus:text-teal-600 focus:font-semibold" 
-                        />
                         <input
                             type="text"
-                            value={formData.phone}
+                            placeholder="First Name"
+                            value={formData.firstName ?? ''}  // Ensures a default empty string
+                            onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                            className="w-full mb-2 p-2 border rounded focus:ring-teal-600 focus:ring-2 focus:outline-none focus:text-teal-600 focus:font-semibold"
+                        />
+
+                        <input
+                            type="text"
+                            placeholder="Last Name"
+                            value={formData.lastName ?? ''}
+                            onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                            className="w-full mb-2 p-2 border rounded focus:ring-teal-600 focus:ring-2 focus:outline-none focus:text-teal-600 focus:font-semibold"
+                        />
+
+                        <input
+                            type="text"
+                            value={formData.email ?? ''}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            className="w-full mb-2 p-2 border rounded focus:ring-teal-600 focus:ring-2 focus:outline-none focus:text-teal-600 focus:font-semibold"
+                        />
+
+                        <input
+                            type="text"
+                            value={formData.phone ?? ''}
                             onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            className="w-full mb-2 p-2 border rounded focus:ring-teal-600 focus:ring-2 focus:outline-none focus:text-teal-600 focus:font-semibold placeholder:text-gray-800 "
+                            className="w-full mb-2 p-2 border rounded focus:ring-teal-600 focus:ring-2 focus:outline-none focus:text-teal-600 focus:font-semibold"
                             placeholder="Phone Number"
-                            
                         />
+
                         <input
                             type="text"
-                            value={formData.address}
+                            value={formData.address ?? ''}
                             onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                             className="w-full mb-2 p-2 border rounded focus:ring-teal-600 focus:ring-2 focus:outline-none focus:text-teal-600 focus:font-semibold"
                             placeholder="Address"
                         />
 
-                        <input type="date" value={formData.dateOfBirth} onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })} className="w-full mb-2 p-2 border rounded" />
-                        <select value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })} className="w-full mb-2 p-2 border rounded">
+                        <input
+                            type="date"
+                            value={formData.dateOfBirth ?? ''}
+                            onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                            className="w-full mb-2 p-2 border rounded"
+                        />
+
+                        <select
+                            value={formData.gender ?? ''}
+                            onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                            className="w-full mb-2 p-2 border rounded"
+                        >
                             <option value="">Select Gender</option>
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                         </select>
+
                         <button className="w-full bg-teal-600 text-white p-2 rounded" onClick={handleProfileUpdate}>Save Changes</button>
                         <button className="w-full bg-red-600 text-white p-2 rounded mt-2" onClick={() => setShowModal(false)}>Close</button>
                     </div>

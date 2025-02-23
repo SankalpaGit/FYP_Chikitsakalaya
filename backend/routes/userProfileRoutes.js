@@ -74,10 +74,10 @@ router.post('/upload/Report', upload.single('report'), async (req, res) => {
 
 
 // POST route for manual profile update ( personal profile)
-router.put('/updateProfile', async (req, res) => {
+router.put('/updateProfile', upload.single('profileImage'), async (req, res) => {
     try {
         // Extract and verify token
-        const token = req.headers.authorization?.split(' ')[1]; 
+        const token = req.headers.authorization?.split(' ')[1];
         if (!token) {
             return res.status(401).json({ success: false, message: 'Unauthorized: No token provided' });
         }
@@ -94,16 +94,22 @@ router.put('/updateProfile', async (req, res) => {
             return res.status(404).json({ success: false, message: 'Patient not found' });
         }
 
-        // Extract data
-        const { dateOfBirth, gender, phone, address, profileImage } = req.body;
+        // Extract form data
+        const { dateOfBirth, gender, phone, address } = req.body;
 
-        // Update patient data (overwrite values if provided)
+        // Handle profile image upload
+        let profileImage = patient.profileImage;
+        if (req.file) {
+            profileImage = req.file.path; // Save file path
+        }
+
+        // Update patient data
         await patient.update({
             dateOfBirth: dateOfBirth || patient.dateOfBirth,
             gender: gender || patient.gender,
             phone: phone || patient.phone,
             address: address || patient.address,
-            profileImage: profileImage || patient.profileImage,
+            profileImage: profileImage,
         });
 
         // Check profile completeness
@@ -118,6 +124,7 @@ router.put('/updateProfile', async (req, res) => {
         res.status(500).json({ success: false, message: 'Error updating profile', error: error.message });
     }
 });
+
 
 router.get('/getProfile', async (req, res) => {
     try {

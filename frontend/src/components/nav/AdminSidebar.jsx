@@ -57,9 +57,11 @@ const AdminSidebar = () => {
               <li className="text-white flex items-center px-4 py-2 hover:bg-teal-600 cursor-pointer">
                 <span>Patient</span>
               </li>
+              <Link to='/admin/user/doctor'>
               <li className="text-white flex items-center px-4 py-2 hover:bg-teal-600 cursor-pointer">
                 <span>Doctor</span>
               </li>
+              </Link>
             </ul>
           )}
 
