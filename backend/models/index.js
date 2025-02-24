@@ -30,8 +30,8 @@ Patient.hasMany(Medication, { foreignKey: 'patientId', onDelete: 'CASCADE' });
 Medication.belongsTo(Patient, { foreignKey: 'patientId' });
 
 // Doctor → DoctorDetail 
-Doctor.hasOne(DoctorDetail, { foreignKey: 'doctorId', onDelete: 'CASCADE', onUpdate: 'CASCADE' , as: 'doctorDetail' });
-DoctorDetail.belongsTo(Doctor, { foreignKey: 'doctorId' , as: 'doctorDetail' });
+Doctor.hasMany(DoctorDetail, { foreignKey: 'doctorId', onDelete: 'CASCADE', onUpdate: 'CASCADE' , as: 'doctorDetails' });
+DoctorDetail.belongsTo(Doctor, { foreignKey: 'doctorId' , as: 'doctorDetails' });
 
 // Doctor → TimeSlots
 Doctor.hasMany(TimeSlot, { foreignKey: 'doctorId', onDelete: 'CASCADE' });
