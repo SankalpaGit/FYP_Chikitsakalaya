@@ -21,6 +21,7 @@ import About from "./pages/others/About";
 import AppointmentForm from "./pages/patients/AppointmentForm";
 import DisplayAppointment from "./pages/patients/DisplayAppointment";
 import PaymentHome from "./pages/patients/PaymentHome";
+import AppointmentList from "./pages/doctors/AppointmentList";
 
 
 function App() {
@@ -36,6 +37,8 @@ function App() {
       <Route path="/doctor/tasks" element={<ToDoList />} />
       <Route path="/doctor/profile" element={<DoctorProfile />} />
       <Route path="/doctor/profile/edit" element={<DoctorEditProfile />} />
+      <Route path="/doctor/view/appointment" element={<AppointmentList />} />
+
 
       {/* route setup for admin user */}
       <Route path="/admin/dashboard" element={
@@ -50,6 +53,8 @@ function App() {
       < Route path="/admin/user/doctor" element={<DoctorUser />} />
       < Route path="/admin/user/patient" element={<PatientUser />} />
 
+
+
       {/* route setup for patient user */}
       <Route path="/login" element={<LoginForm />} />
       <Route path="/register" element={<RegisterForm />} />
@@ -58,6 +63,7 @@ function App() {
       <Route path='/appointment/:doctorId' element={<AppointmentForm />} />
       <Route path='/appointments' element={<DisplayAppointment/>} />
       <Route path='/payment/:appointmentID' element={<PaymentHome />} />
+      
 
       {/* Project Related*/}
       <Route path="/about" element={<About />} />
