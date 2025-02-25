@@ -10,6 +10,7 @@ const Doctor = require('./Doctor');
 const DoctorDetail = require('./DoctorDetail');
 const TimeSlot = require('./TimeSlot');
 const Appointment = require('./Appointment');
+const Payment = require('./Payment');
 
 // ✅ Define Relationships
 
@@ -45,6 +46,9 @@ Appointment.belongsTo(Doctor, { foreignKey: 'doctorId' });
 Patient.hasMany(Appointment, { foreignKey: 'patientId' });
 Appointment.belongsTo(Patient, { foreignKey: 'patientId' });
 
+// Appointment → Payment 
+Appointment.hasOne(Payment, { foreignKey: 'appointmentId', onDelete: 'CASCADE' });
+Payment.belongsTo(Appointment, { foreignKey: 'appointmentId' });
 
 // ✅ Export Models
 module.exports = {
@@ -57,4 +61,6 @@ module.exports = {
   Doctor,
   DoctorDetail,
   TimeSlot,
+  Appointment,
+  Payment,
 };

@@ -26,6 +26,7 @@ const searchDoctorRoute = require('./routes/searchDoctorRoutes')
 const doctorTimeSlotRoute = require('./routes/doctotTimeSlotRoutes')
 const appointmentRoute = require('./routes/appointmenrRoutes')
 const paymentRoute = require('./routes/paymentRoutes')
+const getAppointmentRoute = require('./routes/getAppointmentRoutes')
 
 // configuration of the dotenv variable
 dotenv.config();
@@ -49,6 +50,7 @@ app.use('/api', searchDoctorRoute)
 app.use('/api', doctorTimeSlotRoute)
 app.use('/api', appointmentRoute)
 app.use('/api/payment', paymentRoute)
+app.use('/api' , getAppointmentRoute)
 
 // Authenticate and sync models
 
