@@ -11,5 +11,6 @@ frontend/.env
 # Ignore .env in the backend directory
 /backend/.env
 backend/uploads/
+backend/public/
 
 frontend/public
