@@ -11,6 +11,7 @@ const DoctorDetail = require('./DoctorDetail');
 const TimeSlot = require('./TimeSlot');
 const Appointment = require('./Appointment');
 const Payment = require('./Payment');
+const PhysicalTicket = require('./PhysicalTicket');
 
 // ✅ Define Relationships
 
@@ -50,6 +51,9 @@ Appointment.belongsTo(Patient, { foreignKey: 'patientId' });
 Appointment.hasOne(Payment, { foreignKey: 'appointmentId', onDelete: 'CASCADE' });
 Payment.belongsTo(Appointment, { foreignKey: 'appointmentId' });
 
+// Appointment → PhysicalTicket
+Appointment.hasOne(PhysicalTicket, { foreignKey: 'appointmentId', onDelete: 'CASCADE' });
+PhysicalTicket.belongsTo(Appointment, { foreignKey: 'appointmentId' });
 // ✅ Export Models
 module.exports = {
   sequelize,

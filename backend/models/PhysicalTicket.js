@@ -2,7 +2,7 @@
 
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const Appointment = require('./appointment');
+const Appointment = require('./Appointment');
 
 const PhysicalTicket = sequelize.define('PhysicalTicket', {
   id: {
