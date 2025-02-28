@@ -3,6 +3,7 @@ const Payment = require('../models/Payment');
 const Appointment = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
 const DoctorDetail = require('../models/DoctorDetail');
+const { sendInvoice } = require('./sendInvoiceController');
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -75,7 +76,7 @@ exports.createPaymentIntent = async (req, res) => {
     }
 };
 
-// ✅ Update Payment Status After Success
+// Update Payment Status After Success
 exports.updatePaymentStatus = async (req, res) => {
     try {
         const { appointmentId, paymentStatus } = req.body;
@@ -88,6 +89,19 @@ exports.updatePaymentStatus = async (req, res) => {
 
         payment.paymentStatus = paymentStatus;
         await payment.save();
+
+        // If the payment is marked as "paid", trigger invoice generation
+        if (paymentStatus === 'paid') {
+            const appointment = await Appointment.findOne({ where: { id: appointmentId } });
+
+            if (!appointment || appointment.appointmentType !== 'physical') {
+                return res.status(200).json({ success: true, message: "Payment updated. No ticket required." });
+            }
+
+            const ticket = await sendInvoice(appointment);
+
+            return res.status(200).json({ success: true, message: "Payment updated. Ticket generated and sent.", ticket });
+        }
 
         res.status(200).json({ success: true, message: "Payment status updated" });
     } catch (error) {
