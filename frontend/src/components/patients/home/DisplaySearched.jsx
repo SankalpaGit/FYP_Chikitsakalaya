@@ -33,7 +33,7 @@ const DisplaySearched = ({ searchResults }) => {
                         <div className='w-full flex items-start'>
                             <div className='w-3/12 h-38 object-cover'>
                                 <img
-                                    src={doctor.doctorDetail.profilePicture || defaultProfilePic}
+                                    src={doctor.doctorDetails.profilePicture || defaultProfilePic}
                                     alt="Doctor Avatar"
                                     className='w-full h-full rounded-lg'
                                 />
@@ -42,14 +42,14 @@ const DisplaySearched = ({ searchResults }) => {
                                 <p className='font-bold text-gray-700 text-xl'>
                                     {doctor.firstName} {doctor.lastName}
                                 </p>
-                                <p className='text-gray-700 font-semibold'>{doctor.doctorDetail.speciality}</p>
+                                <p className='text-gray-700 font-semibold'>{doctor.doctorDetails.speciality}</p>
                                 <div className='flex items-center mt-5'>
-                                    <p className='text-orange-600 font-bold text-xl'>Rs {doctor.doctorDetail.consultationFee}</p>
+                                    <p className='text-orange-600 font-bold text-xl'>Rs {doctor.doctorDetails.consultationFee}</p>
                                     <span className='ml-2 font-semibold text-gray-500'>per hour</span>
                                 </div>
                                 <div className='flex items-center mt-8 text-gray-700'>
                                     <FaHospital className='text-orange-600 mr-2 text-2xl' />
-                                    <p>{doctor.doctorDetail.hospitalAffiliation}</p>
+                                    <p>{doctor.doctorDetails.hospitalAffiliation}</p>
                                 </div>
                             </div>
                             <div className='w-2/12 flex flex-col items-center h-44'>
@@ -97,7 +97,7 @@ const DisplaySearched = ({ searchResults }) => {
                                         <div className="flex items-center">
                                             <GrUserExpert className="text-gray-600 mr-3" />
                                             <p className="font-semibold text-gray-700">Years of Experience :</p>
-                                            <p className="text-gray-500 ml-3">{doctor.doctorDetail.experience} years</p>
+                                            <p className="text-gray-500 ml-3">{doctor.doctorDetails.experience} years</p>
                                         </div>
                                         <div className="flex items-center">
                                             <FaEnvelope className="text-gray-600 mr-3" />
@@ -108,17 +108,17 @@ const DisplaySearched = ({ searchResults }) => {
                                         <div className="flex items-center">
                                             <CiHospital1 className="text-gray-600 mr-3" />
                                             <p className="font-semibold text-gray-700">Hospital Address :</p>
-                                            <p className="text-gray-500 ml-3">{doctor.doctorDetail.address}</p>
+                                            <p className="text-gray-500 ml-3">{doctor.doctorDetails.address}</p>
                                         </div>
                                         <div className="flex items-center">
                                             <FaMapMarkerAlt className="text-gray-600 mr-3" />
                                             <p className="font-semibold text-gray-700">District, Province :</p>
-                                            <p className="text-gray-500 ml-3">{doctor.doctorDetail.city}, {doctor.doctorDetail.state}</p>
+                                            <p className="text-gray-500 ml-3">{doctor.doctorDetails.city}, {doctor.doctorDetails.state}</p>
                                         </div>
                                         <div className="flex items-center">
                                             <FaFlag className="text-gray-600 mr-3" />
                                             <p className="font-semibold text-gray-700">Country :</p>
-                                            <p className="text-gray-500 ml-3">{doctor.doctorDetail.country}</p>
+                                            <p className="text-gray-500 ml-3">{doctor.doctorDetails.country}</p>
                                         </div>
                                     </div>
                                 )}
