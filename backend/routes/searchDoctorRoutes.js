@@ -14,7 +14,7 @@ router.get('/search/doctors', async (req, res) => {
             whereClause[Op.or] = [
                 { firstName: { [Op.like]: `%${query}%` } },
                 { lastName: { [Op.like]: `%${query}%` } },
-                { '$doctorDetail.speciality$': { [Op.like]: `%${query}%` } }
+                { '$doctorDetails.speciality$': { [Op.like]: `%${query}%` } }
             ];
         }
 
@@ -43,7 +43,7 @@ router.get('/search/doctors', async (req, res) => {
             include: [
                 {
                     model: DoctorDetail,
-                    as: 'doctorDetail',
+                    as: 'doctorDetails',
                     attributes: ['speciality', 'experience', 'consultationFee', 'hospitalAffiliation', 'address', 'city', 'state', 'zipCode', 'country', 'profilePicture', 'isComplete'],
                     where: doctorDetailWhere
                 }
