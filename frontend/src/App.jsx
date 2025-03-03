@@ -22,7 +22,7 @@ import AppointmentForm from "./pages/patients/AppointmentForm";
 import DisplayAppointment from "./pages/patients/DisplayAppointment";
 import PaymentHome from "./pages/patients/PaymentHome";
 import AppointmentList from "./pages/doctors/AppointmentList";
-import ChatHome from "./pages/patients/ChatHome";
+import PostAppointment from "./pages/patients/PostAppointment";
 
 
 function App() {
@@ -64,7 +64,7 @@ function App() {
       <Route path='/appointment/:doctorId' element={<AppointmentForm />} />
       <Route path='/appointments' element={<DisplayAppointment/>} />
       <Route path='/payment/:appointmentID' element={<PaymentHome />} />
-      <Route path="/chat" element={<ChatHome />} />
+      <Route path="/post-appointments" element={<PostAppointment />} />
       
 
       {/* Project Related*/}

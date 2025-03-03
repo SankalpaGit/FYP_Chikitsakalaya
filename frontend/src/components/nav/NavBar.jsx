@@ -37,7 +37,7 @@ const NavBar = () => {
           <div className="space-x-6 flex items-center">
             <a href="/appointments" className="text-gray-800 hover:text-teal-700">Appointments</a>
             <a href="/chat" className="text-gray-800 hover:text-teal-700">Chat</a>
-            <a href="/report" className="text-gray-800 hover:text-teal-700">Reports</a>
+            <a href="/report" className="text-gray-800 hover:text-teal-700">Post Appointment</a>
             <a href="/prescription" className="text-gray-800 hover:text-teal-700">Prescription</a>
             <FaBell className="text-teal-700 hover:text-teal-600 text-3xl cursor-pointer" />
 
