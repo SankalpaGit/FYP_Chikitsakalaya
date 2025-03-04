@@ -1,46 +1,49 @@
 const express = require('express');
+const jwt = require('jsonwebtoken');
 const PhysicalTicket = require('../models/PhysicalTicket');
 const Appointment = require('../models/Appointment');
+const Patient = require('../models/Patient');
 
 const router = express.Router();
 
-router.get('/tickets/:appointmentId', async (req, res) => {
+// Route to fetch the logged-in patient's physical ticket
+router.get('/appointment/ticket', async (req, res) => {
     try {
-        const { appointmentId } = req.params;
-
-        const ticket = await PhysicalTicket.findOne({ where: { appointmentId } });
-
-        if (!ticket) {
-            return res.status(404).json({ success: false, message: "No ticket found for this appointment." });
+        // Extract token from headers
+        const token = req.headers.authorization?.split(' ')[1];
+        if (!token) {
+            return res.status(401).json({ success: false, message: 'Unauthorized: No token provided' });
         }
 
-        res.status(200).json({ success: true, ticket });
-    } catch (error) {
-        console.error("Error fetching ticket:", error);
-        res.status(500).json({ success: false, message: "Server error" });
-    }
-});
+        // Verify the JWT token
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (err) {
+            return res.status(403).json({ success: false, message: 'Invalid or expired token' });
+        }
 
+        // Fetch the authenticated patient
+        const patient = await Patient.findByPk(decoded.id);
+        if (!patient) {
+            return res.status(404).json({ success: false, message: "Patient not found" });
+        }
 
-router.get('/tickets/patient/:patientId', async (req, res) => {
-    try {
-        const { patientId } = req.params;
-
-        const appointments = await Appointment.findAll({
-            where: { patientId, appointmentType: 'physical' },
+        // Find the patient's appointment with a physical ticket
+        const appointment = await Appointment.findOne({
+            where: { patientId: patient.id },
             include: [{ model: PhysicalTicket }],
         });
 
-        const tickets = appointments.map(app => app.PhysicalTicket).filter(ticket => ticket);
-
-        if (tickets.length === 0) {
-            return res.status(404).json({ success: false, message: "No tickets found for this patient." });
+        if (!appointment || !appointment.PhysicalTicket) {
+            return res.status(404).json({ success: false, message: 'No ticket found' });
         }
 
-        res.status(200).json({ success: true, tickets });
+        // Return the ticket details
+        res.json({ success: true, ticket: appointment.PhysicalTicket });
     } catch (error) {
-        console.error("Error fetching patient tickets:", error);
-        res.status(500).json({ success: false, message: "Server error" });
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error' });
     }
 });
 
