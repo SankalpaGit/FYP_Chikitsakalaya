@@ -2,6 +2,7 @@ const express = require('express');
 const dotenv = require('dotenv');
 const passport = require('passport');
 const cors = require('cors'); 
+const path = require('path');
 const sequelize = require('./config/database'); // Import the configured sequelize instance
 require('./config/passportConfig'); // Initialize Passport strategies
 
@@ -37,6 +38,7 @@ app.use(cors({origin: 'http://localhost:5173'}));  // Enable CORS for all routes
 
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 
 // Use of the route
 app.use('/api', doctorRoutes); // Prefix with '/api' or any base URL 
@@ -52,6 +54,8 @@ app.use('/api', appointmentRoute)
 app.use('/api/payment', paymentRoute)
 app.use('/api' , getAppointmentRoute)
 app.use('/api', physicalTicketRoute)
+
+
 // Authenticate and sync models
 
 sequelize.authenticate()

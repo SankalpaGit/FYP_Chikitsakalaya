@@ -1,12 +1,12 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
+const { Op } = require('sequelize');
 const PhysicalTicket = require('../models/PhysicalTicket');
 const Appointment = require('../models/Appointment');
 const Patient = require('../models/Patient');
 
 const router = express.Router();
 
-// Route to fetch the logged-in patient's physical ticket
 router.get('/appointment/ticket', async (req, res) => {
     try {
         // Extract token from headers
@@ -23,26 +23,31 @@ router.get('/appointment/ticket', async (req, res) => {
             return res.status(403).json({ success: false, message: 'Invalid or expired token' });
         }
 
-        // Fetch the authenticated patient
+        // Fetch the patient
         const patient = await Patient.findByPk(decoded.id);
         if (!patient) {
-            return res.status(404).json({ success: false, message: "Patient not found" });
+            return res.status(404).json({ success: false, message: 'Patient not found' });
         }
 
-        // Find the patient's appointment with a physical ticket
-        const appointment = await Appointment.findOne({
-            where: { patientId: patient.id },
-            include: [{ model: PhysicalTicket }],
+        // Fetch appointment and physical ticket
+        const ticket = await PhysicalTicket.findOne({
+            include: [
+                {
+                    model: Appointment,
+                    where: { patientId: patient.id }, // Ensuring the appointment belongs to the patient
+                    include: [{ model: Patient }]
+                }
+            ]
         });
 
-        if (!appointment || !appointment.PhysicalTicket) {
+        if (!ticket) {
             return res.status(404).json({ success: false, message: 'No ticket found' });
         }
 
         // Return the ticket details
-        res.json({ success: true, ticket: appointment.PhysicalTicket });
+        res.json({ success: true, ticket });
     } catch (error) {
-        console.error(error);
+        console.error('Server Error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
