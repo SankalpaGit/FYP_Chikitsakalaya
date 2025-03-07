@@ -5,6 +5,8 @@ const cors = require('cors');
 const path = require('path');
 const sequelize = require('./config/database'); // Import the configured sequelize instance
 require('./config/passportConfig'); // Initialize Passport strategies
+const { Server } = require("socket.io");
+const WEBRTC_CONFIG = require("./config/webrtcConfig");
 
 // import of the all model 
 const RegisterDoctor = require('./models/RegisterDoctor'); 
@@ -36,6 +38,7 @@ const app = express();
 
 app.use(cors({origin: 'http://localhost:5173'}));  // Enable CORS for all routes and origins
 
+
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 app.use('/public', express.static(path.join(__dirname, 'public')));
@@ -55,9 +58,46 @@ app.use('/api/payment', paymentRoute)
 app.use('/api' , getAppointmentRoute)
 app.use('/api', physicalTicketRoute)
 
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: WEBRTC_CONFIG.FRONTEND_URL,
+    methods: ["GET", "POST"],
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  // Join a specific room (meeting room)
+  socket.on("join-room", (roomId) => {
+    socket.join(roomId);
+    socket.to(roomId).emit("user-joined", socket.id);
+  });
+
+  // Handle WebRTC Offer
+  socket.on("offer", ({ roomId, offer }) => {
+    socket.to(roomId).emit("offer", offer);
+  });
+
+  // Handle WebRTC Answer
+  socket.on("answer", ({ roomId, answer }) => {
+    socket.to(roomId).emit("answer", answer);
+  });
+
+  // Handle ICE Candidates
+  socket.on("ice-candidate", ({ roomId, candidate }) => {
+    socket.to(roomId).emit("ice-candidate", candidate);
+  });
+
+  // Handle Disconnection
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
+
 
 // Authenticate and sync models
-
 sequelize.authenticate()
   .then(() => {
     console.log('Database connected...');

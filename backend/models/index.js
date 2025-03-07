@@ -12,6 +12,7 @@ const TimeSlot = require('./TimeSlot');
 const Appointment = require('./Appointment');
 const Payment = require('./Payment');
 const PhysicalTicket = require('./PhysicalTicket');
+const Chat = require('./Chat');
 
 // ✅ Define Relationships
 
@@ -54,6 +55,15 @@ Payment.belongsTo(Appointment, { foreignKey: 'appointmentId' });
 // Appointment → PhysicalTicket
 Appointment.hasOne(PhysicalTicket, { foreignKey: 'appointmentId', onDelete: 'CASCADE' });
 PhysicalTicket.belongsTo(Appointment, { foreignKey: 'appointmentId' });
+
+// Patient → Chat (sent messages)
+Patient.hasMany(Chat, { as: 'sentMessages', foreignKey: 'senderId' });
+Chat.belongsTo(Patient, { as: 'sender', foreignKey: 'senderId' });
+
+// Doctor → Chat (received messages)
+Doctor.hasMany(Chat, { as: 'receivedMessages', foreignKey: 'receiverId' });
+Chat.belongsTo(Doctor, { as: 'receiver', foreignKey: 'receiverId' });
+
 // ✅ Export Models
 module.exports = {
   sequelize,
@@ -67,4 +77,6 @@ module.exports = {
   TimeSlot,
   Appointment,
   Payment,
+  PhysicalTicket,
+  Chat,
 };

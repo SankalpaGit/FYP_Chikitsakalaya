@@ -20,7 +20,7 @@ const Chat = sequelize.define("Chat", {
     allowNull: false,
   },
   messageType: {
-    type: DataTypes.ENUM("text", "invoice", "meeting"),
+    type: DataTypes.ENUM("text", "file"),
     defaultValue: "text",
   },
   createdAt: {
