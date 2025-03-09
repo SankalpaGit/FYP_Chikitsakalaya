@@ -24,6 +24,7 @@ import PaymentHome from "./pages/patients/PaymentHome";
 import AppointmentList from "./pages/doctors/AppointmentList";
 import PostAppointment from "./pages/patients/PostAppointment";
 import ChatHome from "./pages/patients/ChatHome";
+import VideoCall from "./components/VideoCall";
 
 
 function App() {
@@ -67,6 +68,7 @@ function App() {
       <Route path='/payment/:appointmentID' element={<PaymentHome />} />
       <Route path="/post-appointments" element={<PostAppointment />} />
       <Route path="/chat" element={<ChatHome />} />
+      {/* <Route path="/meeting/:roomId" element={<VideoCallWrapper />} /> */}
       
 
       {/* Project Related*/}
@@ -76,5 +78,10 @@ function App() {
 
   );
 }
+
+// const VideoCallWrapper = () => {
+//   const { roomId } = useParams();
+//   return <VideoCall roomId={roomId} isHost={false} onEndCall={() => console.log("Call ended")} />;
+// };
 
 export default App;
