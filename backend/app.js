@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const passport = require('passport');
 const cors = require('cors'); 
 const path = require('path');
+const http = require('http');
 const sequelize = require('./config/database'); // Import the configured sequelize instance
 require('./config/passportConfig'); // Initialize Passport strategies
 const { Server } = require("socket.io");

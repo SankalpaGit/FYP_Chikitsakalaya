@@ -4,7 +4,6 @@ const fs = require('fs');
 const path = require('path');
 const PDFDocument = require('pdfkit');
 const PhysicalTicket = require('../models/PhysicalTicket');
-const Chat = require('../models/Chat');
 
 exports.sendInvoice = async (appointment) => {
     try {
@@ -43,14 +42,6 @@ exports.sendInvoice = async (appointment) => {
             appointmentId: appointment.id,
             tokenNumber,
             pdfLink: `/public/tickets/${tokenNumber}.pdf`,
-        });
-
-        // Auto-send ticket as a chat message
-        await Chat.create({
-            senderId: appointment.doctorId, // Doctor as sender
-            receiverId: appointment.patientId,
-            message: `Your appointment ticket is ready. Token Number: ${tokenNumber}. Download here: ${newTicket.pdfLink}`,
-            messageType: 'text',
         });
 
         console.log(`Ticket generated and sent for appointment ${appointment.id}`);

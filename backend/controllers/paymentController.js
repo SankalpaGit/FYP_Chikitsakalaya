@@ -3,7 +3,9 @@ const Payment = require('../models/Payment');
 const Appointment = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
 const DoctorDetail = require('../models/DoctorDetail');
+const { createMeetingLink } = require('./createMeetingLinkController');
 const { sendInvoice } = require('./sendInvoiceController');
+
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -90,6 +92,12 @@ exports.updatePaymentStatus = async (req, res) => {
         payment.paymentStatus = paymentStatus;
         await payment.save();
 
+        const appointment = await Appointment.findOne({ where: { id: appointmentId } });
+
+        if (!appointment) {
+            return res.status(404).json({ success: false, message: "Appointment not found" });
+        }
+        
         // If the payment is marked as "paid", trigger invoice generation
         if (paymentStatus === 'paid') {
             const appointment = await Appointment.findOne({ where: { id: appointmentId } });
@@ -101,6 +109,19 @@ exports.updatePaymentStatus = async (req, res) => {
             const ticket = await sendInvoice(appointment);
 
             return res.status(200).json({ success: true, message: "Payment updated. Ticket generated and sent.", ticket });
+        }
+
+        // If the payment is marked as "paid", trigger link generation
+        if (paymentStatus === 'paid') {
+            const appointment = await Appointment.findOne({ where: { id: appointmentId } });
+
+            if (!appointment || appointment.appointmentType !== 'online') {
+                return res.status(200).json({ success: true, message: "Payment updated. No link required." });
+            }
+
+            const meetingResponse = await createMeetingLink(appointmentId);
+
+            return res.status(200).json({ success: true, message: "Payment updated. link generated and sent.", ticket });
         }
 
         res.status(200).json({ success: true, message: "Payment status updated" });
