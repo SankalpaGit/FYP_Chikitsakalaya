@@ -42,7 +42,7 @@ const PostAppointment = () => {
                 {loading ? (
                     <p className="text-gray-600">Loading...</p>
                 ) : error ? (
-                    <p className="text-red-500">{error}</p>
+                    <p className="text-red-500">May be You dont have any Physical Appointmnt</p>
                 ) : ticket ? (
                     <div className="relative w-80 h-96 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-300">
                     {/* PDF Display Without Controls */}

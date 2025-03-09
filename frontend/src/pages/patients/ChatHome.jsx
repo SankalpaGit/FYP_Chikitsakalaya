@@ -4,8 +4,8 @@ import ChatBox from "./ChatBox";
 const ChatHome = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const chats = [
-    { id: 1, name: "Invoice Support" },
-    { id: 2, name: "Technical Issue" },
+    { id: 1, name: "Dr Rahul Subba" },
+    { id: 2, name: "Abhinav Mishra" },
   ];
 
   return (
@@ -19,7 +19,7 @@ const ChatHome = () => {
               key={chat.id}
               className={`p-3 rounded-lg cursor-pointer transition ${
                 selectedChat?.id === chat.id
-                  ? "bg-blue-500 text-white"
+                  ? "bg-teal-500 text-white"
                   : "hover:bg-gray-100"
               }`}
               onClick={() => setSelectedChat(chat)}

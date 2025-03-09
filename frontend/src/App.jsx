@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+// import { useParams } from "react-router-dom";
 import Signup from "./pages/doctors/Signup";
 import Login from "./pages/doctors/Login";
 import NotFound from "./pages/NotFound";
@@ -24,11 +25,13 @@ import PaymentHome from "./pages/patients/PaymentHome";
 import AppointmentList from "./pages/doctors/AppointmentList";
 import PostAppointment from "./pages/patients/PostAppointment";
 import ChatHome from "./pages/patients/ChatHome";
-import VideoCall from "./components/VideoCall";
+// import VideoCall from "./components/VideoCall";
 
+// window.global= window;
 
 function App() {
 
+ 
   return (
     <Routes>
 

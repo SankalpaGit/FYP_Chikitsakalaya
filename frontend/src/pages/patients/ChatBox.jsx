@@ -45,7 +45,7 @@ const ChatBox = ({ selectedChat }) => {
             <div
               className={`px-4 py-2 max-w-xs rounded-2xl text-sm ${
                 msg.sender === "user"
-                  ? "bg-blue-500 text-white rounded-br-none"
+                  ? "bg-teal-700 text-white rounded-br-none"
                   : "bg-gray-200 text-black rounded-bl-none"
               }`}
             >
@@ -66,7 +66,7 @@ const ChatBox = ({ selectedChat }) => {
           onChange={(e) => setNewMessage(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
-        <button onClick={sendMessage} className="bg-blue-500 text-white px-6 py-2 rounded-full">
+        <button onClick={sendMessage} className="bg-orange-500 text-white px-6 py-2 rounded-full">
           Send
         </button>
       </div>
