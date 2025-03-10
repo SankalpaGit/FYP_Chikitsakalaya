@@ -121,7 +121,7 @@ exports.updatePaymentStatus = async (req, res) => {
 
             const meetingResponse = await createMeetingLink(appointmentId);
 
-            return res.status(200).json({ success: true, message: "Payment updated. link generated and sent.", ticket });
+            return res.status(200).json({ success: true, message: "Payment updated. link generated and sent.", meetingResponse });
         }
 
         res.status(200).json({ success: true, message: "Payment status updated" });

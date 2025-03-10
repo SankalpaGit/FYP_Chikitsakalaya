@@ -67,27 +67,37 @@ const io = new Server(server, {
   },
 });
 
+console.log("Allowed frontend URL:", WEBRTC_CONFIG.FRONTEND_URL);
+
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
-  // Join a specific room (meeting room)
+  // User joins a room
   socket.on("join-room", (roomId) => {
+    if (!roomId) return console.error("Room ID is undefined!");
+    console.log(`User ${socket.id} joined room ${roomId}`);
     socket.join(roomId);
     socket.to(roomId).emit("user-joined", socket.id);
   });
 
   // Handle WebRTC Offer
   socket.on("offer", ({ roomId, offer }) => {
+    console.log(`Received offer for room: ${roomId}`);
+    if (!roomId || !offer) return console.error("Invalid offer data!");
     socket.to(roomId).emit("offer", offer);
   });
 
   // Handle WebRTC Answer
   socket.on("answer", ({ roomId, answer }) => {
+    console.log(`Received answer for room: ${roomId}`);
+    if (!roomId || !answer) return console.error("Invalid answer data!");
     socket.to(roomId).emit("answer", answer);
   });
 
   // Handle ICE Candidates
   socket.on("ice-candidate", ({ roomId, candidate }) => {
+    if (!candidate) return console.warn("Received an invalid ICE candidate");
+    console.log(`ICE candidate received for room: ${roomId}`);
     socket.to(roomId).emit("ice-candidate", candidate);
   });
 
