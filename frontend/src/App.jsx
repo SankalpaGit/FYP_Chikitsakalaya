@@ -1,4 +1,6 @@
+  import React from "react";
   import { Route, Routes } from "react-router-dom";
+  import { useParams } from "react-router-dom";
   import Signup from "./pages/doctors/Signup";
   import Login from "./pages/doctors/Login";
   import NotFound from "./pages/NotFound";
@@ -26,7 +28,7 @@
   import ChatHome from "./pages/patients/ChatHome";
   import VideoCall from "./components/VideoCall";
 
-  window.global= window;
+  
   console.log("App Component Loaded");
 
   function App() {

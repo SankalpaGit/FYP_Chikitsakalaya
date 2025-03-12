@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
+import { FaMicrophone, FaMicrophoneSlash, FaVideo, FaVideoSlash, FaPhoneSlash } from "react-icons/fa"; // Import from react-icons
 import useWebRTC from "../hook/useWebRTC";
 
 const VideoCall = ({ roomId, isHost, onEndCall }) => {
@@ -13,40 +14,38 @@ const VideoCall = ({ roomId, isHost, onEndCall }) => {
     if (remoteStream) remoteVideoRef.current.srcObject = remoteStream;
   }, [stream, remoteStream]);
 
-  // Toggle microphone
   const toggleMic = () => {
-    const enabled = !micEnabled;
-    setMicEnabled(enabled);
-    stream.getAudioTracks()[0].enabled = enabled;
+    setMicEnabled(!micEnabled);
+    stream.getAudioTracks()[0].enabled = !micEnabled;
   };
 
-  // Toggle video
   const toggleVideo = () => {
-    const enabled = !videoEnabled;
-    setVideoEnabled(enabled);
-    stream.getVideoTracks()[0].enabled = enabled;
+    setVideoEnabled(!videoEnabled);
+    stream.getVideoTracks()[0].enabled = !videoEnabled;
   };
 
   return (
-    <div className="flex flex-col items-center">
-      <h2 className="text-lg font-bold mb-4">WebRTC Video Call</h2>
-      
-      <div className="flex space-x-4 mb-4">
-        <video ref={localVideoRef} autoPlay playsInline muted className="w-40 h-40 border rounded-md" />
-        <video ref={remoteVideoRef} autoPlay playsInline className="w-40 h-40 border rounded-md" />
+    <div className="flex flex-col items-center h-screen bg-gray-900 text-white">
+      <h2 className="text-2xl font-bold my-4">You are in call with your doctor</h2>
+
+      {/* Video Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full h-3/4 px-4">
+        <video ref={localVideoRef} autoPlay playsInline muted className="w-full h-full object-cover rounded-lg border border-gray-700" />
+        <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover rounded-lg border border-gray-700" />
       </div>
 
-      <div className="flex space-x-4">
-        <button onClick={toggleMic} className={`px-4 py-2 rounded ${micEnabled ? 'bg-green-500' : 'bg-red-500'}`}>
-          {micEnabled ? "Mute Mic" : "Unmute Mic"}
-        </button>
-        
-        <button onClick={toggleVideo} className={`px-4 py-2 rounded ${videoEnabled ? 'bg-green-500' : 'bg-red-500'}`}>
-          {videoEnabled ? "Turn Off Video" : "Turn On Video"}
+      {/* Controls */}
+      <div className="flex justify-center space-x-6 mt-6 bg-gray-800 p-4 rounded-lg">
+        <button onClick={toggleMic} className="p-4 rounded-full bg-gray-700 hover:bg-gray-600 text-xl">
+          {micEnabled ? <FaMicrophone /> : <FaMicrophoneSlash className="text-red-500" />}
         </button>
 
-        <button onClick={onEndCall} className="px-4 py-2 bg-gray-700 text-white rounded">
-          End Call
+        <button onClick={toggleVideo} className="p-4 rounded-full bg-gray-700 hover:bg-gray-600 text-xl">
+          {videoEnabled ? <FaVideo /> : <FaVideoSlash className="text-red-500" />}
+        </button>
+
+        <button onClick={onEndCall} className="p-4 rounded-full bg-red-600 hover:bg-red-500 text-xl">
+          <FaPhoneSlash />
         </button>
       </div>
     </div>
