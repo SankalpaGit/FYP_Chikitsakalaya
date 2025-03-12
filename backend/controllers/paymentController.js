@@ -97,31 +97,17 @@ exports.updatePaymentStatus = async (req, res) => {
         if (!appointment) {
             return res.status(404).json({ success: false, message: "Appointment not found" });
         }
-        
-        // If the payment is marked as "paid", trigger invoice generation
-        if (paymentStatus === 'paid') {
-            const appointment = await Appointment.findOne({ where: { id: appointmentId } });
 
-            if (!appointment || appointment.appointmentType !== 'physical') {
-                return res.status(200).json({ success: true, message: "Payment updated. No ticket required." });
+        if (paymentStatus === 'paid') {
+            if (appointment.appointmentType === 'physical') {
+                const ticket = await sendInvoice(appointment);
+                return res.status(200).json({ success: true, message: "Payment updated. Ticket generated and sent.", ticket });
             }
 
-            const ticket = await sendInvoice(appointment);
-
-            return res.status(200).json({ success: true, message: "Payment updated. Ticket generated and sent.", ticket });
-        }
-
-        // If the payment is marked as "paid", trigger link generation
-        if (paymentStatus === 'paid') {
-            const appointment = await Appointment.findOne({ where: { id: appointmentId } });
-
-            if (!appointment || appointment.appointmentType !== 'online') {
-                return res.status(200).json({ success: true, message: "Payment updated. No link required." });
+            if (appointment.appointmentType === 'online') {
+                const meetingResponse = await createMeetingLink(appointment);
+                return res.status(200).json({ success: true, message: "Payment updated. Link generated and sent.", meetingResponse });
             }
-
-            const meetingResponse = await createMeetingLink(appointmentId);
-
-            return res.status(200).json({ success: true, message: "Payment updated. link generated and sent.", meetingResponse });
         }
 
         res.status(200).json({ success: true, message: "Payment status updated" });

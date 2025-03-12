@@ -1,6 +1,6 @@
 // controllers/createMeetingLinkController.js
 
-const { OnlinePortal } = require('../models');
+const OnlinePortal  = require('../models/OnlinePortal');
 const { v4: uuidv4 } = require('uuid');
 
 exports.createMeetingLink = async (appointment) => {
