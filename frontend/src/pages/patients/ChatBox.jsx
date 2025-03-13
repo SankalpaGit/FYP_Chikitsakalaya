@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useEffect, useRef } from "react";
 
 const ChatBox = ({ selectedChat }) => {
@@ -25,6 +26,7 @@ const ChatBox = ({ selectedChat }) => {
       setMessages((prev) => [
         ...prev,
         { id: prev.length + 1, text: "I'll look into that for you!", sender: "bot" },
+        { id: prev.length + 2, text: "Ok man", sender: "bot" },
       ]);
     }, 1000);
   };

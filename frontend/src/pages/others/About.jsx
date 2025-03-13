@@ -1,3 +1,4 @@
+import React from "react";
 import PatientLayout from "../../layouts/PatientLayout";
 import AboutUs from "../../components/abouts/AboutUs"
 import ContactUI from "../../components//abouts/ContactUI";

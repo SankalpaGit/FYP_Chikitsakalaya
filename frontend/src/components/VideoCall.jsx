@@ -25,8 +25,8 @@ const VideoCall = ({ roomId, isHost, onEndCall }) => {
   };
 
   return (
-    <div className="flex flex-col items-center h-screen bg-gray-900 text-white">
-      <h2 className="text-2xl font-bold my-4">You are in call with your doctor</h2>
+    <div className="flex flex-col items-center h-screen bg-white">
+      <h2 className="text-2xl bg-gray-700 text font-bold my-4">You are in call with your doctor</h2>
 
       {/* Video Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full h-3/4 px-4">
