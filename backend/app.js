@@ -3,11 +3,9 @@ const dotenv = require('dotenv');
 const passport = require('passport');
 const cors = require('cors'); 
 const path = require('path');
-const http = require('http');
 const sequelize = require('./config/database'); // Import the configured sequelize instance
 require('./config/passportConfig'); // Initialize Passport strategies
-const { Server } = require("socket.io");
-const WEBRTC_CONFIG = require("./config/webrtcConfig");
+
 
 // import of the all model 
 const RegisterDoctor = require('./models/RegisterDoctor'); 
@@ -58,55 +56,6 @@ app.use('/api', appointmentRoute)
 app.use('/api/payment', paymentRoute)
 app.use('/api' , getAppointmentRoute)
 app.use('/api', physicalTicketRoute)
-
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: WEBRTC_CONFIG.FRONTEND_URL,
-    methods: ["GET", "POST"],
-  },
-});
-
-console.log("Allowed frontend URL:", WEBRTC_CONFIG.FRONTEND_URL);
-
-io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-
-  // User joins a room
-  socket.on("join-room", (roomId) => {
-    if (!roomId) return console.error("Room ID is undefined!");
-    console.log(`User ${socket.id} joined room ${roomId}`);
-    socket.join(roomId);
-    socket.to(roomId).emit("user-joined", socket.id);
-  });
-
-  // Handle WebRTC Offer
-  socket.on("offer", ({ roomId, offer }) => {
-    console.log(`Received offer for room: ${roomId}`);
-    if (!roomId || !offer) return console.error("Invalid offer data!");
-    socket.to(roomId).emit("offer", offer);
-  });
-
-  // Handle WebRTC Answer
-  socket.on("answer", ({ roomId, answer }) => {
-    console.log(`Received answer for room: ${roomId}`);
-    if (!roomId || !answer) return console.error("Invalid answer data!");
-    socket.to(roomId).emit("answer", answer);
-  });
-
-  // Handle ICE Candidates
-  socket.on("ice-candidate", ({ roomId, candidate }) => {
-    if (!candidate) return console.warn("Received an invalid ICE candidate");
-    console.log(`ICE candidate received for room: ${roomId}`);
-    socket.to(roomId).emit("ice-candidate", candidate);
-  });
-
-  // Handle Disconnection
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
-});
-
 
 // Authenticate and sync models
 sequelize.authenticate()
