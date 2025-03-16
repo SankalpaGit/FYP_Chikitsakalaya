@@ -23,33 +23,29 @@ router.get('/appointment/ticket', async (req, res) => {
             return res.status(403).json({ success: false, message: 'Invalid or expired token' });
         }
 
-        // Fetch the patient
-        const patient = await Patient.findByPk(decoded.id);
-        if (!patient) {
-            return res.status(404).json({ success: false, message: 'Patient not found' });
-        }
-
-        // Fetch appointment and physical ticket
-        const ticket = await PhysicalTicket.findOne({
+        // Fetch the physical tickets linked to the logged-in patient
+        const tickets = await PhysicalTicket.findAll({
+            attributes: ['id', 'pdfLink', 'tokenNumber'], // Select specific fields
             include: [
                 {
                     model: Appointment,
-                    where: { patientId: patient.id }, // Ensuring the appointment belongs to the patient
-                    include: [{ model: Patient }]
+                    attributes: [], // We don't need appointment fields
+                    where: { patientId: decoded.id }, // Ensure the appointment belongs to the logged-in patient
                 }
             ]
         });
 
-        if (!ticket) {
+        if (!tickets.length) {
             return res.status(404).json({ success: false, message: 'No ticket found' });
         }
 
         // Return the ticket details
-        res.json({ success: true, ticket });
+        res.json({ success: true, tickets });
     } catch (error) {
         console.error('Server Error:', error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 });
+
 
 module.exports = router;
