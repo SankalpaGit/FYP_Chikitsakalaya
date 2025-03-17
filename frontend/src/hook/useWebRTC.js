@@ -67,7 +67,7 @@ const useWebRTC = (roomId, isHost) => {
 
         if (peerRef.current) {
           peerRef.current.on("stream", (remoteStream) => {
-            console.log("Received remote stream");
+            console.log("Received remote stream:", remoteStream);
             setRemoteStream(remoteStream);
           });
         }

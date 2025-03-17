@@ -21,7 +21,8 @@ const PostAppointment = () => {
                         headers: { Authorization: `Bearer ${token}` },
                     }
                 );
-
+                console.log(response);
+                
                 setTicket(response.data.ticket);
             } catch (err) {
                 setError(err.message || "Failed to load ticket");
