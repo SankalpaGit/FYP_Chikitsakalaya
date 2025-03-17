@@ -46,15 +46,6 @@ io.on("connection", (socket) => {
   socket.on("ice-candidate", ({ roomId, candidate }) => {
     socket.to(roomId).emit("ice-candidate", candidate);
   });
-
-  // **Real-time Notifications**
-  socket.on("send-notification", ({ recipientId, message }) => {
-    const recipientSocket = activeUsers[recipientId];
-    if (recipientSocket) {
-      io.to(recipientSocket).emit("receive-notification", message);
-    }
-  });
-
   
   // **One-to-One Chat**
   socket.on("send-message", ({ senderId, recipientId, message }) => {
