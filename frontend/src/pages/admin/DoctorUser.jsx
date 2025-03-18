@@ -15,6 +15,8 @@ const DoctorUser = () => {
                 setLoading(true);
                 const response = await axios.get('http://localhost:5000/api/accepted/doctors/all');
                 setDoctors(response.data.data); // Ensure only the array is set
+                console.log(response);
+                
             } catch (err) {
                 setError('Failed to load approved doctors');
             } finally {

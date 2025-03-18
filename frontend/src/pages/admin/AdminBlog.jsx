@@ -1,5 +1,7 @@
+import React from "react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import AdminLayout from "../../layouts/AdminLayout";
 
 const AdminBlog = () => {
   const [blogs, setBlogs] = useState([]);
@@ -26,6 +28,7 @@ const AdminBlog = () => {
   };
 
   return (
+    < AdminLayout>
     <div className="max-w-4xl mx-auto p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-3xl font-bold">Manage Blogs</h1>
@@ -57,6 +60,7 @@ const AdminBlog = () => {
         <p>No blogs available</p>
       )}
     </div>
+    </AdminLayout>
   );
 };
 

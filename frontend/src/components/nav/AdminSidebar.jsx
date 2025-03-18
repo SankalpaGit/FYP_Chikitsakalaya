@@ -66,10 +66,12 @@ const AdminSidebar = () => {
           )}
 
           {/* Testimonial Section */}
+          <Link to="/admin/blog" className="flex items-center w-full">
           <li className="text-white flex items-center px-4 py-2 hover:bg-teal-600 cursor-pointer">
             <FaCommentDots className="mr-4" />
-            <span className={`${!isOpen && 'hidden'}`}>Testimonial</span>
+            <span className={`${!isOpen && 'hidden'}`}>Blog</span>
           </li>
+          </Link>
 
           {/* Offers Section with Dropdown */}
           <li className="text-white flex items-center px-4 py-2 hover:bg-teal-600 cursor-pointer" onClick={toggleOffersDropdown}>
