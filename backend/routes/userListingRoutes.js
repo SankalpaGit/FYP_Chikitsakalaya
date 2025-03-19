@@ -11,7 +11,7 @@ router.get('/accepted/doctors/all', async (req, res) => {
             include: [
                 {
                     model: DoctorDetail,
-                    as: 'doctorDetail',
+                    as: 'doctorDetails',
                     attributes: ['speciality', 'experience', 'consultationFee', 'hospitalAffiliation', 'address', 'city', 'state', 'zipCode', 'country', 'profilePicture', 'isComplete']
                 }
             ]
