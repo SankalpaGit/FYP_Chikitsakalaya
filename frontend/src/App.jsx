@@ -29,6 +29,8 @@ import ChatHome from "./pages/patients/ChatHome";
 import VideoCall from "./components/VideoCall";
 import AdminBlog from "./pages/admin/AdminBlog";
 import CreateBlog from "./pages/admin/CreateBlog";
+import Blog from "./pages/others/Blog";
+import BlogDetail from "./pages/others/BlogDetail";
 
 console.log("App Component Loaded");
 
@@ -63,6 +65,7 @@ function App() {
       < Route path="/admin/user/patient" element={<PatientUser />} />
       < Route path="/admin/blog" element={<AdminBlog />} />
       < Route path="/admin/blog/create" element={<CreateBlog />} />
+      <Route path="/admin/blog/edit/:blogID" element={<CreateBlog />} />
 
 
 
@@ -81,7 +84,10 @@ function App() {
 
       {/* Project Related*/}
       <Route path="/about" element={<About />} />
+      <Route path="/blog" element={<Blog />} />
+      <Route path="/blog/:blogID" element={<BlogDetail />} />
       <Route path="*" element={<NotFound />} />
+
     </Routes>
 
   );

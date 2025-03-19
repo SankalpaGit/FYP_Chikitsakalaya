@@ -1,63 +1,89 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css"; // Styles for Quill editor
-import { FiUpload, FiSend } from "react-icons/fi"; // Icons for upload and publish
+import React, { lazy, Suspense, useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { FiUpload, FiSend } from "react-icons/fi";
+import "react-quill/dist/quill.snow.css";
 import AdminLayout from "../../layouts/AdminLayout";
+import axios from "axios"; // ✅ Import Axios
+
+const ReactQuill = lazy(() => import("react-quill"));
 
 const quillModules = {
   toolbar: [
     [{ header: [1, 2, false] }],
-    ["bold", "italic", "underline", "strike"], // Bold, Italic, Underline, Strikethrough
-    [{ color: [] }, { background: [] }], // Text and background color
-    [{ list: "ordered" }, { list: "bullet" }], // Lists
-    ["link", "image"], // Link and Image
-    ["clean"], // Remove formatting
+    ["bold", "italic", "underline", "strike"],
+    [{ color: [] }, { background: [] }],
+    [{ list: "ordered" }, { list: "bullet" }],
+    ["link", "image"],
+    ["clean"],
   ],
 };
 
 const CreateBlog = () => {
+  const navigate = useNavigate();
+  const { blogID } = useParams(); // Get blog ID from URL if editing
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [image, setImage] = useState(null);
-  const navigate = useNavigate();
+  const [existingImage, setExistingImage] = useState(null); // Store current image URL for editing
 
+  useEffect(() => {
+    if (blogID) {
+      // Fetch blog details if editing
+      axios
+        .get(`http://localhost:5000/api/blog/view/${blogID}`)
+        .then((res) => {
+          setTitle(res.data.title);
+          setContent(res.data.content);
+          setExistingImage(res.data.image); // Keep existing image
+        })
+        .catch((err) => console.error("Error fetching blog", err));
+    }
+  }, [blogID]);
+
+  // Handle Image Upload
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-    }
+    if (file) setImage(file);
   };
 
+  // Handle Blog Submission (Create or Edit)
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const formData = new FormData();
     formData.append("title", title);
     formData.append("content", content);
     if (image) formData.append("image", image);
 
+    const url = blogID
+      ? `http://localhost:5000/api/blog/edit/${blogID}`
+      : "http://localhost:5000/api/blog/create";
+    const method = blogID ? "PUT" : "POST";
+
     try {
-      const res = await fetch("http://localhost:5000/blog/create", {
-        method: "POST",
-        body: formData,
+      const res = await axios({
+        method,
+        url,
+        data: formData,
       });
 
-      if (res.ok) {
-        navigate("/admin/blog"); // Redirect to blog management page after creation
+      if (res.status === 200 || res.status === 201) {
+        navigate("/admin/blog"); // Redirect after success
       }
     } catch (error) {
-      console.error("Error creating blog", error);
+      console.error("Error saving blog", error);
     }
   };
 
   return (
     <AdminLayout>
-      <div className="max-w-4xl  p-8 mt-6 bg-white ">
-        <h1 className="text-4xl font-bold mb-6 text-gray-800 ">📰 Write Your Blog</h1>
+      <div className="max-w-3xl p-6 mt-6">
+        <h1 className="text-3xl font-semibold text-gray-800 mb-6">
+          {blogID ? "✏️ Edit Blog" : "📝 Write Your Blog"}
+        </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Title Input */}
+          {/* Blog Title */}
           <input
             type="text"
             placeholder="Enter Blog Title"
@@ -67,41 +93,52 @@ const CreateBlog = () => {
             required
           />
 
-          {/* ReactQuill Editor with Increased Height */}
-          <div className=" bg-gray-100">
+          {/* Quill Editor */}
+          <Suspense fallback={<div>Loading editor...</div>}>
             <ReactQuill
               value={content}
               onChange={setContent}
               modules={quillModules}
-              className="h-40 bg-red-50"
+              style={{ height: "180px", marginBottom: "70px" }}
             />
-          </div>
+          </Suspense>
 
-          {/* File Upload with Icon */}
-          <label className="flex items-center gap-3 cursor-pointer p-3 border rounded-lg text-gray-700 hover:bg-gray-100">
+          {/* Image Upload */}
+          <label className="flex items-center gap-4 cursor-pointer p-3 border rounded-lg text-gray-700">
             <FiUpload size={20} />
             <span>{image ? image.name : "Upload Image"}</span>
             <input type="file" onChange={handleImageChange} className="hidden" />
           </label>
 
-          {/* Image Preview */}
-          {image && (
-            <div className="mt-3 flex justify-center">
+          {/* Show Existing Image if Editing */}
+          {existingImage && !image && (
+            <div className="mt-3">
               <img
-                src={URL.createObjectURL(image)}
-                alt="Preview"
-                className="max-h-48 rounded-lg border shadow-sm"
+                src={`http://localhost:5000/uploads/${existingImage}`}
+                alt="Existing Blog"
+                className="max-h-48 rounded-lg border"
               />
             </div>
           )}
 
-          {/* Publish Button with Icon */}
+          {/* Image Preview */}
+          {image && (
+            <div className="mt-3">
+              <img
+                src={URL.createObjectURL(image)}
+                alt="New Preview"
+                className="max-h-48 rounded-lg border"
+              />
+            </div>
+          )}
+
+          {/* Publish Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white p-3 rounded-lg flex items-center justify-center gap-2 hover:bg-blue-700 transition"
+            className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"
           >
             <FiSend size={20} />
-            <span>Publish</span>
+            {blogID ? "Update Blog" : "Publish"}
           </button>
         </form>
       </div>

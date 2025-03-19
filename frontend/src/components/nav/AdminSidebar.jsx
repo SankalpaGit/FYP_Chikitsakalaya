@@ -30,9 +30,9 @@ const AdminSidebar = () => {
         <ul className="space-y-2">
           {/* Dashboard */}
           <li className="text-white flex items-center px-4 py-2 hover:bg-teal-600 cursor-pointer">
-          <Link to="/admin/dashboard" className="flex items-center w-full">
-            <FaTachometerAlt className="mr-4" />
-            <span className={`${!isOpen && 'hidden'}`}>Dashboard</span>
+            <Link to="/admin/dashboard" className="flex items-center w-full">
+              <FaTachometerAlt className="mr-4" />
+              <span className={`${!isOpen && 'hidden'}`}>Dashboard</span>
             </Link>
           </li>
 
@@ -58,20 +58,22 @@ const AdminSidebar = () => {
                 <span>Patient</span>
               </li>
               <Link to='/admin/user/doctor'>
-              <li className="text-white flex items-center px-4 py-2 hover:bg-teal-600 cursor-pointer">
-                <span>Doctor</span>
-              </li>
+                <li className="text-white flex items-center px-4 py-2 hover:bg-teal-600 cursor-pointer">
+                  <span>Doctor</span>
+                </li>
               </Link>
             </ul>
           )}
 
           {/* Testimonial Section */}
-          <Link to="/admin/blog" className="flex items-center w-full">
+
           <li className="text-white flex items-center px-4 py-2 hover:bg-teal-600 cursor-pointer">
-            <FaCommentDots className="mr-4" />
-            <span className={`${!isOpen && 'hidden'}`}>Blog</span>
+            <Link to="/admin/blog" className="flex items-center w-full">
+              <FaCommentDots className="mr-4" />
+              <span className={`${!isOpen && 'hidden'}`}>Blog</span>
+            </Link>
           </li>
-          </Link>
+
 
           {/* Offers Section with Dropdown */}
           <li className="text-white flex items-center px-4 py-2 hover:bg-teal-600 cursor-pointer" onClick={toggleOffersDropdown}>
