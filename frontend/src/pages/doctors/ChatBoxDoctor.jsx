@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 
-const ChatBox = ({ selectedChat }) => {
+const ChatBoxDoctor = ({ selectedChat }) => {
   const [newMessage, setNewMessage] = useState("");
 
   const sendMessage = () => {
@@ -11,8 +11,8 @@ const ChatBox = ({ selectedChat }) => {
       senderId: 1,  // Replace with dynamic user ID
       recipientId: selectedChat.userId,
       message: newMessage,
-      senderType: "patient",
-      recipientType: "doctor",
+      senderType: "doctor",
+      recipientType: "patient",
       appointmentId: selectedChat.id, // Use appointment ID
     };
 
@@ -52,4 +52,4 @@ const ChatBox = ({ selectedChat }) => {
   );
 };
 
-export default ChatBox;
+export default ChatBoxDoctor;

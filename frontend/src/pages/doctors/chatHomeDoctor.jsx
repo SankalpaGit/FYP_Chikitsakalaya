@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import ChatBox from "./ChatBox";
+import ChatBoxDoctor from "./ChatBoxDoctor";
 
-const ChatHome = () => {
+const ChatHomeDoctor = () => {
   const [selectedChat, setSelectedChat] = useState(null);
   const [chats, setChats] = useState([]);
 
   useEffect(() => {
-    // Fetch chats for the patient
+    // Fetch chats for the doctor
     axios
-      .get("/api/chat/chats", { params: { userId: 1, userType: "patient" } }) // Replace '1' with dynamic user ID
+      .get("/api/chat/chats", { params: { userId: 1, userType: "doctor" } }) // Replace '1' with dynamic user ID
       .then((response) => setChats(response.data))
       .catch((error) => console.error(error));
   }, []);
@@ -39,7 +39,7 @@ const ChatHome = () => {
       {/* Chat Box */}
       <div className="flex-1 flex flex-col p-4">
         {selectedChat ? (
-          <ChatBox selectedChat={selectedChat} />
+          <ChatBoxDoctor selectedChat={selectedChat} />
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500">
             Select a chat to start messaging
@@ -50,4 +50,4 @@ const ChatHome = () => {
   );
 };
 
-export default ChatHome;
+export default ChatHomeDoctor;
