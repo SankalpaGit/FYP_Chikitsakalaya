@@ -2,9 +2,12 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const WEBRTC_CONFIG = require("./config/webrtcConfig");
+const Chat= require('./models/Chat');
 
 const PORT = process.env.PORT || 5000;
 const SIGNALING_PORT = WEBRTC_CONFIG.SIGNALING_PORT || 5050; 
+
+const activeUsers = {};
 
 const app = require("./app");
 const apiServer = http.createServer(app); // API server
@@ -48,12 +51,38 @@ io.on("connection", (socket) => {
   });
   
   // **One-to-One Chat**
-  socket.on("send-message", ({ senderId, recipientId, message }) => {
-    const recipientSocket = activeUsers[recipientId];
-    if (recipientSocket) {
-      io.to(recipientSocket).emit("receive-message", { senderId, message });
+  socket.on("send-message", async ({ senderId, recipientId, message, messageType = "text" }) => {
+    try {
+      // Store message in the database
+      const chatMessage = await Chat.create({ senderId, receiverId: recipientId, message, messageType });
+  
+      const recipientSocket = activeUsers[recipientId];
+      if (recipientSocket) {
+        io.to(recipientSocket).emit("receive-message", chatMessage); // Send message in real-time
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
   });
+
+  socket.on("get-messages", async ({ senderId, recipientId }, callback) => {
+    try {
+      const messages = await Chat.findAll({
+        where: {
+          [Op.or]: [
+            { senderId, receiverId: recipientId },
+            { senderId: recipientId, receiverId: senderId },
+          ],
+        },
+        order: [["createdAt", "ASC"]],
+      });
+      callback(messages); // Send back messages to the client
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      callback([]);
+    }
+  });
+  
 
   socket.on("disconnect", () => {
     const userId = Object.keys(activeUsers).find((key) => activeUsers[key] === socket.id);

@@ -60,13 +60,20 @@ PhysicalTicket.belongsTo(Appointment, { foreignKey: 'appointmentId' });
 Appointment.hasOne(OnlinePortal, { foreignKey: 'appointmentId', onDelete: 'CASCADE' });
 OnlinePortal.belongsTo(Appointment, { foreignKey: 'appointmentId' });
 
-// Patient → Chat (sent messages)
-Patient.hasMany(Chat, { as: 'sentMessages', foreignKey: 'senderId' });
-Chat.belongsTo(Patient, { as: 'sender', foreignKey: 'senderId' });
+// One-to-Many: A Patient can send/receive multiple messages
+Patient.hasMany(Chat, { foreignKey: "senderId", as: "sentMessages" });
+Patient.hasMany(Chat, { foreignKey: "receiverId", as: "receivedMessages" });
 
-// Doctor → Chat (received messages)
-Doctor.hasMany(Chat, { as: 'receivedMessages', foreignKey: 'receiverId' });
-Chat.belongsTo(Doctor, { as: 'receiver', foreignKey: 'receiverId' });
+// One-to-Many: A Doctor can send/receive multiple messages
+Doctor.hasMany(Chat, { foreignKey: "senderId", as: "sentMessages" });
+Doctor.hasMany(Chat, { foreignKey: "receiverId", as: "receivedMessages" });
+
+// Chat belongs to both sender and receiver
+Chat.belongsTo(Patient, { foreignKey: "senderId", as: "sender" });
+Chat.belongsTo(Patient, { foreignKey: "receiverId", as: "receiver" });
+
+Chat.belongsTo(Doctor, { foreignKey: "senderId", as: "sender" });
+Chat.belongsTo(Doctor, { foreignKey: "receiverId", as: "receiver" });
 
 
 
