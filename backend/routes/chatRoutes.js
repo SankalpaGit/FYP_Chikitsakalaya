@@ -1,24 +1,30 @@
 const express = require('express');
 const router = express.Router();
-const verifyToken = require('../middlewares/authMiddleware'); // Import the middleware
-const { Chat, Message, Appointment, Patient, Doctor } = require('../models');
+const verifyToken = require('../middlewares/authMiddleware');
+const { Chat, Appointment, Patient, Doctor } = require('../models');
+const { Op } = require('sequelize');
 
-// 1. Create a new chat (Called from ChatBox.jsx or ChatBoxDoctor.jsx)
-router.post('/create', verifyToken, async (req, res) => {
+// 1️⃣ **Create a new chat (Called from ChatBox.jsx or ChatBoxDoctor.jsx)**
+router.post('/chat/create', verifyToken, async (req, res) => {
   const { doctorId, patientId, appointmentId } = req.body;
 
   try {
-    // Check if there's an existing appointment between the patient and doctor
+    // Check if an appointment exists between the patient and doctor
     const appointment = await Appointment.findOne({
       where: { id: appointmentId, patientId, doctorId }
     });
 
     if (!appointment) {
-      return res.status(400).json({ success: false, message: 'Appointment not found.' });
+      return res.status(400).json({ success: false, message: 'No appointment found between these users.' });
     }
 
-    // Create the chat
-    const chat = await Chat.create({ doctorId, patientId, appointmentId });
+    // Check if a chat already exists
+    let chat = await Chat.findOne({ where: { doctorId, patientId, appointmentId } });
+
+    if (!chat) {
+      chat = await Chat.create({ doctorId, patientId, appointmentId, message: '' }); // Empty message initially
+    }
+
     res.json({ success: true, chatId: chat.id });
   } catch (error) {
     console.error(error);
@@ -26,61 +32,62 @@ router.post('/create', verifyToken, async (req, res) => {
   }
 });
 
-// 2. Get chat history (Called from ChatBox.jsx or ChatBoxDoctor.jsx)
-router.get('/history/:chatId', verifyToken, async (req, res) => {
+// 2️⃣ **Get chat history (Called from ChatBox.jsx or ChatBoxDoctor.jsx)**
+router.get('/chat/history/:chatId', verifyToken, async (req, res) => {
   const { chatId } = req.params;
 
   try {
-    // Fetch the messages from the chat history
-    const messages = await Message.findAll({
-      where: { chatId },
-      order: [['createdAt', 'ASC']],
+    // Fetch chat messages directly from the Chat table
+    const chat = await Chat.findByPk(chatId, {
+      attributes: ['id', 'doctorId', 'patientId', 'message', 'createdAt']
     });
 
-    res.json({ success: true, messages });
+    if (!chat) {
+      return res.status(404).json({ success: false, message: 'Chat not found' });
+    }
+
+    res.json({ success: true, chat });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
-// 3. Send a message (Called from ChatBox.jsx or ChatBoxDoctor.jsx)
-router.post('/send', verifyToken, async (req, res) => {
+// 3️⃣ **Send a message (Called from ChatBox.jsx or ChatBoxDoctor.jsx)**
+router.post('/chat/send', verifyToken, async (req, res) => {
   const { chatId, senderId, message } = req.body;
 
   try {
-    // Save the message to the database
-    const newMessage = await Message.create({
-      chatId,
-      senderId,
-      message
-    });
+    const chat = await Chat.findByPk(chatId);
 
-    // Optionally, you can also broadcast the message to the chat participants using Socket.io
+    if (!chat) {
+      return res.status(404).json({ success: false, message: 'Chat not found' });
+    }
 
-    res.json({ success: true, message: newMessage });
+    // Append the new message (assuming a simple text-based message log)
+    chat.message += `\n[${new Date().toISOString()}] ${senderId}: ${message}`;
+    await chat.save();
+
+    res.json({ success: true, updatedChat: chat });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
-// 4. Get the list of patients or doctors with whom the user has an appointment (Used in chatHome.jsx or chatHomeDoctor.jsx)
-router.get('/list', verifyToken, async (req, res) => {
-  const { userId } = req.user; // Assuming the JWT token provides the userId
+// 4️⃣ **Get chat list (Used in chatHome.jsx or chatHomeDoctor.jsx)**
+router.get('/chat/list', verifyToken, async (req, res) => {
+  const { userId } = req.user;
 
   try {
-    // Find chats associated with the user (patient or doctor)
+    // Fetch all chats where the user is either the doctor or patient
     const chats = await Chat.findAll({
       where: {
-        [Op.or]: [
-          { doctorId: userId }, // User is a doctor
-          { patientId: userId }, // User is a patient
-        ]
+        [Op.or]: [{ doctorId: userId }, { patientId: userId }]
       },
       include: [
-        { model: Doctor, attributes: ['firstName', 'lastName'] }, // Fetch doctor details for patient side
-        { model: Patient, attributes: ['firstName', 'lastName'] }, // Fetch patient details for doctor side
+        { model: Doctor, attributes: ['firstName', 'lastName'] },
+        { model: Patient, attributes: ['firstName', 'lastName'] }
       ]
     });
 
@@ -91,22 +98,18 @@ router.get('/list', verifyToken, async (req, res) => {
   }
 });
 
-// 5. Get the user (patient or doctor) details for chat (Called from chatHome.jsx or chatHomeDoctor.jsx)
-router.get('/user-details', verifyToken, async (req, res) => {
+// 5️⃣ **Get user details (Used in chatHome.jsx or chatHomeDoctor.jsx)**
+router.get('/chat/user-details', verifyToken, async (req, res) => {
   const { userId } = req.user;
 
   try {
-    // Fetch user details from either Patient or Doctor model
-    const patient = await Patient.findByPk(userId);
-    const doctor = await Doctor.findByPk(userId);
+    const user = await Patient.findByPk(userId) || await Doctor.findByPk(userId);
 
-    if (patient) {
-      res.json({ success: true, user: patient });
-    } else if (doctor) {
-      res.json({ success: true, user: doctor });
-    } else {
-      res.status(404).json({ success: false, message: 'User not found' });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
     }
+
+    res.json({ success: true, user });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Internal server error' });
