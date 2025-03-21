@@ -1,77 +1,115 @@
-const express = require("express");
-const { Chat, Appointment, Patient, Doctor } = require("../models");
+const express = require('express');
 const router = express.Router();
+const verifyToken = require('../middlewares/authMiddleware'); // Import the middleware
+const { Chat, Message, Appointment, Patient, Doctor } = require('../models');
 
-// **Get list of chats for a user (Doctor or Patient)**
-router.get("/chats", async (req, res) => {
+// 1. Create a new chat (Called from ChatBox.jsx or ChatBoxDoctor.jsx)
+router.post('/create', verifyToken, async (req, res) => {
+  const { doctorId, patientId, appointmentId } = req.body;
+
   try {
-    const { userId, userType } = req.query;  // userId is either patient or doctor ID
-
-    let chats;
-    if (userType === "patient") {
-      // Get list of appointments and the corresponding doctors for the patient
-      chats = await Appointment.findAll({
-        where: { patientId: userId },
-        include: [{ model: Doctor }],
-      });
-    } else if (userType === "doctor") {
-      // Get list of appointments and the corresponding patients for the doctor
-      chats = await Appointment.findAll({
-        where: { doctorId: userId },
-        include: [{ model: Patient }],
-      });
-    }
-
-    const chatList = chats.map((appointment) => {
-      return {
-        id: appointment.id,
-        name: userType === "patient" ? appointment.Doctor.firstName + " " + appointment.Doctor.lastName : appointment.Patient.firstName + " " + appointment.Patient.lastName,
-        userId: userType === "patient" ? appointment.Doctor.id : appointment.Patient.id,
-        userType: userType === "patient" ? "doctor" : "patient",
-      };
-    });
-
-    res.json(chatList);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to fetch chat list." });
-  }
-});
-
-// **Send a message**
-router.post("/send", async (req, res) => {
-  try {
-    const { senderId, recipientId, message, senderType, recipientType, appointmentId } = req.body;
-
-    // Ensure the sender and recipient have an active appointment
+    // Check if there's an existing appointment between the patient and doctor
     const appointment = await Appointment.findOne({
-      where: { id: appointmentId },
+      where: { id: appointmentId, patientId, doctorId }
     });
 
     if (!appointment) {
-      return res.status(400).json({ error: "No active appointment found." });
+      return res.status(400).json({ success: false, message: 'Appointment not found.' });
     }
 
-    const chat = await Chat.create({
-      senderId,
-      recipientId,
-      message,
-      senderType,
-      recipientType,
-      appointmentId,
-    });
-
-    // Emit the message to the corresponding socket
-    io.to(recipientId).emit("receive-message", {
-      senderId,
-      recipientId,
-      message,
-    });
-
-    res.status(201).json({ chat });
+    // Create the chat
+    const chat = await Chat.create({ doctorId, patientId, appointmentId });
+    res.json({ success: true, chatId: chat.id });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Failed to send message." });
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// 2. Get chat history (Called from ChatBox.jsx or ChatBoxDoctor.jsx)
+router.get('/history/:chatId', verifyToken, async (req, res) => {
+  const { chatId } = req.params;
+
+  try {
+    // Fetch the messages from the chat history
+    const messages = await Message.findAll({
+      where: { chatId },
+      order: [['createdAt', 'ASC']],
+    });
+
+    res.json({ success: true, messages });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// 3. Send a message (Called from ChatBox.jsx or ChatBoxDoctor.jsx)
+router.post('/send', verifyToken, async (req, res) => {
+  const { chatId, senderId, message } = req.body;
+
+  try {
+    // Save the message to the database
+    const newMessage = await Message.create({
+      chatId,
+      senderId,
+      message
+    });
+
+    // Optionally, you can also broadcast the message to the chat participants using Socket.io
+
+    res.json({ success: true, message: newMessage });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// 4. Get the list of patients or doctors with whom the user has an appointment (Used in chatHome.jsx or chatHomeDoctor.jsx)
+router.get('/list', verifyToken, async (req, res) => {
+  const { userId } = req.user; // Assuming the JWT token provides the userId
+
+  try {
+    // Find chats associated with the user (patient or doctor)
+    const chats = await Chat.findAll({
+      where: {
+        [Op.or]: [
+          { doctorId: userId }, // User is a doctor
+          { patientId: userId }, // User is a patient
+        ]
+      },
+      include: [
+        { model: Doctor, attributes: ['firstName', 'lastName'] }, // Fetch doctor details for patient side
+        { model: Patient, attributes: ['firstName', 'lastName'] }, // Fetch patient details for doctor side
+      ]
+    });
+
+    res.json({ success: true, chats });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+// 5. Get the user (patient or doctor) details for chat (Called from chatHome.jsx or chatHomeDoctor.jsx)
+router.get('/user-details', verifyToken, async (req, res) => {
+  const { userId } = req.user;
+
+  try {
+    // Fetch user details from either Patient or Doctor model
+    const patient = await Patient.findByPk(userId);
+    const doctor = await Doctor.findByPk(userId);
+
+    if (patient) {
+      res.json({ success: true, user: patient });
+    } else if (doctor) {
+      res.json({ success: true, user: doctor });
+    } else {
+      res.status(404).json({ success: false, message: 'User not found' });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
