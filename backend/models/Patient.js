@@ -3,9 +3,9 @@ const sequelize = require('../config/database');
 
 const Patient = sequelize.define('Patient', {
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,  // Change from INTEGER to UUID
+    defaultValue: DataTypes.UUIDV4, // Generate UUID automatically
     primaryKey: true,
-    autoIncrement: true,
   },
   email: {
     type: DataTypes.STRING,

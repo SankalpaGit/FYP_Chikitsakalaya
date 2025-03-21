@@ -4,12 +4,12 @@ const Patient = require('./Patient');
 
 const PatientReport = sequelize.define('PatientReport', {
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,  // Change from INTEGER to UUID
+    defaultValue: DataTypes.UUIDV4, // Generate UUID automatically
     primaryKey: true,
-    autoIncrement: true,
   },
   patientId: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
     allowNull: false,
     references: {  // foreign key references from patient table
       model: Patient,

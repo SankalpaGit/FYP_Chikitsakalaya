@@ -3,9 +3,6 @@ const sequelize = require('../config/database');
 // Import models
 const Patient = require('./Patient');
 const PatientReport = require('./PatientReport');
-const Diagnosis = require('./Diagnosis');
-const Test = require('./Test');
-const Medication = require('./Medication');
 const Doctor = require('./Doctor');
 const DoctorDetail = require('./DoctorDetail');
 const TimeSlot = require('./TimeSlot');
@@ -21,17 +18,6 @@ const OnlinePortal = require('./OnlinePortal');
 Patient.hasMany(PatientReport, { foreignKey: 'patientId', onDelete: 'CASCADE' });
 PatientReport.belongsTo(Patient, { foreignKey: 'patientId' });
 
-// Patient → Diagnoses
-Patient.hasMany(Diagnosis, { foreignKey: 'patientId', onDelete: 'CASCADE' });
-Diagnosis.belongsTo(Patient, { foreignKey: 'patientId' });
-
-// Patient → Tests
-Patient.hasMany(Test, { foreignKey: 'patientId', onDelete: 'CASCADE' });
-Test.belongsTo(Patient, { foreignKey: 'patientId' });
-
-// Patient → Medications
-Patient.hasMany(Medication, { foreignKey: 'patientId', onDelete: 'CASCADE' });
-Medication.belongsTo(Patient, { foreignKey: 'patientId' });
 
 // Doctor → DoctorDetail 
 Doctor.hasMany(DoctorDetail, { foreignKey: 'doctorId', onDelete: 'CASCADE', onUpdate: 'CASCADE' , as: 'doctorDetails' });
@@ -61,19 +47,20 @@ Appointment.hasOne(OnlinePortal, { foreignKey: 'appointmentId', onDelete: 'CASCA
 OnlinePortal.belongsTo(Appointment, { foreignKey: 'appointmentId' });
 
 // One-to-Many: A Patient can send/receive multiple messages
-Patient.hasMany(Chat, { foreignKey: "senderId", as: "sentMessages" });
-Patient.hasMany(Chat, { foreignKey: "receiverId", as: "receivedMessages" });
+Patient.hasMany(Chat, { foreignKey: "senderId", as: "sentMessagesAsPatient" });
+Patient.hasMany(Chat, { foreignKey: "receiverId", as: "receivedMessagesAsPatient" });
 
 // One-to-Many: A Doctor can send/receive multiple messages
-Doctor.hasMany(Chat, { foreignKey: "senderId", as: "sentMessages" });
-Doctor.hasMany(Chat, { foreignKey: "receiverId", as: "receivedMessages" });
+Doctor.hasMany(Chat, { foreignKey: "senderId", as: "sentMessagesAsDoctor" });
+Doctor.hasMany(Chat, { foreignKey: "receiverId", as: "receivedMessagesAsDoctor" });
 
-// Chat belongs to both sender and receiver
-Chat.belongsTo(Patient, { foreignKey: "senderId", as: "sender" });
-Chat.belongsTo(Patient, { foreignKey: "receiverId", as: "receiver" });
+// Chat belongs to both sender and receiver (Patient or Doctor)
+Chat.belongsTo(Patient, { foreignKey: "senderId", as: "senderPatient" });
+Chat.belongsTo(Patient, { foreignKey: "receiverId", as: "receiverPatient" });
 
-Chat.belongsTo(Doctor, { foreignKey: "senderId", as: "sender" });
-Chat.belongsTo(Doctor, { foreignKey: "receiverId", as: "receiver" });
+Chat.belongsTo(Doctor, { foreignKey: "senderId", as: "senderDoctor" });
+Chat.belongsTo(Doctor, { foreignKey: "receiverId", as: "receiverDoctor" });
+
 
 
 
@@ -82,9 +69,6 @@ module.exports = {
   sequelize,
   Patient,
   PatientReport,
-  Diagnosis,
-  Test,
-  Medication,
   Doctor,
   DoctorDetail,
   TimeSlot,
