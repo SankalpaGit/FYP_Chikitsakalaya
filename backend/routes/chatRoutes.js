@@ -77,43 +77,54 @@ router.post('/chat/send', verifyToken, async (req, res) => {
 
 // 4️⃣ **Get chat list (Used in chatHome.jsx or chatHomeDoctor.jsx)**
 router.get('/chat/list', verifyToken, async (req, res) => {
-  const { userId } = req.user;
+  const userId = req.user.id; // Ensure correct user ID usage
+
+  if (!userId) {
+    return res.status(400).json({ success: false, message: 'User ID missing in request' });
+  }
 
   try {
-    // Fetch all chats where the user is either the doctor or patient
     const chats = await Chat.findAll({
-      where: {
-        [Op.or]: [{ doctorId: userId }, { patientId: userId }]
-      },
+      where: { [Op.or]: [{ senderId: userId }, { receiverId: userId }] },
       include: [
-        { model: Doctor, attributes: ['firstName', 'lastName'] },
-        { model: Patient, attributes: ['firstName', 'lastName'] }
-      ]
+        { model: Patient, as: "senderPatient", attributes: ["firstName", "lastName"] },
+        { model: Patient, as: "receiverPatient", attributes: ["firstName", "lastName"] },
+        { model: Doctor, as: "senderDoctor", attributes: ["firstName", "lastName"] },
+        { model: Doctor, as: "receiverDoctor", attributes: ["firstName", "lastName"] }
+      ],
+      order: [["createdAt", "DESC"]] // Optional: Order by latest messages first
     });
 
     res.json({ success: true, chats });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error("Error fetching chats:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 });
 
-// 5️⃣ **Get user details (Used in chatHome.jsx or chatHomeDoctor.jsx)**
-router.get('/chat/user-details', verifyToken, async (req, res) => {
-  const { userId } = req.user;
 
-  try {
-    const user = await Patient.findByPk(userId) || await Doctor.findByPk(userId);
 
-    if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
-    }
+// 5️⃣ **Get user details 
+// router.get('/chat/user-details', verifyToken, async (req, res) => {
+//   const userId = req.user.id;  // Fix: Use req.user.id instead of req.user.userId
 
-    res.json({ success: true, user });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
+//   if (!userId) {
+//     return res.status(400).json({ success: false, message: 'User ID missing in request' });
+//   }
+
+//   try {
+//     const user = await Patient.findByPk(userId) || await Doctor.findByPk(userId);
+
+//     if (!user) {
+//       return res.status(404).json({ success: false, message: 'User not found' });
+//     }
+
+//     res.json({ success: true, user });
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ success: false, message: 'Internal server error' });
+//   }
+// });
+
 
 module.exports = router;

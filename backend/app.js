@@ -31,6 +31,7 @@ const paymentRoute = require('./routes/paymentRoutes')
 const getAppointmentRoute = require('./routes/getAppointmentRoutes')
 const physicalTicketRoute = require('./routes/physicalTicketRoutes')
 const blogRoute = require('./routes/blogRoutes')
+const chatRoute = require('./routes/chatRoutes')
 // configuration of the dotenv variable
 dotenv.config();
 
@@ -58,6 +59,7 @@ app.use('/api/payment', paymentRoute)
 app.use('/api' , getAppointmentRoute)
 app.use('/api', physicalTicketRoute)
 app.use('/api', blogRoute)
+app.use('/api', chatRoute)
 
 // Authenticate and sync models
 sequelize.authenticate()
