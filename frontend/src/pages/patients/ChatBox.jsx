@@ -1,32 +1,44 @@
-import React, { useState, useEffect } from "react";
-import useChat from "../../hook/useChat";
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
 
-const ChatBox = ({ userId, chatId }) => {
-  const { messages, fetchChatHistory, sendMessage } = useChat(userId);
-  const [message, setMessage] = useState("");
-
+const ChatBox = () => {
+  const { appointmentId } = useParams();
+  const [messages, setMessages] = useState([]);
+  
   useEffect(() => {
-    if (chatId) {
-      fetchChatHistory(chatId);
-    }
-  }, [chatId]);
+    const fetchMessages = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) return;
 
-  const handleSendMessage = async () => {
-    if (message.trim()) {
-      await sendMessage(chatId, userId, message);
-      setMessage("");
-    }
-  };
+      try {
+        const response = await axios.get(`http://localhost:5000/api/chat/messages/${appointmentId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+
+        setMessages(response.data);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
+
+    fetchMessages();
+  }, [appointmentId]);
 
   return (
-    <div>
-      <div>
-        {messages.map((msg, index) => (
-          <p key={index}><strong>{msg.senderId === userId ? "You" : "Doctor"}:</strong> {msg.message}</p>
-        ))}
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4">Chat</h2>
+      <div className="space-y-3">
+        {messages.length === 0 ? (
+          <p>No messages yet.</p>
+        ) : (
+          messages.map((msg) => (
+            <div key={msg.id} className="p-3 bg-gray-100 rounded-lg">
+              <p>{msg.message}</p>
+            </div>
+          ))
+        )}
       </div>
-      <input value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type a message..." />
-      <button onClick={handleSendMessage}>Send</button>
     </div>
   );
 };

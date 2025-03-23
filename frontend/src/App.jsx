@@ -26,11 +26,13 @@ import PaymentHome from "./pages/patients/PaymentHome";
 import AppointmentList from "./pages/doctors/AppointmentList";
 import PostAppointment from "./pages/patients/PostAppointment";
 import ChatHome from "./pages/patients/ChatHome";
+import ChatBox from "./pages/patients/ChatBox";
 import VideoCall from "./components/VideoCall";
 import AdminBlog from "./pages/admin/AdminBlog";
 import CreateBlog from "./pages/admin/CreateBlog";
 import Blog from "./pages/others/Blog";
 import BlogDetail from "./pages/others/BlogDetail";
+import ChatLayout from "./layouts/ChatLayout";
 
 console.log("App Component Loaded");
 
@@ -39,7 +41,6 @@ function App() {
 
   return (
     <Routes>
-
       {/* route setup for doctor user */}
       <Route path="/doctor" element={<Signup />} />
       <Route path="/doctor/login" element={<Login />} />
@@ -78,7 +79,10 @@ function App() {
       <Route path='/appointments' element={<DisplayAppointment />} />
       <Route path='/payment/:appointmentID' element={<PaymentHome />} />
       <Route path="/post-appointments" element={<PostAppointment />} />
-      <Route path="/chat" element={<ChatHome />} />
+      <Route path="/chat" element={<ChatLayout />}>
+        <Route path=":doctorId" element={<ChatBox />} />
+      </Route>
+
       <Route path="/meeting/:roomId" element={<VideoCallWrapper />} />
 
 

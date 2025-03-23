@@ -1,40 +1,36 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-const Doctor = require('./Doctor');
-const Patient = require('./Patient');
+const { DataTypes } = require("sequelize");
+const sequelize = require("../config/database");
+const Appointment = require("../models/Appointment");
 
-const Chat = sequelize.define('Chat', {
-  id: {
-    type: DataTypes.UUID,
-    defaultValue: DataTypes.UUIDV4,
-    primaryKey: true,
+const Chat = sequelize.define(
+  "Chat",
+  {
+    id: {
+      type: DataTypes.UUID,
+      defaultValue: DataTypes.UUIDV4,
+      primaryKey: true,
+    },
+    appointmentId: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: "Appointments",
+        key: "id",
+      },
+    },
+    senderType: {
+      type: DataTypes.ENUM("doctor", "patient"),
+      allowNull: false,
+    },
+    message: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
   },
-  senderId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-  },
-  senderType: {
-    type: DataTypes.ENUM('doctor', 'patient'),
-    allowNull: false,
-  },
-  receiverId: {
-    type: DataTypes.UUID,
-    allowNull: false,
-  },
-  receiverType: {
-    type: DataTypes.ENUM('doctor', 'patient'),
-    allowNull: false,
-  },
-  message: {
-    type: DataTypes.TEXT,
-    allowNull: false,
-  },
-  seen: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true,
+  }
+);
+
 
 module.exports = Chat;

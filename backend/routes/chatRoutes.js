@@ -1,130 +1,40 @@
 const express = require('express');
 const router = express.Router();
 const verifyToken = require('../middlewares/authMiddleware');
-const { Chat, Appointment, Patient, Doctor } = require('../models');
+const Chat= require('../models/Chat');
+const Doctor = require('../models/Doctor');
+const Patient = require('../models/Patient');
+const Appointment = require('../models/Appointment');
+const sequelize = require('../config/database');
+
 const { Op } = require('sequelize');
 
-// 1️⃣ **Create a new chat (Called from ChatBox.jsx or ChatBoxDoctor.jsx)**
-router.post('/chat/create', verifyToken, async (req, res) => {
-  const { doctorId, patientId, appointmentId } = req.body;
-
-  try {
-    // Check if an appointment exists between the patient and doctor
-    const appointment = await Appointment.findOne({
-      where: { id: appointmentId, patientId, doctorId }
-    });
-
-    if (!appointment) {
-      return res.status(400).json({ success: false, message: 'No appointment found between these users.' });
+router.get('/chat/doctors', verifyToken, async (req, res) => {
+    try {
+      // Fetch only distinct doctors that the patient has appointments with
+      const doctors = await Appointment.findAll({
+        where: { patientId: req.user.id },
+        include: [{ model: Doctor, attributes: ['id', 'firstName', 'lastName'] }],
+        attributes: [
+          [sequelize.fn('MIN', sequelize.col('id')), 'appointmentId'], // Select first appointment ID
+          'doctorId'
+        ],
+        group: ['doctorId', 'Doctor.id', 'Doctor.firstName', 'Doctor.lastName']
+      });
+  
+      res.json(doctors.map(a => ({
+        doctorId: a.Doctor.id,
+        firstName: a.Doctor.firstName,
+        lastName: a.Doctor.lastName,
+        appointmentId: a.getDataValue('appointmentId') // Use appointmentId for chat linkage
+      })));
+    } catch (error) {
+      res.status(500).json({ message: 'Error fetching doctors' });
     }
-
-    // Check if a chat already exists
-    let chat = await Chat.findOne({ where: { doctorId, patientId, appointmentId } });
-
-    if (!chat) {
-      chat = await Chat.create({ doctorId, patientId, appointmentId, message: '' }); // Empty message initially
-    }
-
-    res.json({ success: true, chatId: chat.id });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-// 2️⃣ **Get chat history (Called from ChatBox.jsx or ChatBoxDoctor.jsx)**
-router.get('/chat/history/:chatId', verifyToken, async (req, res) => {
-  const { chatId } = req.params;
-
-  try {
-    // Fetch chat messages directly from the Chat table
-    const chat = await Chat.findByPk(chatId, {
-      attributes: ['id', 'doctorId', 'patientId', 'message', 'createdAt']
-    });
-
-    if (!chat) {
-      return res.status(404).json({ success: false, message: 'Chat not found' });
-    }
-
-    res.json({ success: true, chat });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-// 3️⃣ **Send a message (Called from ChatBox.jsx or ChatBoxDoctor.jsx)**
-router.post('/chat/send', verifyToken, async (req, res) => {
-  const { chatId, senderId, message } = req.body;
-
-  try {
-    const chat = await Chat.findByPk(chatId);
-
-    if (!chat) {
-      return res.status(404).json({ success: false, message: 'Chat not found' });
-    }
-
-    // Append the new message (assuming a simple text-based message log)
-    chat.message += `\n[${new Date().toISOString()}] ${senderId}: ${message}`;
-    await chat.save();
-
-    res.json({ success: true, updatedChat: chat });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
-  }
-});
-
-// 4️⃣ **Get chat list (Used in chatHome.jsx or chatHomeDoctor.jsx)**
-router.get('/chat/list', verifyToken, async (req, res) => {
-  const userId = req.user.id; // Ensure correct user ID usage
-
-  if (!userId) {
-    return res.status(400).json({ success: false, message: 'User ID missing in request' });
-  }
-
-  try {
-    const chats = await Chat.findAll({
-      where: { [Op.or]: [{ senderId: userId }, { receiverId: userId }] },
-      include: [
-        { model: Patient, as: "senderPatient", attributes: ["firstName", "lastName"] },
-        { model: Patient, as: "receiverPatient", attributes: ["firstName", "lastName"] },
-        { model: Doctor, as: "senderDoctor", attributes: ["firstName", "lastName"] },
-        { model: Doctor, as: "receiverDoctor", attributes: ["firstName", "lastName"] }
-      ],
-      order: [["createdAt", "DESC"]] // Optional: Order by latest messages first
-    });
-
-    res.json({ success: true, chats });
-  } catch (error) {
-    console.error("Error fetching chats:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
-  }
-});
+  });
+  
 
 
-
-// 5️⃣ **Get user details 
-// router.get('/chat/user-details', verifyToken, async (req, res) => {
-//   const userId = req.user.id;  // Fix: Use req.user.id instead of req.user.userId
-
-//   if (!userId) {
-//     return res.status(400).json({ success: false, message: 'User ID missing in request' });
-//   }
-
-//   try {
-//     const user = await Patient.findByPk(userId) || await Doctor.findByPk(userId);
-
-//     if (!user) {
-//       return res.status(404).json({ success: false, message: 'User not found' });
-//     }
-
-//     res.json({ success: true, user });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ success: false, message: 'Internal server error' });
-//   }
-// });
 
 
 module.exports = router;
