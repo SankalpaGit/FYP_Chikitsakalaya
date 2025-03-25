@@ -2,22 +2,7 @@ import React, { useState, useEffect } from "react";
 import useChat from "../../hook/useChat";
 
 const ChatBoxDoctor = ({ userId, chatId }) => {
-  const { messages, fetchChatHistory, sendMessage } = useChat(userId);
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    if (chatId) {
-      fetchChatHistory(chatId);
-    }
-  }, [chatId]);
-
-  const handleSendMessage = async () => {
-    if (message.trim()) {
-      await sendMessage(chatId, userId, message);
-      setMessage("");
-    }
-  };
-
+  
   return (
     <div>
       <div>
