@@ -51,20 +51,24 @@ router.get('/chat/doctors', verifyToken, async (req, res) => {
 
 router.get('/chat/patients', verifyToken, async (req, res) => {
   try {
-    if (!req.user || !req.user.id) {
+    console.log("Decoded user in verifyToken middleware:", req.user);
+    console.log("Doctor ID extracted:", req.user.doctorId); // Debugging
+
+    if (!req.user || !req.user.doctorId) {
       return res.status(400).json({ message: 'Invalid user' });
     }
 
     const appointments = await Appointment.findAll({
-      where: { doctorId: req.user.id },
+      where: { doctorId: req.user.doctorId }, // Corrected
       include: [{ model: Patient, attributes: ['id', 'firstName', 'lastName'] }],
     });
+
+    console.log("Appointments found:", appointments);
 
     if (!appointments || appointments.length === 0) {
       return res.status(404).json({ message: 'No patients found' });
     }
 
-    // Extract unique patients
     const uniquePatients = {};
     appointments.forEach((a) => {
       if (!uniquePatients[a.Patient.id]) {
@@ -83,6 +87,7 @@ router.get('/chat/patients', verifyToken, async (req, res) => {
   }
 });
 
+
 router.post('/chat/send', verifyToken, async (req, res) => {
   try {
     const { recipientId, message } = req.body;
@@ -93,6 +98,7 @@ router.post('/chat/send', verifyToken, async (req, res) => {
 
     console.log("🔹 Sending message from:", req.user.id, "to:", recipientId);
 
+    // Ensure the appointment exists between the user (doctor or patient) and the recipient
     const appointment = await Appointment.findOne({
       where: {
         [Op.or]: [
@@ -137,6 +143,7 @@ router.post('/chat/send', verifyToken, async (req, res) => {
 });
 
 
+
 router.get('/chat/history/:recipientId', verifyToken, async (req, res) => {
   try {
     const { recipientId } = req.params;
@@ -166,7 +173,7 @@ router.get('/chat/history/:recipientId', verifyToken, async (req, res) => {
     // Fetch chat messages linked to this appointment
     const messages = await Chat.findAll({
       where: { appointmentId: appointment.id },
-      order: [["createdAt", "ASC"]],
+      order: [["createdAt", "ASC"]], // Order messages by creation time
     });
 
     console.log("✅ Chat history found:", messages.length, "messages");
@@ -177,5 +184,6 @@ router.get('/chat/history/:recipientId', verifyToken, async (req, res) => {
     return res.status(500).json({ message: "Error fetching chat history", error: error.message });
   }
 });
+
 
 module.exports = router;
