@@ -33,6 +33,8 @@ import CreateBlog from "./pages/admin/CreateBlog";
 import Blog from "./pages/others/Blog";
 import BlogDetail from "./pages/others/BlogDetail";
 import ChatLayout from "./layouts/ChatLayout";
+import ChatBoxDoctor from "./pages/doctors/ChatBoxDoctor";
+import DoctorChatLayout from "./layouts/DoctorChatLayout";
 
 console.log("App Component Loaded");
 
@@ -50,6 +52,9 @@ function App() {
       <Route path="/doctor/profile" element={<DoctorProfile />} />
       <Route path="/doctor/profile/edit" element={<DoctorEditProfile />} />
       <Route path="/doctor/view/appointment" element={<AppointmentList />} />
+      <Route path="/doctor/chat" element={<DoctorChatLayout />}>
+        <Route path=":patientId" element={<ChatBoxDoctor />} />
+      </Route>
 
 
       {/* route setup for admin user */}
