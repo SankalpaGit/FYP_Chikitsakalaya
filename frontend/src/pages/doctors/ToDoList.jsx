@@ -24,23 +24,24 @@ const ToDoList = () => {
     }
   };
 
-  const onDragEnd = (result) => {
-    const { source, destination } = result;
+ const onDragEnd = (result) => {
+  const { source, destination } = result;
 
-    if (!destination) return;
+  if (!destination) return; // If dropped outside, do nothing
 
-    const sourceList = Array.from(tasks[source.droppableId]);
-    const destinationList = Array.from(tasks[destination.droppableId]);
+  const updatedTasks = { ...tasks };
 
-    const [movedItem] = sourceList.splice(source.index, 1);
-    destinationList.splice(destination.index, 0, movedItem);
+  // Get the dragged item
+  const [movedItem] = updatedTasks[source.droppableId].splice(source.index, 1);
 
-    setTasks({
-      ...tasks,
-      [source.droppableId]: sourceList,
-      [destination.droppableId]: destinationList,
-    });
-  };
+  // Insert it into the correct position in the destination list
+  updatedTasks[destination.droppableId].splice(destination.index, 0, movedItem);
+
+  // Update state
+  setTasks(updatedTasks);
+};
+
+  
 
   const deleteTask = (column, index) => {
     const updatedColumn = tasks[column].filter((_, i) => i !== index);
@@ -86,7 +87,7 @@ const ToDoList = () => {
                     }`}
                   >
                     <h3 className="text-xl font-semibold text-gray-700 capitalize mb-3 text-center py-2 rounded-md">
-                      {column.charAt(0).toUpperCase() + column.slice(1)}
+                      {column.charAt(0).toUpperCase() + column.slice(2)}
                     </h3>
                     <div className="w-full bg-gray-400 h-0.5"></div>
                     <div className="space-y-2 overflow-y-auto max-h-64 mt-2">

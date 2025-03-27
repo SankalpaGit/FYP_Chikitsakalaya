@@ -76,10 +76,12 @@ const DoctorSidebar = () => {
 
           {/* Chats */}
           <li className="relative group flex justify-center mt-6 mb-6">
+          <Link to="/doctor/chat">
             <MdMarkUnreadChatAlt className="text-teal-600 text-2xl" /> {/* Increased icon size */}
             <span className="absolute left-16 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
               Chats
             </span>
+            </Link>
           </li>
 
           {/* Feedback */}

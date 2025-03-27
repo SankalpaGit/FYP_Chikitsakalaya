@@ -3,42 +3,47 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const ChatHomeDoctor = () => {
-  const [patients, setPatients] = useState([]);
+  const [chatList, setChatList] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchPatients = async () => {
+    const fetchChats = async () => {
       try {
         const token = localStorage.getItem("token"); // Assuming token is stored
+        if (!token) {
+          console.error("No token found");
+          return;
+        }
         const response = await axios.get("http://localhost:5000/api/chat/patients", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log(response.data);
-        setPatients(response.data);
+        setChatList(response.data);
       } catch (error) {
-        console.error("Error fetching patients:", error);
+        console.error("Error fetching patients chat list:", error);
       }
     };
 
-    fetchPatients();
+    fetchChats();
   }, []);
 
   return (
-    <div className="p-4">
-      <h2 className="text-lg font-bold mb-4">Patients</h2>
-      {patients.length > 0 ? (
-        patients.map((patient) => (
-          <div
-            key={patient.patientId}
-            className="p-2 border-b cursor-pointer hover:bg-gray-100"
-            onClick={() => navigate(`/doctor/chat/${patient.patientId}`)}
-          >
-            {patient.firstName} {patient.lastName}
-          </div>
-        ))
-      ) : (
-        <p>No chats available</p>
-      )}
+    <div className="p-4 mt-16">
+      <div className="space-y-3">
+        {chatList.length === 0 ? (
+          <p>No chats available</p>
+        ) : (
+          chatList.map((chat) => (
+            <div
+              key={chat.appointmentId}
+              className="p-3 rounded-lg cursor-pointer hover:bg-gray-200"
+              onClick={() => navigate(`/doctor/chat/${chat.patientId}`)} // Link to the specific appointment
+            >
+              <p className="font-semibold">Dr. {chat.firstName} {chat.lastName}</p>
+              <p className="text-sm text-gray-600">{chat.lastMessage || "Tap to start chatting..."}</p>
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 };

@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { AiOutlineEye, AiOutlineDownload } from "react-icons/ai";
 import PatientLayout from "../../layouts/PatientLayout";
 
 const PostAppointment = () => {
-    const [ticket, setTicket] = useState(null);
-    const [open, setOpen] = useState(false);
+    const [tickets, setTickets] = useState([]); // Changed to an array
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchTicket = async () => {
+        const fetchTickets = async () => {
             try {
                 const token = localStorage.getItem("token");
                 if (!token) throw new Error("No authentication token found");
@@ -21,21 +19,18 @@ const PostAppointment = () => {
                         headers: { Authorization: `Bearer ${token}` },
                     }
                 );
-                console.log(response);
-                
-                setTicket(response.data.ticket);
+
+                console.log(response.data);
+                setTickets(response.data.tickets || []); // Ensure an array is stored
             } catch (err) {
-                setError(err.message || "Failed to load ticket");
+                setError(err.message || "Failed to load tickets");
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchTicket();
+        fetchTickets();
     }, []);
-
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
 
     return (
         <PatientLayout>
@@ -43,27 +38,31 @@ const PostAppointment = () => {
                 {loading ? (
                     <p className="text-gray-600">Loading...</p>
                 ) : error ? (
-                    <p className="text-red-500">May be You dont have any Physical Appointmnt</p>
-                ) : ticket ? (
-                    <div className="relative w-80 h-96 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-300">
-                    {/* PDF Display Without Controls */}
-                    <embed 
-                        src={`http://localhost:5000${ticket.pdfLink}`} 
-                        type="application/pdf" 
-                        className="w-full h-full"
-                    />
-                
-                    {/* Token Number */}
-                    <div className="absolute bottom-0 left-0 w-full bg-orange-600 bg-opacity-80 text-white text-center py-2 text-sm font-semibold">
-                        Token: {ticket.tokenNumber}
+                    <p className="text-red-500">Maybe you don't have any physical appointment.</p>
+                ) : tickets.length > 0 ? ( // Check if array has items
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {tickets.map((ticket, index) => (
+                            <div 
+                                key={index} 
+                                className="relative w-80 h-96 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-300"
+                            >
+                                {/* PDF Display Without Controls */}
+                                <embed 
+                                    src={`http://localhost:5000${ticket.pdfLink}`} 
+                                    type="application/pdf" 
+                                    className="w-full h-full"
+                                />
+
+                                {/* Token Number */}
+                                <div className="absolute bottom-0 left-0 w-full bg-orange-600 bg-opacity-80 text-white text-center py-2 text-sm font-semibold">
+                                    Token: {ticket.tokenNumber}
+                                </div>
+                            </div>
+                        ))}
                     </div>
-                </div>
-                
                 ) : (
                     <p className="text-gray-600">No ticket found.</p>
                 )}
-
-
             </div>
         </PatientLayout>
     );

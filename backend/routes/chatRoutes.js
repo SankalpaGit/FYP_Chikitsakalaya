@@ -11,7 +11,8 @@ const { Op } = require('sequelize');
 
 router.get('/chat/doctors', verifyToken, async (req, res) => {
   try {
-    console.log("Request received from user:", req.user); // Debugging
+    console.log("🔹 User from token:", req.user); // Debugging
+    console.log("🔹 Requested chat with:", req.params.recipientId);
 
     if (!req.user || !req.user.id) {
       return res.status(400).json({ message: 'Invalid user' });
@@ -137,12 +138,10 @@ router.post('/chat/send', verifyToken, async (req, res) => {
 
     return res.status(201).json(newMessage);
   } catch (error) {
-    console.error("🔴 Error sending message:", error);
+    console.error(" Error sending message:", error);
     return res.status(500).json({ message: "Error sending message", error: error.message });
   }
 });
-
-
 
 router.get('/chat/history/:recipientId', verifyToken, async (req, res) => {
   try {

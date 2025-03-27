@@ -12,24 +12,32 @@ const ChatBoxDoctor = () => {
     const fetchMessages = async () => {
       try {
         const token = localStorage.getItem("token");
-        console.log(token);
-        
-        if (!token) return;
-
+  
+        if (!token) {
+          console.error("❌ No token found in localStorage");
+          return;
+        }
+  
+        console.log("🔹 Fetching messages with token:", token);
+  
         const response = await axios.get(
           `http://localhost:5000/api/chat/history/${patientId}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
+  
+        console.log("✅ Messages fetched:", response.data);
         setMessages(response.data);
       } catch (error) {
-        console.error("Error fetching chat history:", error);
+        console.error("❌ Error fetching chat history:", error.response?.data || error);
       }
     };
-
+  
     fetchMessages();
   }, [patientId]);
+  
+  
 
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
