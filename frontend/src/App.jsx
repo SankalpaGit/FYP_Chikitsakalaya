@@ -35,6 +35,7 @@ import BlogDetail from "./pages/others/BlogDetail";
 import ChatLayout from "./layouts/ChatLayout";
 import ChatBoxDoctor from "./pages/doctors/ChatBoxDoctor";
 import DoctorChatLayout from "./layouts/DoctorChatLayout";
+import FAQ from "./pages/others/FAQ";
 
 console.log("App Component Loaded");
 
@@ -95,6 +96,7 @@ function App() {
       <Route path="/about" element={<About />} />
       <Route path="/blog" element={<Blog />} />
       <Route path="/blog/:blogID" element={<BlogDetail />} />
+      <Route path="/FAQ" element={<FAQ />} />
       <Route path="*" element={<NotFound />} />
 
     </Routes>

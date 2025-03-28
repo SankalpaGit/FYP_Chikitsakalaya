@@ -39,12 +39,12 @@ const Footer = () => {
                             <h4 className="font-bold mb-4">Resources</h4>
                             <ul>
                                 <li className="mb-2">
-                                    <a href="#faq" className="text-gray-700 hover:text-teal-700 hover:font-semibold">
+                                    <a href="faq" className="text-gray-700 hover:text-teal-700 hover:font-semibold">
                                         FAQ
                                     </a>
                                 </li>
                                 <li className="mb-2">
-                                    <a href="#blog" className="text-gray-700 hover:text-teal-700 hover:font-semibold">
+                                    <a href="blog" className="text-gray-700 hover:text-teal-700 hover:font-semibold">
                                         Blog
                                     </a>
                                 </li>
