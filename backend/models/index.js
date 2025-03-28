@@ -10,6 +10,7 @@ const Appointment = require('./Appointment');
 const Payment = require('./Payment');
 const PhysicalTicket = require('./PhysicalTicket');
 const Chat = require('./Chat');
+const TaskList = require('./TaskList');
 const OnlinePortal = require('./OnlinePortal');
 
 // ✅ Define Relationships
@@ -30,6 +31,10 @@ TimeSlot.belongsTo(Doctor, { foreignKey: 'doctorId' });
 // Doctor → Appointment
 Doctor.hasMany(Appointment, { foreignKey: 'doctorId' });
 Appointment.belongsTo(Doctor, { foreignKey: 'doctorId' });
+
+// Doctor → Tasks
+Doctor.hasMany(TaskList, { foreignKey: 'doctorId' ,  onDelete: "CASCADE"});
+TaskList.belongsTo(Doctor, { foreignKey: 'doctorId' });
 
 // Patient → Appointment
 Patient.hasMany(Appointment, { foreignKey: 'patientId' });
