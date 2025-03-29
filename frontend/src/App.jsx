@@ -36,6 +36,8 @@ import ChatLayout from "./layouts/ChatLayout";
 import ChatBoxDoctor from "./pages/doctors/ChatBoxDoctor";
 import DoctorChatLayout from "./layouts/DoctorChatLayout";
 import FAQ from "./pages/others/FAQ";
+import PrescriptionMain from "./pages/doctors/PrescriptionMain";
+import Prescription from "./pages/patients/Prescription";
 
 console.log("App Component Loaded");
 
@@ -56,6 +58,7 @@ function App() {
       <Route path="/doctor/chat" element={<DoctorChatLayout />}>
         <Route path=":patientId" element={<ChatBoxDoctor />} />
       </Route>
+      <Route path="/doctor/prescription" element={<PrescriptionMain />} />
 
 
       {/* route setup for admin user */}
@@ -76,6 +79,7 @@ function App() {
 
 
 
+
       {/* route setup for patient user */}
       <Route path="/login" element={<LoginForm />} />
       <Route path="/register" element={<RegisterForm />} />
@@ -88,8 +92,8 @@ function App() {
       <Route path="/chat" element={<ChatLayout />}>
         <Route path=":doctorId" element={<ChatBox />} />
       </Route>
-
       <Route path="/meeting/:roomId" element={<VideoCallWrapper />} />
+      <Route path="/prescription" element={<Prescription />} />
 
 
       {/* Project Related*/}

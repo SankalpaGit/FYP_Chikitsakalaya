@@ -42,19 +42,12 @@ const DoctorSidebar = () => {
             </span>
             </Link>
           </li>
-          {/* Appointments - Requests */}
-          <li className="relative group flex justify-center mt-6 mb-6">
-            <FaCalendarCheck className="text-teal-600 text-2xl" /> {/* Increased icon size */}
-            <span className="absolute left-16 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
-              Appointment Requests
-            </span>
-          </li>
 
-          {/* Appointments - Upcoming */}
+          {/* Appointments  */}
           <li className="relative group flex justify-center mt-6 mb-6">
             <FaCalendarDay className="text-teal-600 text-2xl" /> {/* Increased icon size */}
             <span className="absolute left-16 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
-              Upcoming Appointments
+              Appointments
             </span>
           </li>
 
@@ -84,11 +77,21 @@ const DoctorSidebar = () => {
             </Link>
           </li>
 
-          {/* Feedback */}
+          {/* prescription */}
           <li className="relative group flex justify-center mt-6 mb-6">
+          <Link to="/doctor/prescription">
             <FaPrescriptionBottleMedical className="text-teal-600 text-2xl" /> {/* Increased icon size */}
             <span className="absolute left-16 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
               Prescription
+            </span>
+            </Link>
+          </li>
+
+           {/* Feedback */}
+           <li className="relative group flex justify-center mt-6 mb-6">
+            <FaCalendarCheck className="text-teal-600 text-2xl" /> {/* Increased icon size */}
+            <span className="absolute left-16 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
+              Appointment Requests
             </span>
           </li>
         </ul>
