@@ -9,17 +9,17 @@ const ChatHomeDoctor = () => {
   useEffect(() => {
     const fetchChats = async () => {
       try {
-        const token = localStorage.getItem("token"); // Assuming token is stored
+        const token = localStorage.getItem("token");
         if (!token) {
           console.error("No token found");
           return;
         }
-        const response = await axios.get("http://localhost:5000/api/chat/patients", {
+        const response = await axios.get("http://localhost:5000/api/chat/doctor/patients", {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setChatList(response.data);
+        setChatList(response.data); // Expecting [{ patientId, firstName, lastName }]
       } catch (error) {
-        console.error("Error fetching patients chat list:", error);
+        console.error("Error fetching patients chat list:", error.response?.data || error);
       }
     };
 
@@ -34,12 +34,16 @@ const ChatHomeDoctor = () => {
         ) : (
           chatList.map((chat) => (
             <div
-              key={chat.appointmentId}
+              key={chat.patientId} // Use patientId as key
               className="p-3 rounded-lg cursor-pointer hover:bg-gray-200"
-              onClick={() => navigate(`/doctor/chat/${chat.patientId}`)} // Link to the specific appointment
+              onClick={() => navigate(`/doctor/chat/${chat.patientId}`)}
             >
-              <p className="font-semibold">Dr. {chat.firstName} {chat.lastName}</p>
-              <p className="text-sm text-gray-600">{chat.lastMessage || "Tap to start chatting..."}</p>
+              <p className="font-semibold">
+                {chat.firstName} {chat.lastName}
+              </p>
+              <p className="text-sm text-gray-600">
+                {chat.lastMessage || "Tap to start chatting..."}
+              </p>
             </div>
           ))
         )}
