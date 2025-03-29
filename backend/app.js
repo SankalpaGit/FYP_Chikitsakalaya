@@ -1,11 +1,29 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const passport = require('passport');
+const http = require('http');
+const { Server } = require('socket.io');
 const cors = require('cors'); 
 const path = require('path');
 const sequelize = require('./config/database'); // Import the configured sequelize instance
 require('./config/passportConfig'); // Initialize Passport strategies
+const WEBRTC_CONFIG = require('./config/webrtcConfig');
 
+
+const app = express();
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: WEBRTC_CONFIG.FRONTEND_URL,
+    methods: ["GET", "POST"],
+  },
+});
+
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
 
 // import of the all model 
 const RegisterDoctor = require('./models/RegisterDoctor'); 
@@ -32,10 +50,11 @@ const getAppointmentRoute = require('./routes/getAppointmentRoutes')
 const physicalTicketRoute = require('./routes/physicalTicketRoutes')
 const blogRoute = require('./routes/blogRoutes')
 const chatRoute = require('./routes/chatRoutes')
+const tasksRoute = require('./routes/toDoListRoutes')
 // configuration of the dotenv variable
 dotenv.config();
 
-const app = express();
+
 
 app.use(
   cors({
@@ -44,6 +63,10 @@ app.use(
   })
 );
 
+app.use((req, res, next) => {
+  if (!req.io) console.warn('⚠️ Socket.io not injected yet');
+  next();
+});
 
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
@@ -65,6 +88,7 @@ app.use('/api' , getAppointmentRoute)
 app.use('/api', physicalTicketRoute)
 app.use('/api', blogRoute)
 app.use('/api', chatRoute)
+app.use('/api', tasksRoute)
 
 // Authenticate and sync models
 sequelize.authenticate()
@@ -83,4 +107,4 @@ app.get('/', (req, res) => {
   res.send('Chikitsakalaya server is running'); // sending the response
 });
 
-module.exports = app;
+module.exports = { app, server, io };

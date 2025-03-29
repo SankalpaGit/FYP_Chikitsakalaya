@@ -56,8 +56,6 @@ Chat.belongsTo(Appointment, { foreignKey: 'appointmentId' });
 Appointment.hasMany(Chat, { foreignKey: 'appointmentId' });
 
 
-
-
 // ✅ Export Models
 module.exports = {
   sequelize,

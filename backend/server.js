@@ -1,90 +1,102 @@
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
-const WEBRTC_CONFIG = require("./config/webrtcConfig");
-const Chat= require('./models/Chat');
+const { server, io } = require('./app'); // Import server and io from app.js
+const Chat = require('./models/Chat');
+const Appointment = require('./models/Appointment');
+const { Op } = require('sequelize');
 
 const PORT = process.env.PORT || 5000;
-const SIGNALING_PORT = WEBRTC_CONFIG.SIGNALING_PORT || 5050; 
 
 const activeUsers = {};
 
-const app = require("./app");
-const apiServer = http.createServer(app); // API server
-const signalingServer = http.createServer(); // WebRTC Signaling server
+io.on('connection', (socket) => {
+  console.log('User connected');
 
-const io = new Server(signalingServer, {
-  cors: {
-    origin: WEBRTC_CONFIG.FRONTEND_URL,
-    methods: ["GET", "POST"],
-  },
-});
-
-console.log("Allowed frontend URL:", WEBRTC_CONFIG.FRONTEND_URL);
-
-// WebRTC Socket Logic
-io.on("connection", (socket) => {
-  console.log("New user connected");
-
-  // **User Registration (for notifications & chat)**
-  socket.on("register", (userId) => {
+  socket.on('register', (userId) => {
     activeUsers[userId] = socket.id;
-    console.log(`User ${userId} registered with socket ID: ${socket.id}`);
+    socket.join(`user-${userId}`);
+    console.log(`User ${userId} registered and joined user-${userId}`);
   });
 
-  // **WebRTC Signaling**
-  socket.on("join-room", (roomId) => {
+  socket.on('join-room', (roomId) => {
     socket.join(roomId);
     console.log(`User joined room: ${roomId}`);
   });
 
-  socket.on("offer", ({ roomId, offer }) => {
-    socket.to(roomId).emit("offer", offer);
+  socket.on('offer', ({ roomId, offer }) => {
+    socket.to(roomId).emit('offer', offer);
   });
 
-  socket.on("answer", ({ roomId, answer }) => {
-    socket.to(roomId).emit("answer", answer);
+  socket.on('answer', ({ roomId, answer }) => {
+    socket.to(roomId).emit('answer', answer);
   });
 
-  socket.on("ice-candidate", ({ roomId, candidate }) => {
-    socket.to(roomId).emit("ice-candidate", candidate);
+  socket.on('ice-candidate', ({ roomId, candidate }) => {
+    socket.to(roomId).emit('ice-candidate', candidate);
   });
-  
-  // **One-to-One Chat**
-  socket.on("send-message", async ({ senderId, recipientId, message, messageType = "text" }) => {
+
+  socket.on('send-message', async ({ senderId, recipientId, message, messageType = 'text', mediaUrl }) => {
     try {
-      // Store message in the database
-      const chatMessage = await Chat.create({ senderId, receiverId: recipientId, message, messageType });
-  
-      const recipientSocket = activeUsers[recipientId];
-      if (recipientSocket) {
-        io.to(recipientSocket).emit("receive-message", chatMessage); // Send message in real-time
+      const appointment = await Appointment.findOne({
+        where: {
+          [Op.or]: [
+            { patientId: senderId, doctorId: recipientId },
+            { patientId: recipientId, doctorId: senderId },
+          ],
+        },
+      });
+
+      if (!appointment) {
+        socket.emit('error', { message: 'No appointment exists between sender and recipient' });
+        return;
       }
+
+      const senderType = senderId === appointment.doctorId ? 'doctor' : 'patient';
+      const chatMessage = await Chat.create({
+        appointmentId: appointment.id,
+        senderType,
+        message: messageType === 'text' ? message : null,
+        messageType,
+        mediaUrl: messageType !== 'text' ? mediaUrl : null,
+      });
+
+      io.to(`user-${recipientId}`).emit('newMessage', chatMessage);
+      socket.emit('newMessage', chatMessage);
+      console.log(`Message sent from ${senderId} to ${recipientId}:`, chatMessage);
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error('Error sending message:', error);
+      socket.emit('error', { message: 'Failed to send message', error: error.message });
     }
   });
 
-  socket.on("get-messages", async ({ senderId, recipientId }, callback) => {
+  socket.on('get-messages', async ({ senderId, recipientId }, callback) => {
     try {
-      const messages = await Chat.findAll({
+      const appointment = await Appointment.findOne({
         where: {
           [Op.or]: [
-            { senderId, receiverId: recipientId },
-            { senderId: recipientId, receiverId: senderId },
+            { patientId: senderId, doctorId: recipientId },
+            { patientId: recipientId, doctorId: senderId },
           ],
         },
-        order: [["createdAt", "ASC"]],
       });
-      callback(messages); // Send back messages to the client
+
+      if (!appointment) {
+        console.log(`No appointment found for ${senderId} and ${recipientId}`);
+        return callback([]);
+      }
+
+      const messages = await Chat.findAll({
+        where: { appointmentId: appointment.id },
+        order: [['createdAt', 'ASC']],
+      });
+
+      console.log(`Fetched ${messages.length} messages for ${senderId} and ${recipientId}`);
+      callback(messages);
     } catch (error) {
-      console.error("Error fetching messages:", error);
+      console.error('Error fetching messages:', error);
       callback([]);
     }
   });
-  
 
-  socket.on("disconnect", () => {
+  socket.on('disconnect', () => {
     const userId = Object.keys(activeUsers).find((key) => activeUsers[key] === socket.id);
     if (userId) {
       delete activeUsers[userId];
@@ -93,12 +105,6 @@ io.on("connection", (socket) => {
   });
 });
 
-// **Express Server on 5000**
-apiServer.listen(PORT, () => {
-  console.log(`API Server running on port ${PORT}`);
-});
-
-// **Socket Server on 5050**
-signalingServer.listen(SIGNALING_PORT, () => {
-  console.log(`WebRTC Signaling Server running on port ${SIGNALING_PORT}`);
+server.listen(PORT, () => {
+  console.log(`API and Socket.io Server running on port ${PORT}`);
 });
