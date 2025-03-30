@@ -38,7 +38,9 @@ import DoctorChatLayout from "./layouts/DoctorChatLayout";
 import FAQ from "./pages/others/FAQ";
 import PrescriptionMain from "./pages/doctors/PrescriptionMain";
 import Prescription from "./pages/patients/Prescription";
-
+import ReportUpload from "./pages/patients/ReportUpload";
+import Privacy from "./pages/others/Privacy";
+import TermsOfService from "./pages/others/TermsOfService";
 console.log("App Component Loaded");
 
 function App() {
@@ -85,6 +87,7 @@ function App() {
       <Route path="/register" element={<RegisterForm />} />
       <Route path='/' element={<HomePage />} />
       < Route path='/profile' element={<PatientProfile />} />
+      <Route path="/upload" element={<ReportUpload />} />
       <Route path='/appointment/:doctorId' element={<AppointmentForm />} />
       <Route path='/appointments' element={<DisplayAppointment />} />
       <Route path='/payment/:appointmentID' element={<PaymentHome />} />
@@ -101,6 +104,10 @@ function App() {
       <Route path="/blog" element={<Blog />} />
       <Route path="/blog/:blogID" element={<BlogDetail />} />
       <Route path="/FAQ" element={<FAQ />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<TermsOfService />} />
+
+      {/* 404 Not Found */}
       <Route path="*" element={<NotFound />} />
 
     </Routes>

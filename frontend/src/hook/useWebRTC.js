@@ -1,90 +1,84 @@
-// src/hook/useWebRTC.js
-
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import SimplePeer from "simple-peer";
 
-const SIGNALING_SERVER = "http://localhost:5050"; // WebRTC signaling server
+const SOCKET_SERVER = "http://localhost:5000"; // Match server.js
 
-const useWebRTC = (roomId, isHost) => {
+const useWebRTC = (roomId, userId, isHost) => {
   const [stream, setStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
-  const socket = useRef(null);
+  const socket = useRef(io(SOCKET_SERVER, { autoConnect: true }));
   const peerRef = useRef(null);
 
   useEffect(() => {
-    socket.current = io(SIGNALING_SERVER);
-
     socket.current.on("connect", () => {
-      console.log("Connected to signaling server");
-      socket.current.emit("join-room", roomId);
+      console.log("Connected to Socket.io server");
+      socket.current.emit("register", userId); // Register user
+      socket.current.emit("join-room", roomId); // Join meeting room
     });
 
-    socket.current.on("connect_error", (err) => {
-      console.error("Socket connection error:", err);
-    });
-
-    const getMedia = async () => {
+    const initWebRTC = async () => {
       try {
         const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         setStream(mediaStream);
         console.log("Got user media stream");
 
-        if (isHost) {
-          console.log("Setting up as Host...");
-          peerRef.current = new SimplePeer({ initiator: true, trickle: false, stream: mediaStream });
+        peerRef.current = new SimplePeer({
+          initiator: isHost,
+          trickle: false,
+          stream: mediaStream,
+          config: { iceServers: [{ urls: "stun:stun.l.google.com:19302" }] },
+        });
 
-          peerRef.current.on("signal", (offer) => {
+        peerRef.current.on("signal", (data) => {
+          if (isHost) {
             console.log("Sending offer...");
-            socket.current.emit("offer", { roomId, offer });
-          });
-
-          socket.current.on("answer", (answer) => {
-            console.log("Received answer, connecting...");
-            peerRef.current.signal(answer);
-          });
-        } else {
-          console.log("Setting up as Guest...");
-          socket.current.on("offer", (offer) => {
-            console.log("Received offer, responding...");
-            peerRef.current = new SimplePeer({ initiator: false, trickle: false, stream: mediaStream });
-
-            peerRef.current.on("signal", (answer) => {
-              socket.current.emit("answer", { roomId, answer });
-            });
-
-            peerRef.current.signal(offer);
-          });
-        }
-
-        socket.current.on("ice-candidate", (candidate) => {
-          if (peerRef.current) {
-            peerRef.current.signal(candidate);
+            socket.current.emit("offer", { roomId, offer: data });
           } else {
-            console.warn("Received ICE candidate before peerRef was initialized");
+            console.log("Sending answer...");
+            socket.current.emit("answer", { roomId, answer: data });
           }
         });
 
-        if (peerRef.current) {
-          peerRef.current.on("stream", (remoteStream) => {
-            console.log("Received remote stream:", remoteStream);
-            setRemoteStream(remoteStream);
-          });
-        }
+        peerRef.current.on("stream", (remote) => {
+          console.log("Received remote stream:", remote);
+          setRemoteStream(remote);
+        });
 
+        peerRef.current.on("error", (err) => {
+          console.error("Peer error:", err);
+        });
       } catch (error) {
         console.error("Error accessing media devices:", error);
       }
     };
 
-    getMedia();
+    socket.current.on("offer", async (offer) => {
+      if (!isHost && !peerRef.current.signalingState) {
+        await peerRef.current.signal(offer);
+      }
+    });
+
+    socket.current.on("answer", (answer) => {
+      if (isHost) {
+        peerRef.current.signal(answer);
+      }
+    });
+
+    socket.current.on("ice-candidate", (candidate) => {
+      if (peerRef.current) {
+        peerRef.current.signal(candidate);
+      }
+    });
+
+    initWebRTC();
 
     return () => {
-      console.log("Cleaning up WebRTC connection...");
-      if (socket.current) socket.current.disconnect();
+      console.log("Cleaning up WebRTC...");
+      socket.current.disconnect();
       if (peerRef.current) peerRef.current.destroy();
     };
-  }, [roomId, isHost]);
+  }, [roomId, userId, isHost]);
 
   return { stream, remoteStream };
 };

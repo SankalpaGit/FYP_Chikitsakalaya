@@ -3,6 +3,7 @@ import { FaEnvelope, FaMapMarkerAlt, FaPhoneAlt, FaMale, FaBirthdayCake, FaEdit,
 import { RxCross2 } from 'react-icons/rx';
 import axios from 'axios';
 import PatientLayout from '../../layouts/PatientLayout';
+import { Link } from 'react-router-dom';
 
 const PatientProfile = () => {
     const [isProfileComplete, setIsProfileComplete] = useState(false);
@@ -116,6 +117,9 @@ const PatientProfile = () => {
                         <RxCross2 className="cursor-pointer text-xl text-gray-600" onClick={() => setShowPopup(false)} />
                     </div>
                     <button className="mt-3 bg-teal-600 text-white px-4 py-2 rounded-md w-full font-semibold" onClick={() => setShowModal(true)}>Complete Now</button>
+                    <Link to="/upload" className="w-full">
+                    <button className="mt-3 bg-teal-600 text-white px-4 py-2 rounded-md w-full font-semibold" >Set up via OCR</button>
+                    </Link>
                 </div>
             )}
 
@@ -140,7 +144,11 @@ const PatientProfile = () => {
                             <p className="flex items-center text-gray-600"><FaPhoneAlt className="mr-2" /> {patient?.phone || 'N/A'}</p>
                             <div className="flex justify-between w-8/12">
                                 <p className="flex items-center text-gray-600"><FaMale className="mr-2" /> {patient?.gender || 'N/A'}</p>
-                                <p className="flex items-center text-gray-600"><FaBirthdayCake className="mr-2" /> {patient?.dateOfBirth || 'N/A'}</p>
+                                <p className="flex items-center text-gray-600">
+  <FaBirthdayCake className="mr-2" /> 
+  {patient?.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "2-digit" }) : "N/A"}
+</p>
+
                             </div>
                         </div>
                     </div>
