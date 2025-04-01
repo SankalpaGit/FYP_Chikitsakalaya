@@ -79,7 +79,7 @@ function App() {
       < Route path="/admin/blog/create" element={<CreateBlog />} />
       <Route path="/admin/blog/edit/:blogID" element={<CreateBlog />} />
 
-
+      <Route path="/meeting/:meetingId" element={<VideoCall />} />
 
 
       {/* route setup for patient user */}
@@ -95,7 +95,6 @@ function App() {
       <Route path="/chat" element={<ChatLayout />}>
         <Route path=":doctorId" element={<ChatBox />} />
       </Route>
-      <Route path="/meeting/:roomId" element={<VideoCallWrapper />} />
       <Route path="/prescription" element={<Prescription />} />
 
 
@@ -115,9 +114,6 @@ function App() {
   );
 }
 
-const VideoCallWrapper = () => {
-  const { roomId } = useParams();
-  return <VideoCall roomId={roomId} isHost={false} onEndCall={() => console.log("Call ended")} />;
-};
+
 
 export default App;

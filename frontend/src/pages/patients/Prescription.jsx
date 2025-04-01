@@ -58,7 +58,7 @@ const Prescription = () => {
                     {prescription.doctor} • {prescription.date}
                   </p>
                 </div>
-                <span className="bg-black text-white text-sm px-3 py-1 rounded-full">
+                <span className="bg-teal-500 text-white text-sm px-3 py-1 rounded-full">
                   {prescription.status}
                 </span>
               </div>
@@ -105,7 +105,7 @@ const Prescription = () => {
 
               {/* Status & Date */}
               <div className="flex justify-between items-center mt-3">
-                <span className="bg-black text-white text-sm px-3 py-1 rounded-full">
+                <span className="bg-teal-500 text-white text-sm px-3 py-1 rounded-full">
                   {selectedPrescription.status}
                 </span>
                 <p className="text-gray-500 text-sm">{selectedPrescription.date}</p>
@@ -150,7 +150,7 @@ const Prescription = () => {
                     <p className="text-sm text-gray-500">Progress</p>
                     <div className="w-full bg-gray-200 h-2 rounded-full mt-1">
                       <div
-                        className="bg-black h-2 rounded-full"
+                        className="bg-teal-500 h-2 rounded-full"
                         style={{ width: `${(med.remainingDoses / 30) * 100}%` }}
                       ></div>
                     </div>

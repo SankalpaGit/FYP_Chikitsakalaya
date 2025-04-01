@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { FcGoogle } from 'react-icons/fc';
+import NavBar from '../../components/nav/NavBar';
 
 function LoginForm() {
   const [email, setEmail] = useState('');
@@ -30,6 +31,8 @@ function LoginForm() {
   };
 
   return (
+    <>
+    <NavBar />
     <div className="flex flex-col md:flex-row items-center justify-evenly min-h-screen bg-white p-4">
       <div className="w-5/12 flex justify-center">
         <img src="/patients/auth.png" alt="Login"  />
@@ -70,6 +73,7 @@ function LoginForm() {
         <p className="text-center mt-4 text-gray-600">Don't have an account? <a href="/register" className="text-teal-600 hover:underline">Register now</a></p>
       </div>
     </div>
+    </>
   );
 }
 
