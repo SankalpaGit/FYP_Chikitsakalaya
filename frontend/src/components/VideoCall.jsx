@@ -1,23 +1,21 @@
 import React, { useRef } from "react";
 import { useEffect } from "react";
-import { useParams } from "react-router-dom"; // Assuming React Router for meetingId
-import useWebRTC from "../hooks/useWebRTC"; // Adjust path to your hook
+import { useParams } from "react-router-dom";
+import useWebRTC from "../hook/useWebRTC"; // Adjust path
 
-const VideoCall = ({ userId, isHost }) => {
-  const { meetingId } = useParams(); // Extract meetingId from URL (e.g., /meeting/:meetingId)
+const VideoCall = () => {
+  const { meetingId } = useParams();
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
 
-  const { stream, remoteStream, endCall } = useWebRTC(meetingId, userId, isHost);
+  const { stream, remoteStream, endCall, isHost, participantCount } = useWebRTC(meetingId);
 
-  // Attach local stream to video element
   useEffect(() => {
     if (stream && localVideoRef.current) {
       localVideoRef.current.srcObject = stream;
     }
   }, [stream]);
 
-  // Attach remote stream to video element
   useEffect(() => {
     if (remoteStream && remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = remoteStream;
@@ -26,7 +24,7 @@ const VideoCall = ({ userId, isHost }) => {
 
   return (
     <div>
-      <h2>Video Call - Meeting ID: {meetingId}</h2>
+      <p>Host: {isHost ? "Yes" : "No"} | Participants: {participantCount}</p>
       <div style={{ display: "flex", gap: "20px" }}>
         <video ref={localVideoRef} autoPlay muted style={{ width: "300px", border: "1px solid #ccc" }} />
         <video ref={remoteVideoRef} autoPlay style={{ width: "300px", border: "1px solid #ccc" }} />

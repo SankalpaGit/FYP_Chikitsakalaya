@@ -4,10 +4,12 @@ import SimplePeer from "simple-peer";
 
 const SOCKET_SERVER = "http://localhost:5000";
 
-const useWebRTC = (roomId, userId, isHost) => {
+const useWebRTC = (roomId) => {
   const [stream, setStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
-  const peerRef = useRef(null Facetune_2024-10-30_21-56-33.png
+  const [isHost, setIsHost] = useState(false);
+  const [participantCount, setParticipantCount] = useState(0);
+  const peerRef = useRef(null);
   const socket = useRef(null);
 
   useEffect(() => {
@@ -15,23 +17,41 @@ const useWebRTC = (roomId, userId, isHost) => {
 
     socket.current.on("connect", () => {
       console.log("Connected to Socket.io server");
-      socket.current.emit("register", userId);
       socket.current.emit("join-room", roomId);
+    });
+
+    socket.current.on("host-status", (hostStatus) => {
+      console.log("Host status received:", hostStatus);
+      console.log('host joined the room');
+
+      setIsHost(hostStatus);
+    });
+
+    socket.current.on("participant-count", (count) => {
+      setParticipantCount(count);
+    });
+
+    socket.current.on("room-full", (message) => {
+      console.log(message);
+      alert(message);
     });
 
     return () => {
       if (socket.current) socket.current.disconnect();
     };
-  }, [roomId, userId]);
+  }, [roomId]);
 
   useEffect(() => {
     const initWebRTC = async () => {
       try {
-        console.log("Requesting media devices...");
-        const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        if (!mediaStream) throw new Error("No media stream available.");
+        const mediaStream = await navigator.mediaDevices.getUserMedia(
+          {
+            video: true,
+            audio: true
+          });
+        if (!mediaStream) throw new Error("No media stream available");
+        console.log("Media stream is available:", mediaStream);
         setStream(mediaStream);
-        console.log("Got user media stream");
       } catch (error) {
         console.error("Error accessing media devices:", error);
       }
@@ -41,6 +61,10 @@ const useWebRTC = (roomId, userId, isHost) => {
 
   useEffect(() => {
     if (!stream) return;
+
+    console.log("Stream:", stream);
+    console.log("isHost:", isHost);
+    console.log("roomId:", roomId);
 
     if (peerRef.current) {
       console.log("Destroying old peer connection...");
@@ -59,14 +83,13 @@ const useWebRTC = (roomId, userId, isHost) => {
         ],
       },
     });
-
+    console.log("SimplePeer initialized successfully");
+    
     peerRef.current.on("signal", (data) => {
-      console.log("Sending signaling data:", data);
       socket.current.emit("webrtc-signal", { roomId, signal: data });
     });
 
     peerRef.current.on("stream", (remote) => {
-      console.log("Received remote stream:", remote);
       setRemoteStream(remote);
     });
 
@@ -86,7 +109,6 @@ const useWebRTC = (roomId, userId, isHost) => {
 
     socket.current.on("webrtc-signal", (signal) => {
       if (peerRef.current) {
-        console.log("Received WebRTC signal:", signal);
         peerRef.current.signal(signal);
       }
     });
@@ -116,7 +138,7 @@ const useWebRTC = (roomId, userId, isHost) => {
     }
   };
 
-  return { stream, remoteStream, endCall };
+  return { stream, remoteStream, endCall, isHost, participantCount };
 };
 
 export default useWebRTC;
