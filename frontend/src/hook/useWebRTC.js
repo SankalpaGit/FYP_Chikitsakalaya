@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
-import SimplePeer from "simple-peer";
 
 const SOCKET_SERVER = "http://localhost:5000";
 
@@ -9,7 +8,7 @@ const useWebRTC = (roomId) => {
   const [remoteStream, setRemoteStream] = useState(null);
   const [isHost, setIsHost] = useState(false);
   const [participantCount, setParticipantCount] = useState(0);
-  const peerRef = useRef(null);
+  const pcRef = useRef(null);
   const socket = useRef(null);
 
   useEffect(() => {
@@ -22,12 +21,11 @@ const useWebRTC = (roomId) => {
 
     socket.current.on("host-status", (hostStatus) => {
       console.log("Host status received:", hostStatus);
-      console.log('host joined the room');
-
       setIsHost(hostStatus);
     });
 
     socket.current.on("participant-count", (count) => {
+      console.log("Participant count updated:", count);
       setParticipantCount(count);
     });
 
@@ -44,13 +42,8 @@ const useWebRTC = (roomId) => {
   useEffect(() => {
     const initWebRTC = async () => {
       try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia(
-          {
-            video: true,
-            audio: true
-          });
-        if (!mediaStream) throw new Error("No media stream available");
-        console.log("Media stream is available:", mediaStream);
+        const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        console.log("Media stream acquired:", mediaStream);
         setStream(mediaStream);
       } catch (error) {
         console.error("Error accessing media devices:", error);
@@ -60,73 +53,91 @@ const useWebRTC = (roomId) => {
   }, []);
 
   useEffect(() => {
-    if (!stream) return;
+    if (!stream || !socket.current) return;
 
-    console.log("Stream:", stream);
-    console.log("isHost:", isHost);
-    console.log("roomId:", roomId);
-
-    if (peerRef.current) {
-      console.log("Destroying old peer connection...");
-      peerRef.current.destroy();
-    }
-
-    peerRef.current = new SimplePeer({
-      initiator: isHost,
-      trickle: true,
-      stream: stream,
-      config: {
-        iceServers: [
-          { urls: "stun:stun.l.google.com:19302" },
-          { urls: "stun:stun1.l.google.com:19302" },
-          { urls: "stun:stun2.l.google.com:19302" },
-        ],
-      },
-    });
-    console.log("SimplePeer initialized successfully");
-    
-    peerRef.current.on("signal", (data) => {
-      socket.current.emit("webrtc-signal", { roomId, signal: data });
+    console.log("Setting up RTCPeerConnection...");
+    pcRef.current = new RTCPeerConnection({
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" },
+      ],
     });
 
-    peerRef.current.on("stream", (remote) => {
-      setRemoteStream(remote);
+    stream.getTracks().forEach((track) => {
+      console.log("Adding track to peer connection:", track);
+      pcRef.current.addTrack(track, stream);
     });
 
-    peerRef.current.on("error", (err) => {
-      console.error("Peer error:", err);
-    });
+    pcRef.current.ontrack = (event) => {
+      console.log("Received remote stream:", event.streams[0]);
+      setRemoteStream(event.streams[0]);
+    };
 
-    return () => {
-      if (peerRef.current) {
-        peerRef.current.destroy();
+    pcRef.current.onicecandidate = (event) => {
+      if (event.candidate) {
+        console.log("Sending ICE candidate:", event.candidate);
+        socket.current.emit("webrtc-signal", { roomId, signal: event.candidate });
       }
     };
-  }, [stream, isHost, roomId]);
 
-  useEffect(() => {
-    if (!socket.current) return;
+    pcRef.current.onconnectionstatechange = () => {
+      console.log("Connection state:", pcRef.current.connectionState);
+    };
 
-    socket.current.on("webrtc-signal", (signal) => {
-      if (peerRef.current) {
-        peerRef.current.signal(signal);
+    const createOffer = async () => {
+      try {
+        const offer = await pcRef.current.createOffer();
+        console.log("Created offer:", offer);
+        await pcRef.current.setLocalDescription(offer);
+        console.log("Offer set as local description:", pcRef.current.localDescription);
+        socket.current.emit("webrtc-signal", { roomId, signal: pcRef.current.localDescription });
+      } catch (error) {
+        console.error("Error creating offer:", error);
+      }
+    };
+
+    if (isHost) {
+      createOffer();
+    }
+
+    socket.current.on("webrtc-signal", async (signal) => {
+      console.log("Received signal:", signal);
+      try {
+        if (signal.type === "offer" && !isHost) {
+          await pcRef.current.setRemoteDescription(new RTCSessionDescription(signal));
+          const answer = await pcRef.current.createAnswer();
+          await pcRef.current.setLocalDescription(answer);
+          console.log("Sending answer:", pcRef.current.localDescription);
+          socket.current.emit("webrtc-signal", { roomId, signal: pcRef.current.localDescription });
+        } else if (signal.type === "answer" && isHost) {
+          await pcRef.current.setRemoteDescription(new RTCSessionDescription(signal));
+        } else if (signal.candidate) {
+          await pcRef.current.addIceCandidate(new RTCIceCandidate(signal));
+          console.log("Added ICE candidate:", signal);
+        }
+      } catch (error) {
+        console.error("Error handling signal:", error);
       }
     });
 
     socket.current.on("call-ended", () => {
+      console.log("Call ended by remote user");
       endCall();
     });
 
     return () => {
-      socket.current.off("webrtc-signal");
-      socket.current.off("call-ended");
+      if (pcRef.current) {
+        pcRef.current.close();
+        pcRef.current = null;
+      }
     };
-  }, []);
+  }, [stream, isHost, roomId]);
 
   const endCall = () => {
-    if (peerRef.current) {
-      peerRef.current.destroy();
-      peerRef.current = null;
+    console.log("Ending call...");
+    if (pcRef.current) {
+      pcRef.current.close();
+      pcRef.current = null;
     }
     if (stream) {
       stream.getTracks().forEach((track) => track.stop());

@@ -7,6 +7,12 @@ export default defineConfig({
     global: {},
   },
   optimizeDeps: {
-    include: ["simple-peer"],
+    include: ["simple-peer", "socket.io-client"],
+  },
+  plugins: [react()],
+  build:{
+    commonjsOptions:{
+      include: [ /SimplePeer/,/node_modules/],
+    }
   },
 });

@@ -12,5 +12,5 @@ frontend/.env
 /backend/.env
 backend/uploads/
 backend/public/
-
+backend/eng.traineddata
 frontend/public

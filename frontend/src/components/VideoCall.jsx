@@ -1,5 +1,4 @@
-import React, { useRef } from "react";
-import { useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import useWebRTC from "../hook/useWebRTC"; // Adjust path
 
@@ -12,13 +11,17 @@ const VideoCall = () => {
 
   useEffect(() => {
     if (stream && localVideoRef.current) {
+      console.log("Setting local video stream:", stream);
       localVideoRef.current.srcObject = stream;
     }
   }, [stream]);
 
   useEffect(() => {
     if (remoteStream && remoteVideoRef.current) {
+      console.log("Setting remote video stream:", remoteStream);
       remoteVideoRef.current.srcObject = remoteStream;
+    } else {
+      console.log("No remote stream yet");
     }
   }, [remoteStream]);
 

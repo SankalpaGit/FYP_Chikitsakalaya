@@ -6,6 +6,8 @@ const { Op } = require('sequelize');
 const PORT = process.env.PORT || 5000;
 
 const activeUsers = {};
+const meetingHosts = {}; // Track host per meeting
+const meetingParticipants = {}; // Track all users per meeting
 
 io.on('connection', (socket) => {
   console.log('User connected');
@@ -16,9 +18,34 @@ io.on('connection', (socket) => {
     console.log(`User ${userId} registered and joined user-${userId}`);
   });
 
-  socket.on('join-room', (roomId) => {
+  socket.on("join-room", (roomId) => {
+    // Check current participants
+    if (!meetingParticipants[roomId]) {
+      meetingParticipants[roomId] = [];
+    }
+
+    // Limit to 2 users
+    if (meetingParticipants[roomId].length >= 2) {
+      socket.emit("room-full", "This meeting is limited to 2 users.");
+      socket.disconnect(true);
+      return;
+    }
+
+    // Add user to participants
+    meetingParticipants[roomId].push(socket.id);
     socket.join(roomId);
-    console.log(`User joined room: ${roomId}`);
+    console.log(`User ${socket.id} joined room: ${roomId}`);
+
+    // Set host if first user
+    if (!meetingHosts[roomId]) {
+      meetingHosts[roomId] = socket.id;
+      socket.emit("host-status", true);
+    } else {
+      socket.emit("host-status", false);
+    }
+
+    // Notify all users of participant count
+    io.to(roomId).emit("participant-count", meetingParticipants[roomId].length);
   });
 
   socket.on('offer', ({ roomId, offer }) => {
@@ -31,6 +58,19 @@ io.on('connection', (socket) => {
 
   socket.on('ice-candidate', ({ roomId, candidate }) => {
     socket.to(roomId).emit('ice-candidate', candidate);
+  });
+
+  socket.on("webrtc-signal", ({ roomId, signal }) => {
+    console.log(`WebRTC signal received for room ${roomId}:`, signal);
+    socket.to(roomId).emit("webrtc-signal", signal);
+    console.log(`WebRTC signal sent to room: ${roomId}`);
+  });
+
+  socket.on("call-end", (roomId) => {
+    socket.to(roomId).emit("call-ended");
+    delete meetingHosts[roomId];
+    delete meetingParticipants[roomId];
+    console.log(`Call ended in room: ${roomId}`);
   });
 
   socket.on('send-message', async ({ senderId, recipientId, message, messageType = 'text', mediaUrl }) => {
@@ -96,11 +136,33 @@ io.on('connection', (socket) => {
     }
   });
 
-  socket.on('disconnect', () => {
+  socket.on("disconnect", () => {
+    console.log(`User ${socket.id} disconnected`);
+  
+    // Chat logic: Remove from activeUsers
     const userId = Object.keys(activeUsers).find((key) => activeUsers[key] === socket.id);
     if (userId) {
       delete activeUsers[userId];
-      console.log(`User ${userId} disconnected`);
+      console.log(`User ${userId} disconnected from activeUsers`);
+    }
+  
+    // Video call logic: Manage meeting room
+    for (const roomId in meetingParticipants) {
+      const index = meetingParticipants[roomId].indexOf(socket.id);
+      if (index !== -1) {
+        meetingParticipants[roomId].splice(index, 1);
+        if (meetingHosts[roomId] === socket.id) {
+          delete meetingHosts[roomId];
+          if (meetingParticipants[roomId].length > 0) {
+            meetingHosts[roomId] = meetingParticipants[roomId][0]; // New host
+            io.to(meetingHosts[roomId]).emit("host-status", true);
+          }
+        }
+        io.to(roomId).emit("participant-count", meetingParticipants[roomId].length);
+        if (meetingParticipants[roomId].length === 0) {
+          delete meetingParticipants[roomId];
+        }
+      }
     }
   });
 });
