@@ -1,6 +1,5 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
-import { useParams } from "react-router-dom";
 import Signup from "./pages/doctors/Signup";
 import Login from "./pages/doctors/Login";
 import NotFound from "./pages/NotFound";

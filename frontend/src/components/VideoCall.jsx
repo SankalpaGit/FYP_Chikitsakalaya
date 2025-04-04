@@ -1,23 +1,28 @@
 import React, { useRef, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import useWebRTC from "../hook/useWebRTC"; // Adjust path
+import { useParams } from "react-router-dom"; // Import useParams
+import useWebRTC from "../hook/useWebRTC";
 
 const VideoCall = () => {
-  const { meetingId } = useParams();
+  const { meetingId } = useParams(); // Get meetingId from URL
+  const roomId = meetingId || "test123"; // Fallback to "test123" if undefined
+  const { stream, remoteStream, endCall, isHost, participantCount } = useWebRTC(roomId);
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
 
-  const { stream, remoteStream, endCall, isHost, participantCount } = useWebRTC(meetingId);
+  useEffect(() => {
+    console.log("VideoCall mounted - roomId:", roomId, "isHost:", isHost, "participantCount:", participantCount);
+    return () => console.log("VideoCall unmounting...");
+  }, [roomId, isHost, participantCount]);
 
   useEffect(() => {
-    if (stream && localVideoRef.current) {
+    if (localVideoRef.current && stream) {
       console.log("Setting local video stream:", stream);
       localVideoRef.current.srcObject = stream;
     }
   }, [stream]);
 
   useEffect(() => {
-    if (remoteStream && remoteVideoRef.current) {
+    if (remoteVideoRef.current && remoteStream) {
       console.log("Setting remote video stream:", remoteStream);
       remoteVideoRef.current.srcObject = remoteStream;
     } else {
@@ -27,14 +32,14 @@ const VideoCall = () => {
 
   return (
     <div>
-      <p>Host: {isHost ? "Yes" : "No"} | Participants: {participantCount}</p>
-      <div style={{ display: "flex", gap: "20px" }}>
-        <video ref={localVideoRef} autoPlay muted style={{ width: "300px", border: "1px solid #ccc" }} />
-        <video ref={remoteVideoRef} autoPlay style={{ width: "300px", border: "1px solid #ccc" }} />
-      </div>
-      <button onClick={endCall} style={{ marginTop: "10px" }}>
-        End Call
-      </button>
+      <h3>{isHost ? "Host" : "Participant"} - Count: {participantCount}</h3>
+      <video ref={localVideoRef} autoPlay muted style={{ width: "300px" }} />
+      {remoteStream ? (
+        <video ref={remoteVideoRef} autoPlay style={{ width: "300px" }} />
+      ) : (
+        <p>Waiting for remote stream...</p>
+      )}
+      <button onClick={endCall}>End Call</button>
     </div>
   );
 };
