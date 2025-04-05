@@ -83,9 +83,9 @@ function App() {
 
       {/* route setup for admin user */}
       <Route path="/admin/dashboard" element={
-        <ProtectedRoute>
+        
           <Dashboard />
-        </ProtectedRoute>} />
+        } />
       <Route path="/admin/request" element={
         <ProtectedRoute>
           <DoctorApproval />
@@ -126,9 +126,7 @@ function App() {
 
       {/* 404 Not Found */}
       <Route path="*" element={<NotFound />} />
-
     </Routes>
-
   );
 }
 
