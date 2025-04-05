@@ -1,4 +1,7 @@
 import React from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Route, Routes } from "react-router-dom";
 import Signup from "./pages/doctors/Signup";
 import Login from "./pages/doctors/Login";
@@ -44,6 +47,22 @@ console.log("App Component Loaded");
 
 function App() {
 
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios
+        .get('http://localhost:5000/api/user', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => setUser(response.data))
+        .catch(() => {
+          localStorage.removeItem('token');
+          setUser(null);
+        });
+    }
+  }, []);
 
   return (
     <Routes>
@@ -84,7 +103,7 @@ function App() {
       {/* route setup for patient user */}
       <Route path="/login" element={<LoginForm />} />
       <Route path="/register" element={<RegisterForm />} />
-      <Route path='/' element={<HomePage />} />
+      <Route path="/" element={<HomePageWrapper user={user} setUser={setUser} />} />
       < Route path='/profile' element={<PatientProfile />} />
       <Route path="/upload" element={<ReportUpload />} />
       <Route path='/appointment/:doctorId' element={<AppointmentForm />} />
@@ -113,6 +132,32 @@ function App() {
   );
 }
 
+function HomePageWrapper({ user, setUser }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const query = new URLSearchParams(location.search);
+    const token = query.get('token');
+    if (token) {
+      localStorage.setItem('token', token);
+      axios
+        .get('http://localhost:5000/api/user', {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .then((response) => {
+          setUser(response.data);
+          navigate('/'); // Clean up URL
+        })
+        .catch(() => {
+          localStorage.removeItem('token');
+          navigate('/login');
+        });
+    }
+  }, [location.search, navigate, setUser]);
+
+  return <HomePage user={user} setUser={setUser} />;
+}
 
 
 export default App;
