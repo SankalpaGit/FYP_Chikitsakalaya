@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useEffect } from 'react';
 import { FaStethoscope, FaHospital, FaCalendarAlt, FaClock, FaUserMd, FaDollarSign } from 'react-icons/fa';
+import PatientLayout from '../../layouts/PatientLayout';
 
 const DisplayAppointment = () => {
   const [appointments, setAppointments] = useState([]);
@@ -52,6 +54,7 @@ const DisplayAppointment = () => {
   });
 
   return (
+    <PatientLayout>
     <div className="w-10/12 m-auto py-5 mb-5">
       {/* Filter and loading UI */}
       {loading ? (
@@ -156,6 +159,7 @@ const DisplayAppointment = () => {
         </div>
       )}
     </div>
+    </PatientLayout>
   );
 };
 

@@ -17,7 +17,7 @@ const DoctorSidebar = () => {
           <li className="relative group flex justify-center mt-6 mb-6">
             <Link to="/doctor/dashboard">
               <FaTachometerAlt className="text-teal-600 text-2xl" /> {/* Increased icon size */}
-              <span className="absolute left-16 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
+              <span className="absolute left-2 top-1 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold duration-300 whitespace-nowrap">
                 Dashboard
               </span>
             </Link>
@@ -27,7 +27,7 @@ const DoctorSidebar = () => {
           <li className="relative group flex justify-center mt-6 mb-6">
           <Link to="/doctor/schedule">
             <FaClock className="text-teal-600 text-2xl" /> {/* Increased icon size */}
-            <span className="absolute left-16 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
+            <span className="absolute left-2 top-1  opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
               Set Free Time
             </span>
             </Link>
@@ -37,7 +37,7 @@ const DoctorSidebar = () => {
           <li className="relative group flex justify-center mt-6 mb-6">
           <Link to="/doctor/tasks">
             <FaTasks className="text-teal-600 text-2xl" /> {/* Increased icon size */}
-            <span className="absolute left-16 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
+            <span className="absolute left-2 top-1 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
               To-Do List
             </span>
             </Link>
@@ -45,16 +45,18 @@ const DoctorSidebar = () => {
 
           {/* Appointments  */}
           <li className="relative group flex justify-center mt-6 mb-6">
+          <Link to="/doctor/view/appointment">
             <FaCalendarDay className="text-teal-600 text-2xl" /> {/* Increased icon size */}
-            <span className="absolute left-16 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
+            <span className="absolute left-2 top-1 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
               Appointments
             </span>
+            </Link>
           </li>
 
           {/* Patient History */}
           <li className="relative group flex justify-center mt-6 mb-6">
             <FaUserInjured className="text-teal-600 text-2xl" /> {/* Increased icon size */}
-            <span className="absolute left-16 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
+            <span className="absolute left-2 top-1 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
               Patient History
             </span>
           </li>
@@ -62,7 +64,7 @@ const DoctorSidebar = () => {
           {/* Payments */}
           <li className="relative group flex justify-center mt-6 mb-6">
             <FaMoneyBillAlt className="text-teal-600 text-2xl" /> {/* Increased icon size */}
-            <span className="absolute left-16 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
+            <span className="absolute left-2 top-1 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
               Payments
             </span>
           </li>
@@ -71,7 +73,7 @@ const DoctorSidebar = () => {
           <li className="relative group flex justify-center mt-6 mb-6">
           <Link to="/doctor/chat">
             <MdMarkUnreadChatAlt className="text-teal-600 text-2xl" /> {/* Increased icon size */}
-            <span className="absolute left-16 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
+            <span className="absolute left-2 top-1 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
               Chats
             </span>
             </Link>
@@ -81,7 +83,7 @@ const DoctorSidebar = () => {
           <li className="relative group flex justify-center mt-6 mb-6">
           <Link to="/doctor/prescription">
             <FaPrescriptionBottleMedical className="text-teal-600 text-2xl" /> {/* Increased icon size */}
-            <span className="absolute left-16 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
+            <span className="absolute left-2 top-1 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
               Prescription
             </span>
             </Link>
@@ -90,7 +92,7 @@ const DoctorSidebar = () => {
            {/* Feedback */}
            <li className="relative group flex justify-center mt-6 mb-6">
             <FaCalendarCheck className="text-teal-600 text-2xl" /> {/* Increased icon size */}
-            <span className="absolute left-16 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
+            <span className="absolute left-2 top-1 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
               Appointment Requests
             </span>
           </li>
