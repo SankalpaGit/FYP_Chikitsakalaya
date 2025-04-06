@@ -37,7 +37,9 @@ router.get('/view/appointments', async (req, res) => {
         user = patient;
     }
 
-    const doctor = await Doctor.findByPk(decoded.id);
+    const doctor = await Doctor.findByPk(decoded.doctorId);
+    console.log('doctor found is : ',doctor);
+    
     if (doctor) {
         role = 'doctor';
         user = doctor;
@@ -61,7 +63,7 @@ router.get('/view/appointments', async (req, res) => {
 
         // Use the correct role for filtering
         if (role === 'doctor') {
-            filter.doctorId = decoded.id;
+            filter.doctorId = decoded.doctorId;
             include.push(
                 {
                     model: Patient,
@@ -104,7 +106,6 @@ router.get('/view/appointments', async (req, res) => {
             });
     }
     catch (error) {
-        console.error(error);
         return res.status(500).json(
             {
                 success: false,
@@ -130,7 +131,6 @@ router.get('/admin/appointments', async (req, res) => {
 
         return res.status(200).json({ success: true, appointments });
     } catch (error) {
-        console.error(error);
         return res.status(500).json({ success: false, message: 'Server error' });
     }
 });
