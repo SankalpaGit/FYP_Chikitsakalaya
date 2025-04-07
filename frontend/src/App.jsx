@@ -49,21 +49,6 @@ function App() {
 
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      axios
-        .get('http://localhost:5000/api/user', {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((response) => setUser(response.data))
-        .catch(() => {
-          localStorage.removeItem('token');
-          setUser(null);
-        });
-    }
-  }, []);
-
   return (
     <Routes>
       {/* route setup for doctor user */}
@@ -138,24 +123,32 @@ function HomePageWrapper({ user, setUser }) {
     const query = new URLSearchParams(location.search);
     const token = query.get('token');
     if (token) {
+      console.log('OAuth flow detected, validating token:', token);
       localStorage.setItem('token', token);
       axios
         .get('http://localhost:5000/api/user', {
           headers: { Authorization: `Bearer ${token}` },
         })
         .then((response) => {
+          console.log('User fetched:', response.data);
           setUser(response.data);
           navigate('/'); // Clean up URL
         })
-        .catch(() => {
-          localStorage.removeItem('token');
-          navigate('/login');
+        .catch((error) => {
+          console.error('API error:', error.message, error.response?.status);
+          if (error.response?.status === 401) {
+            localStorage.removeItem('token');
+            console.log('Token removed due to 401 Unauthorized');
+            setUser(null);
+            navigate('/login');
+          } else {
+            console.log('API failed, keeping token for now');
+          }
         });
     }
   }, [location.search, navigate, setUser]);
 
   return <HomePage user={user} setUser={setUser} />;
 }
-
 
 export default App;
