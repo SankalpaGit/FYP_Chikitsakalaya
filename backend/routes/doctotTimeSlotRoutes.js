@@ -223,17 +223,19 @@ router.get('/show/time-slot/:doctorId', async (req, res) => {
         if (!doctor) {
             return res.status(404).json({ success: false, message: "Doctor not found" });
         }
+
         const appointmentType = req.query.type;
         const whereClause = { doctorId };
         if (appointmentType && ['online', 'physical'].includes(appointmentType)) {
             whereClause.appointmentType = appointmentType;
         }
 
-        const timeSlots = await TimeSlot.findAll({ where: { whereClause } });
+        const timeSlots = await TimeSlot.findAll({ where: whereClause });
         return res.status(200).json({ success: true, timeSlots });
     } catch (err) {
         return res.status(500).json({ success: false, message: 'Server error', error: err.message });
     }
 });
+
 
 module.exports = router;
