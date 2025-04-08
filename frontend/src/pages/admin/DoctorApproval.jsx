@@ -91,10 +91,9 @@ const DoctorApproval = () => {
                     />
                   </th>
                   <th className="px-6 py-3 border border-gray-300">ID</th>
-                  <th className="px-6 py-3 border border-gray-300">Email</th>
+                  <th className="px-6 py-3 border border-gray-300">Doctor Name</th>
                   <th className="px-6 py-3 border border-gray-300">Licence Number</th>
-                  <th className="px-6 py-3 border border-gray-300 text-center">Licence Document</th>
-                  <th className="px-6 py-3 border border-gray-300">Status</th>
+                  <th className="px-6 py-3 border border-gray-300 text-center">Licence Document</th> 
                   <th className="px-6 py-3 border border-gray-300">Actions</th>
                 </tr>
               </thead>
@@ -122,7 +121,7 @@ const DoctorApproval = () => {
                       />
                     </td>
                     <td className="border px-6 py-4 text-center">{index + 1}</td>
-                    <td className="border px-6 py-4">{doctor.email}</td>
+                    <td className="border px-6 py-4">{doctor.firstName} {doctor.lastName}</td>
                     <td className="border px-6 py-4">{doctor.licenceNumber}</td>
                     <td className="border px-6 py-4 text-center">
                       <button
@@ -133,7 +132,7 @@ const DoctorApproval = () => {
                         <span className="hidden sm:inline">View</span>
                       </button>
                     </td>
-                    <td className="border px-6 py-4">{doctor.status}</td>
+                   
                     <td className="border px-6 py-4 text-center">
                       <button
                         onClick={() => handleApprove(doctor.id)}

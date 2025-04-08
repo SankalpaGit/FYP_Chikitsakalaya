@@ -43,6 +43,14 @@ const Appointment = sequelize.define('Appointment', {
     references: { model: Patient, key: 'id' },
     onDelete: 'CASCADE',
   },
+  isComplete: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  isCancelled: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },  
 }, {
   timestamps: true,
 });

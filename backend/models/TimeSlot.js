@@ -35,6 +35,11 @@ const TimeSlot = sequelize.define('TimeSlot', {
         type: DataTypes.TIME,
         allowNull: false,
     },
+    appointmentType: {
+        type: DataTypes.ENUM('online', 'physical'),
+        allowNull: false,
+        defaultValue: 'physical',
+    },
 }, {
     timestamps: true, // Optional: Adds createdAt and updatedAt timestamps
 });

@@ -1,5 +1,4 @@
 // routes/getAppointmentRoutes.js 
-
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { Doctor, Patient, DoctorDetail } = require('../models');
@@ -7,6 +6,8 @@ const Appointment = require('../models/Appointment');
 const Payment = require('../models/Payment');
 const router = express.Router();
 
+// Route to view appointments for both patients and doctors
+// This route will be used to fetch appointments for both patients and doctors
 router.get('/view/appointments', async (req, res) => {
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
@@ -113,28 +114,6 @@ router.get('/view/appointments', async (req, res) => {
             });
     }
 });
-
-
-// route used in admin pages
-router.get('/admin/appointments', async (req, res) => {
-
-    try {
-        const appointments = await Appointment.findAll({
-            attributes: ['date', 'StartTime', 'EndTime', 'appointmentType', 'description'],
-            include: [
-                { model: Doctor, attributes: ['firstName', 'lastName'] },
-                { model: Patient, attributes: ['firstName', 'lastName'] },
-                { model: Payment, attributes: ['paymentStatus'] }
-            ],
-            order: [['date', 'ASC'], ['StartTime', 'ASC']]
-        });
-
-        return res.status(200).json({ success: true, appointments });
-    } catch (error) {
-        return res.status(500).json({ success: false, message: 'Server error' });
-    }
-});
-
 
 
 module.exports = router;

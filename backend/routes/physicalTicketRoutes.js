@@ -7,6 +7,7 @@ const Patient = require('../models/Patient');
 
 const router = express.Router();
 
+// routes to get physical tickets and display them to the patient
 router.get('/appointment/ticket', async (req, res) => {
     try {
         // Extract token from headers

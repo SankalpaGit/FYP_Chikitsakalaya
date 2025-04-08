@@ -3,7 +3,6 @@ const  Appointment  = require("../models/Appointment"); // Import Appointment mo
 const { Patient, Doctor } = require("../models"); // Import Doctor model
 const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize"); // Import Op for Sequelize comparisons
-
 const router = express.Router(); 
 
 router.post("/doctor/appointment/create", async (req, res) => {

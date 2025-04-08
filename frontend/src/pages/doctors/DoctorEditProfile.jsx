@@ -33,7 +33,7 @@ const DoctorEditProfile = () => {
                 const response = await axios.get("http://localhost:5000/api/doctor/view", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-
+                
                 if (response.data.success) {
                     const { doctor } = response.data;
                     setBasicInfo({
@@ -58,7 +58,7 @@ const DoctorEditProfile = () => {
                         setPreviewImage(`http://localhost:5000${doctor.profilePicture}`);
                     }
                 }
-                console.log(response.data);
+               
                 
             } catch (error) {
                 console.error("Error fetching doctor details:", error);
