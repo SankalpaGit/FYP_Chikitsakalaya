@@ -54,7 +54,7 @@ router.get('/view/appointments', async (req, res) => {
     }
 
     try {
-        let filter = {};
+        let filter = {isComplete: false, isCancelled: false}; // Filter for appointments
         let include = [
             {
                 model: Payment,
@@ -115,5 +115,71 @@ router.get('/view/appointments', async (req, res) => {
     }
 });
 
+// route for completed appointments
+router.get('/view/appointments/completed', async (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) return res.status(401).json({ success: false, message: 'Unauthorized: No token' });
+  
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded;
+    } catch (err) {
+      return res.status(403).json({ success: false, message: 'Invalid or expired token' });
+    }
+  
+    let role;
+    let user;
+  
+    const patient = await Patient.findByPk(decoded.id);
+    if (patient) {
+      role = 'patient';
+      user = patient;
+    }
+  
+    const doctor = await Doctor.findByPk(decoded.doctorId);
+    if (doctor) {
+      role = 'doctor';
+      user = doctor;
+    }
+  
+    if (!role) return res.status(403).json({ success: false, message: 'Unauthorized role' });
+  
+    try {
+      let filter = { isComplete: true };
+      let include = [];
+  
+      if (role === 'doctor') {
+        filter.doctorId = decoded.doctorId;
+        include.push({
+          model: Patient,
+          attributes: ['firstName', 'lastName']
+        });
+      } else if (role === 'patient') {
+        filter.patientId = decoded.id;
+        include.push({
+          model: Doctor,
+          attributes: ['firstName', 'lastName'],
+          include: [{
+            model: DoctorDetail,
+            as: 'doctorDetails',
+            attributes: ['speciality', 'hospitalAffiliation', 'profilePicture']
+          }]
+        });
+      }
+  
+      const appointments = await Appointment.findAll({
+        where: filter,
+        attributes: ['id', 'date', 'StartTime', 'EndTime', 'appointmentType', 'description', 'isComplete'],
+        include,
+        order: [['date', 'ASC'], ['StartTime', 'ASC']]
+      });
+  
+      return res.status(200).json({ success: true, appointments });
+    } catch (error) {
+      return res.status(500).json({ success: false, message: 'Server error' });
+    }
+  });
+  
 
 module.exports = router;

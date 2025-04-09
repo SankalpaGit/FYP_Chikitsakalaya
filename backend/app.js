@@ -52,6 +52,7 @@ const blogRoute = require('./routes/blogRoutes')
 const chatRoute = require('./routes/chatRoutes')
 const tasksRoute = require('./routes/toDoListRoutes')
 const OnlinePortalRoute = require('./routes/onlinePortalRoutes')
+const appointmentStatusRoute = require('./routes/appointmentStatusRoutes')
 // configuration of the dotenv variable
 dotenv.config();
 
@@ -91,6 +92,7 @@ app.use('/api', blogRoute)
 app.use('/api', chatRoute)
 app.use('/api', tasksRoute)
 app.use('/api', OnlinePortalRoute)
+app.use('/api', appointmentStatusRoute)
 
 // Authenticate and sync models
 sequelize.authenticate()

@@ -55,10 +55,12 @@ const DoctorSidebar = () => {
 
           {/* Patient History */}
           <li className="relative group flex justify-center mt-6 mb-6">
+          <Link to="/doctor/appointment/history">
             <FaUserInjured className="text-teal-600 text-2xl" /> {/* Increased icon size */}
             <span className="absolute left-2 top-1 opacity-0 group-hover:opacity-100 bg-white text-teal-800 font-semibold px-2 py-1 rounded-md shadow-lg transition-opacity duration-300 whitespace-nowrap">
               Patient History
             </span>
+            </Link>
           </li>
 
           {/* Payments */}

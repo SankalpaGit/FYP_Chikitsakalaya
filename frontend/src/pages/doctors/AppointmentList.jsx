@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import DoctorLayout from '../../layouts/DoctorLayout';
-import { FaCalendarTimes, FaSearch, FaSync } from 'react-icons/fa'; // Using react-icons for icons
+import { FaCalendarTimes, FaSearch, FaSync } from 'react-icons/fa';
 
 const AppointmentList = () => {
   const [appointments, setAppointments] = useState([]);
   const [selectedAppointments, setSelectedAppointments] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(''); // For search functionality
+  const [searchTerm, setSearchTerm] = useState('');
   const token = localStorage.getItem('token');
 
   useEffect(() => {
@@ -23,7 +23,6 @@ const AppointmentList = () => {
       const response = await axios.get('http://localhost:5000/api/view/appointments', {
         headers: { Authorization: `Bearer ${token}` },
       });
-      console.log('Fetched appointments:', response.data);
       const paidAppointments = response.data.appointments.filter(
         (appt) => appt.Payment?.paymentStatus === 'paid'
       );
@@ -33,7 +32,6 @@ const AppointmentList = () => {
     }
   };
 
-  // Handle checkbox toggle
   const handleCheckboxChange = (appointmentId) => {
     setSelectedAppointments((prev) =>
       prev.includes(appointmentId)
@@ -42,42 +40,68 @@ const AppointmentList = () => {
     );
   };
 
-  // Enhanced handler for marking as complete
+  const markAppointmentsAsComplete = async () => {
+    try {
+      await Promise.all(
+        selectedAppointments.map(async (appointmentId) => {
+          await axios.post(
+            'http://localhost:5000/api/appointment/complete',
+            { appointmentId },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+        })
+      );
+      alert('Appointments marked as complete.');
+      fetchAppointments();
+      setSelectedAppointments([]);
+    } catch (error) {
+      console.error('Error marking complete:', error.response?.data || error.message);
+      alert('Failed to mark appointments as complete.');
+    }
+  };
+
+  const deleteAppointment = async (appointmentId) => {
+    try {
+      await axios.delete('http://localhost:5000/api/appointment/delete', {
+        data: { appointmentId },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      alert('Appointment deleted.');
+      fetchAppointments();
+    } catch (error) {
+      console.error('Error deleting:', error.response?.data || error.message);
+      alert('Failed to delete appointment.');
+    }
+  };
+
   const handleMarkComplete = () => {
     if (selectedAppointments.length === 0) {
       alert('Please select at least one appointment to mark as complete.');
       return;
     }
+
     const confirm = window.confirm(
       `Are you sure you want to mark ${selectedAppointments.length} appointment(s) as complete?`
     );
     if (confirm) {
-      console.log('Marking as complete:', selectedAppointments);
-      alert(`Marked appointments as complete: ${selectedAppointments.join(', ')}`);
-      // Static: Reset selection after "completing"
-      setSelectedAppointments([]);
+      markAppointmentsAsComplete();
     }
   };
 
-  // Static handler for delete
   const handleDelete = (appointmentId) => {
     const confirm = window.confirm(`Are you sure you want to delete appointment ${appointmentId}?`);
     if (confirm) {
-      console.log('Deleting appointment:', appointmentId);
-      alert(`Deleted appointment: ${appointmentId}`);
+      deleteAppointment(appointmentId);
     }
   };
 
-  // Filter appointments based on search term
   const filteredAppointments = appointments.filter((appt) =>
-    `${appt.Patient?.firstName} ${appt.Patient?.lastName}`
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase())
+    `${appt.Patient?.firstName} ${appt.Patient?.lastName}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <DoctorLayout>
-      <div className="p-6 max-w-7xl mx-auto ">
+      <div className="p-6 max-w-7xl mx-auto">
         {/* Header with Search and Refresh */}
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-3xl font-bold text-gray-600">Appointments</h2>
@@ -108,7 +132,7 @@ const AppointmentList = () => {
             <p className="text-sm">Check back later or refresh the list!</p>
           </div>
         ) : (
-          <div className="bg-white  overflow-hidden animate-fadeIn">
+          <div className="bg-white overflow-hidden animate-fadeIn">
             {/* Action Button */}
             <div className="p-4 border-b border-gray-200 flex justify-between items-center">
               <button
@@ -140,38 +164,21 @@ const AppointmentList = () => {
                           selectedAppointments.length === filteredAppointments.length &&
                           filteredAppointments.length > 0
                         }
-                        className="h-4 w-4  rounded-md "
+                        className="h-4 w-4 rounded-md"
                       />
                     </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                      Patient
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                      Date
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                      Time
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                      Type
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                      Description
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                      Payment Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                      Action
-                    </th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Patient</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Time</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Type</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Description</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Payment Status</th>
+                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {filteredAppointments.map((appointment) => (
-                    <tr
-                      key={appointment.id}
-                      className="hover:bg-teal-50 transition duration-150"
-                    >
+                    <tr key={appointment.id} className="hover:bg-teal-50 transition duration-150">
                       <td className="px-6 py-4">
                         <input
                           type="checkbox"
