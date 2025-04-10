@@ -12,7 +12,8 @@ const PhysicalTicket = require('./PhysicalTicket');
 const Chat = require('./Chat');
 const TaskList = require('./TaskList');
 const OnlinePortal = require('./OnlinePortal');
-
+const Prescription = require('./Prescription');
+const PrescriptionMedicine = require('./PrescriptionMedicine');
 // ✅ Define Relationships
 
 // Patient → Reports
@@ -55,6 +56,13 @@ OnlinePortal.belongsTo(Appointment, { foreignKey: 'appointmentId' });
 Chat.belongsTo(Appointment, { foreignKey: 'appointmentId' });
 Appointment.hasMany(Chat, { foreignKey: 'appointmentId' });
 
+// Appointment → Prescription
+Appointment.hasOne(Prescription, { foreignKey: 'appointmentId', onDelete: 'CASCADE' });
+Prescription.belongsTo(Appointment, { foreignKey: 'appointmentId' });
+
+// Prescription → PrescriptionMedicine
+Prescription.hasMany(PrescriptionMedicine, { foreignKey: 'prescriptionId', onDelete: 'CASCADE' });
+PrescriptionMedicine.belongsTo(Prescription, { foreignKey: 'prescriptionId' });
 
 // ✅ Export Models
 module.exports = {
@@ -68,4 +76,6 @@ module.exports = {
   Payment,
   PhysicalTicket,
   Chat,
+  Prescription,
+  PrescriptionMedicine,
 };
