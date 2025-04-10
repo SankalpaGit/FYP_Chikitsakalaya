@@ -146,135 +146,135 @@ const PrescriptionMain = () => {
         </div>
 
         {/* Modal */}
-{showModal && (
-  <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
-    <div className="bg-white rounded-lg w-[600px] max-h-[90vh] overflow-y-auto p-6 relative">
-      <button
-        className="absolute top-4 right-4 text-gray-600"
-        onClick={() => setShowModal(false)}
-      >
-        <IoMdClose size={24} />
-      </button>
+        {showModal && (
+          <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center">
+            <div className="bg-white rounded-lg w-[600px] max-h-[90vh] overflow-y-auto p-6 relative">
+              <button
+                className="absolute top-4 right-4 text-gray-600"
+                onClick={() => setShowModal(false)}
+              >
+                <IoMdClose size={24} />
+              </button>
 
-      <h2 className="text-xl font-semibold mb-4">Create Prescription</h2>
+              <h2 className="text-xl font-semibold mb-4">Create Prescription</h2>
 
-    
 
-      {/* Patient */}
-      <div className="mb-4">
-        <label className="block font-medium mb-2">Patient</label>
-        <select
-          className="w-full p-3 border rounded-md"
-          onChange={(e) =>
-            setSelectedPatient(patients.find((p) => p.id === e.target.value))
-          }
-        >
-          <option value="">Select a patient</option>
-          {patients.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.name}
-            </option>
-          ))}
-        </select>
-      </div>
 
-      {/* Diagnosis */}
-      <div className="mb-4">
-        <label className="block font-medium mb-2">Diagnosis</label>
-        <input
-          type="text"
-          className="w-full p-3 border rounded-md"
-          placeholder="Enter diagnosis"
-          value={diagnosis}
-          onChange={(e) => setDiagnosis(e.target.value)}
-        />
-      </div>
+              {/* Patient */}
+              <div className="mb-4">
+                <label className="block font-medium mb-2">Patient</label>
+                <select
+                  className="w-full p-3 border rounded-md"
+                  onChange={(e) =>
+                    setSelectedPatient(patients.find((p) => p.id === e.target.value))
+                  }
+                >
+                  <option value="">Select a patient</option>
+                  {patients.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-      {/* Notes */}
-      <div className="mb-4">
-        <label className="block font-medium mb-2">Additional Notes</label>
-        <textarea
-          className="w-full p-3 border rounded-md"
-          placeholder="Enter any additional notes"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-        />
-      </div>
-
-      {/* Medications */}
-      <div className="mb-4">
-        <div className="flex justify-between items-center mb-2">
-          <h3 className="font-semibold">Medications</h3>
-          <button className="text-sm text-orange-600" onClick={addMedication}>
-            + Add
-          </button>
-        </div>
-        {medications.map((med, index) => (
-          <div key={med.id} className="border p-3 mb-3 rounded-md">
-            <div className="flex justify-between items-center">
-              <p className="font-medium">#{index + 1}</p>
-              {medications.length > 1 && (
-                <RiDeleteBin6Line
-                  className="text-red-500 cursor-pointer"
-                  onClick={() => deleteMedication(med.id)}
+              {/* Diagnosis */}
+              <div className="mb-4">
+                <label className="block font-medium mb-2">Diagnosis</label>
+                <input
+                  type="text"
+                  className="w-full p-3 border rounded-md"
+                  placeholder="Enter diagnosis"
+                  value={diagnosis}
+                  onChange={(e) => setDiagnosis(e.target.value)}
                 />
-              )}
-            </div>
+              </div>
 
-            <div className="grid grid-cols-2 gap-2 mt-2">
-              <input
-                className="border p-2 rounded"
-                placeholder="Medicine Name"
-                value={med.name}
-                onChange={(e) => handleChangeMedication(med.id, "name", e.target.value)}
-              />
-              <input
-                className="border p-2 rounded"
-                placeholder="Dosage"
-                value={med.dosage}
-                onChange={(e) => handleChangeMedication(med.id, "dosage", e.target.value)}
-              />
-              <input
-                className="border p-2 rounded"
-                placeholder="Frequency"
-                value={med.frequency}
-                onChange={(e) => handleChangeMedication(med.id, "frequency", e.target.value)}
-              />
-              <input
-                className="border p-2 rounded"
-                placeholder="Duration"
-                value={med.duration}
-                onChange={(e) => handleChangeMedication(med.id, "duration", e.target.value)}
-              />
-            </div>
+              {/* Notes */}
+              <div className="mb-4">
+                <label className="block font-medium mb-2">Additional Notes</label>
+                <textarea
+                  className="w-full p-3 border rounded-md"
+                  placeholder="Enter any additional notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
+              </div>
 
-            {/* Instructions */}
-            <div className="mt-2">
-              <textarea
-                className="w-full border p-2 rounded mt-2"
-                placeholder="Instructions"
-                value={med.instructions}
-                onChange={(e) =>
-                  handleChangeMedication(med.id, "instructions", e.target.value)
-                }
-              />
+              {/* Medications */}
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="font-semibold">Medications</h3>
+                  <button className="text-sm text-orange-600" onClick={addMedication}>
+                    + Add
+                  </button>
+                </div>
+                {medications.map((med, index) => (
+                  <div key={med.id} className="border p-3 mb-3 rounded-md">
+                    <div className="flex justify-between items-center">
+                      <p className="font-medium">#{index + 1}</p>
+                      {medications.length > 1 && (
+                        <RiDeleteBin6Line
+                          className="text-red-500 cursor-pointer"
+                          onClick={() => deleteMedication(med.id)}
+                        />
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      <input
+                        className="border p-2 rounded"
+                        placeholder="Medicine Name"
+                        value={med.name}
+                        onChange={(e) => handleChangeMedication(med.id, "name", e.target.value)}
+                      />
+                      <input
+                        className="border p-2 rounded"
+                        placeholder="Dosage"
+                        value={med.dosage}
+                        onChange={(e) => handleChangeMedication(med.id, "dosage", e.target.value)}
+                      />
+                      <input
+                        className="border p-2 rounded"
+                        placeholder="Frequency"
+                        value={med.frequency}
+                        onChange={(e) => handleChangeMedication(med.id, "frequency", e.target.value)}
+                      />
+                      <input
+                        className="border p-2 rounded"
+                        placeholder="Duration"
+                        value={med.duration}
+                        onChange={(e) => handleChangeMedication(med.id, "duration", e.target.value)}
+                      />
+                    </div>
+
+                    {/* Instructions */}
+                    <div className="mt-2">
+                      <textarea
+                        className="w-full border p-2 rounded mt-2"
+                        placeholder="Instructions"
+                        value={med.instructions}
+                        onChange={(e) =>
+                          handleChangeMedication(med.id, "instructions", e.target.value)
+                        }
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Submit */}
+              <div className="flex justify-end">
+                <button
+                  className="px-4 py-2 bg-orange-600 text-white rounded-md"
+                  onClick={handleSubmit}
+                >
+                  Submit Prescription
+                </button>
+              </div>
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* Submit */}
-      <div className="flex justify-end">
-        <button
-          className="px-4 py-2 bg-orange-600 text-white rounded-md"
-          onClick={handleSubmit}
-        >
-          Submit Prescription
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+        )}
 
       </div>
     </DoctorLayout>
