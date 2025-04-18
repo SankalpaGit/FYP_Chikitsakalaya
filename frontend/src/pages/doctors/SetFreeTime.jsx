@@ -13,6 +13,7 @@ const SetFreeTime = () => {
     const [startTime, setStartTime] = useState("");
     const [endTime, setEndTime] = useState("");
     const [appointmentType, setAppointmentType] = useState("online");
+    const [hospitalAffiliation, setHospitalAffiliation] = useState("");
     const [showModal, setShowModal] = useState(false);
     const [pendingSlot, setPendingSlot] = useState(null);
 
@@ -52,7 +53,8 @@ const SetFreeTime = () => {
                         updatedSchedule[slot.day].push({
                             startTime: convertTo12Hour(slot.startTime),
                             endTime: convertTo12Hour(slot.endTime),
-                            appointmentType: slot.appointmentType
+                            appointmentType: slot.appointmentType,
+                            hospitalAffiliation: slot.hospitalAffiliation || null,
                         });
                     });
                     setWeeklySchedule(updatedSchedule);
@@ -77,7 +79,11 @@ const SetFreeTime = () => {
 
     const addSlot = () => {
         if (startTime && endTime && appointmentType) {
-            setPendingSlot({ startTime, endTime, appointmentType });
+            if (appointmentType === "physical" && !hospitalAffiliation) {
+                alert("Hospital affiliation is required for physical appointments");
+                return;
+            }
+            setPendingSlot({ startTime, endTime, appointmentType, hospitalAffiliation });
             setShowModal(true);
         }
     };
@@ -88,13 +94,15 @@ const SetFreeTime = () => {
                 day,
                 startTime: convertTo24Hour(pendingSlot.startTime),
                 endTime: convertTo24Hour(pendingSlot.endTime),
-                appointmentType: pendingSlot.appointmentType
+                appointmentType: pendingSlot.appointmentType,
+                hospitalAffiliation: pendingSlot.appointmentType === "physical" ? pendingSlot.hospitalAffiliation : null,
             }))
             : [{
                 day: selectedDay,
                 startTime: convertTo24Hour(pendingSlot.startTime),
                 endTime: convertTo24Hour(pendingSlot.endTime),
-                appointmentType: pendingSlot.appointmentType
+                appointmentType: pendingSlot.appointmentType,
+                hospitalAffiliation: pendingSlot.appointmentType === "physical" ? pendingSlot.hospitalAffiliation : null,
             }];
 
         try {
@@ -112,7 +120,8 @@ const SetFreeTime = () => {
                     updatedSchedule[slot.day].push({
                         startTime: convertTo12Hour(slot.startTime),
                         endTime: convertTo12Hour(slot.endTime),
-                        appointmentType: slot.appointmentType
+                        appointmentType: slot.appointmentType,
+                        hospitalAffiliation: slot.hospitalAffiliation || null,
                     });
                 });
                 setWeeklySchedule(updatedSchedule);
@@ -126,6 +135,7 @@ const SetFreeTime = () => {
         setPendingSlot(null);
         setStartTime("");
         setEndTime("");
+        setHospitalAffiliation("");
     };
 
     const removeSlot = async (day, index) => {
@@ -138,7 +148,8 @@ const SetFreeTime = () => {
                     day,
                     startTime: slot.startTime,
                     endTime: slot.endTime,
-                    appointmentType: slot.appointmentType
+                    appointmentType: slot.appointmentType,
+                    hospitalAffiliation: slot.appointmentType === "physical" ? slot.hospitalAffiliation : null,
                 }
             });
 
@@ -189,11 +200,27 @@ const SetFreeTime = () => {
                     <select 
                         className="w-full border-gray-300 border rounded-md p-2 mb-4" 
                         value={appointmentType} 
-                        onChange={(e) => setAppointmentType(e.target.value)}
+                        onChange={(e) => {
+                            setAppointmentType(e.target.value);
+                            if (e.target.value === "online") setHospitalAffiliation("");
+                        }}
                     >
                         <option value="online">Online</option>
                         <option value="physical">Physical</option>
                     </select>
+
+                    {appointmentType === "physical" && (
+                        <>
+                            <label className="block text-gray-700 font-medium mb-2">Hospital Affiliation</label>
+                            <input
+                                type="text"
+                                className="w-full border-gray-300 border rounded-md p-2 mb-4"
+                                value={hospitalAffiliation}
+                                onChange={(e) => setHospitalAffiliation(e.target.value)}
+                                placeholder="Enter hospital name"
+                            />
+                        </>
+                    )}
 
                     <button 
                         className="w-full bg-orange-500 text-white font-medium py-2 rounded-md hover:bg-orange-600 transition duration-200 flex items-center justify-center gap-2" 
@@ -221,6 +248,9 @@ const SetFreeTime = () => {
                                 <span className="flex items-center gap-2">
                                     <FaClock className="text-gray-500" />
                                     {slot.startTime} - {slot.endTime} ({slot.appointmentType})
+                                    {slot.appointmentType === "physical" && slot.hospitalAffiliation && (
+                                        <span className="ml-2 text-gray-600">at {slot.hospitalAffiliation}</span>
+                                    )}
                                 </span>
                                 <button 
                                     className="text-red-500 hover:text-red-700" 

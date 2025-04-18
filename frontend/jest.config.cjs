@@ -7,5 +7,5 @@ module.exports = {
   transform: {
     '^.+\\.jsx?$': 'babel-jest',
   },
-  testMatch: ['**/src/test/**/*.test.js'],
+  testMatch: ['**/src/test/**/*.test.jsx'],
 };

@@ -35,19 +35,8 @@ const DoctorNavbar = () => {
 
             {/* Right Section: Notification and Profile */}
             <div className="flex  w-72 space-x-24 items-center">
-                {/* Notification Icon with Badge */}
-                <div className="relative cursor-pointer">
-                    <FaBell className="text-4xl text-gray-600" onClick={toggleNotificationPopup} />
-                    <span className="absolute top-0 right-0 bg-red-500 text-xs text-white rounded-full px-1">
-                        {notifications.length} {/* Update this based on actual notifications */}
-                    </span>
-                    {/* Notification Modal */}
-                    <NotificationModel
-                        isOpen={isNotificationOpen}
-                        onClose={toggleNotificationPopup}
-                        notifications={notifications}
-                    />
-                </div>
+            
+             <FaBell className="text-teal-700 hover:text-teal-600 text-3xl cursor-pointer" />
 
                 {/* Profile Section */}
                 <div className="relative">
