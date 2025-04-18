@@ -40,6 +40,11 @@ const TimeSlot = sequelize.define('TimeSlot', {
         allowNull: false,
         defaultValue: 'physical',
     },
+    //new added columns
+    hospitalAffiliation: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
 }, {
     timestamps: true, // Optional: Adds createdAt and updatedAt timestamps
 });

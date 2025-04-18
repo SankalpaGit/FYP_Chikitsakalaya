@@ -14,6 +14,7 @@ const TaskList = require('./TaskList');
 const OnlinePortal = require('./OnlinePortal');
 const Prescription = require('./Prescription');
 const PrescriptionMedicine = require('./PrescriptionMedicine');
+const Notification = require('./Notification');
 // ✅ Define Relationships
 
 // Patient → Reports
@@ -64,6 +65,14 @@ Prescription.belongsTo(Appointment, { foreignKey: 'appointmentId' });
 Prescription.hasMany(PrescriptionMedicine, { foreignKey: 'prescriptionId', onDelete: 'CASCADE' });
 PrescriptionMedicine.belongsTo(Prescription, { foreignKey: 'prescriptionId' });
 
+
+// Notification → Patient
+Patient.hasMany(Notification, { foreignKey: 'patientId', onDelete: 'CASCADE' });
+Notification.belongsTo(Patient, { foreignKey: 'patientId' });
+
+Appointment.hasMany(Notification, { foreignKey: 'appointmentId', onDelete: 'CASCADE' });
+Notification.belongsTo(Appointment, { foreignKey: 'appointmentId' });
+
 // ✅ Export Models
 module.exports = {
   sequelize,
@@ -78,4 +87,5 @@ module.exports = {
   Chat,
   Prescription,
   PrescriptionMedicine,
+  Notification,
 };

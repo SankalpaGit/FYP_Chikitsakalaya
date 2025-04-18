@@ -1,6 +1,7 @@
 const { server, io } = require('./app'); // Import server and io from app.js
 const Chat = require('./models/Chat');
 const Appointment = require('./models/Appointment');
+const cronConfig = require('./config/cronConfig');
 const { Op } = require('sequelize');
 
 const PORT = process.env.PORT || 5000;
@@ -166,6 +167,9 @@ io.on('connection', (socket) => {
     }
   });
 });
+
+// Initialize Cron Jobs
+cronConfig.initCrons();
 
 server.listen(PORT, () => {
   console.log(`API and Socket.io Server running on port ${PORT}`);
