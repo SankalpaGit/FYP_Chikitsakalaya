@@ -1,71 +1,83 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import PatientLayout from "../../layouts/PatientLayout";
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import PatientLayout from '../../layouts/PatientLayout';
+import InvoiceModal from '../../components/InvoiceModal';
 
 const PostAppointment = () => {
-    const [tickets, setTickets] = useState([]); // Changed to an array
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+  const [invoices, setInvoices] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
 
-    useEffect(() => {
-        const fetchTickets = async () => {
-            try {
-                const token = localStorage.getItem("token");
-                if (!token) throw new Error("No authentication token found");
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        console.log('Token:', token);
+        if (!token) throw new Error('No authentication token found');
 
-                const response = await axios.get(
-                    "http://localhost:5000/api/appointment/ticket",
-                    {
-                        headers: { Authorization: `Bearer ${token}` },
-                    }
-                );
+        const response = await axios.get('http://localhost:5000/api/invoices/user', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-                console.log(response.data);
-                setTickets(response.data.tickets || []); // Ensure an array is stored
-            } catch (err) {
-                setError(err.message || "Failed to load tickets");
-            } finally {
-                setLoading(false);
-            }
-        };
+        console.log('API Response:', response.data);
+        setInvoices(response.data.invoices || []);
+      } catch (err) {
+        console.error('Fetch Invoices Error:', err.response || err.message);
+        if (err.response?.status === 401) {
+          setError('Please log in again to view your invoices.');
+        } else {
+          setError(err.response?.data?.message || err.message || 'Failed to load invoices');
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
 
-        fetchTickets();
-    }, []);
+    fetchInvoices();
+  }, []);
 
-    return (
-        <PatientLayout>
-            <div className="p-10">
-                {loading ? (
-                    <p className="text-gray-600">Loading...</p>
-                ) : error ? (
-                    <p className="text-red-500">Maybe you don't have any physical appointment.</p>
-                ) : tickets.length > 0 ? ( // Check if array has items
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {tickets.map((ticket, index) => (
-                            <div 
-                                key={index} 
-                                className="relative w-80 h-96 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-300"
-                            >
-                                {/* PDF Display Without Controls */}
-                                <embed 
-                                    src={`http://localhost:5000${ticket.pdfLink}`} 
-                                    type="application/pdf" 
-                                    className="w-full h-full"
-                                />
+  const openModal = (invoice) => {
+    setSelectedInvoice(invoice);
+  };
 
-                                {/* Token Number */}
-                                <div className="absolute bottom-0 left-0 w-full bg-orange-600 bg-opacity-80 text-white text-center py-2 text-sm font-semibold">
-                                    Token: {ticket.tokenNumber}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                ) : (
-                    <p className="text-gray-600">No ticket found.</p>
-                )}
-            </div>
-        </PatientLayout>
-    );
+  const closeModal = () => {
+    setSelectedInvoice(null);
+  };
+
+  return (
+    <PatientLayout>
+      <div className="p-10">
+        {loading ? (
+          <p className="text-gray-600">Loading...</p>
+        ) : error ? (
+          <p className="text-red-500">{error}</p>
+        ) : invoices.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {invoices.map((invoice, index) => (
+              <div
+                key={index}
+                className="relative w-80 bg-white shadow-lg rounded-xl overflow-hidden border border-gray-300 p-4 cursor-pointer"
+                onClick={() => openModal(invoice)}
+              >
+               
+                <p className="text-sm text-gray-600">Token: {invoice.tokenNumber}</p>
+                <p className="text-sm text-gray-600">Date: {invoice.date} at {invoice.startTime} to {invoice.endTime} </p>
+                <p className="text-sm text-gray-600">
+                  Patient: {invoice.patientFirstName} {invoice.patientLastName}
+                </p>
+                
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-600">No invoices found for paid physical appointments.</p>
+        )}
+
+        {selectedInvoice && <InvoiceModal invoice={selectedInvoice} onClose={closeModal} />}
+      </div>
+    </PatientLayout>
+  );
 };
 
 export default PostAppointment;
