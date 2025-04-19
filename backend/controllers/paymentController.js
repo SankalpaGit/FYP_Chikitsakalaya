@@ -4,7 +4,6 @@ const Appointment = require('../models/Appointment');
 const Doctor = require('../models/Doctor');
 const DoctorDetail = require('../models/DoctorDetail');
 const { createMeetingLink } = require('./createMeetingLinkController');
-const { sendInvoice } = require('./sendInvoiceController');
 
 
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
@@ -99,11 +98,6 @@ exports.updatePaymentStatus = async (req, res) => {
         }
 
         if (paymentStatus === 'paid') {
-            if (appointment.appointmentType === 'physical') {
-                const ticket = await sendInvoice(appointment);
-                return res.status(200).json({ success: true, message: "Payment updated. Ticket generated and sent.", ticket });
-            }
-
             if (appointment.appointmentType === 'online') {
                 const meetingResponse = await createMeetingLink(appointment);
                 return res.status(200).json({ success: true, message: "Payment updated. Link generated and sent.", meetingResponse });

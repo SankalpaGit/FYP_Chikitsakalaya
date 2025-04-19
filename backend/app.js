@@ -54,6 +54,7 @@ const tasksRoute = require('./routes/toDoListRoutes')
 const OnlinePortalRoute = require('./routes/onlinePortalRoutes')
 const appointmentStatusRoute = require('./routes/appointmentStatusRoutes')
 const prescriptionRoute= require('./routes/prescriptionRoutes')
+app.use('/verify-ticket', require('./routes/verifyTicket'));
 // configuration of the dotenv variable
 dotenv.config();
 
