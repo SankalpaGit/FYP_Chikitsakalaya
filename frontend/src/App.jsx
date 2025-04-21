@@ -95,7 +95,7 @@ function App() {
       <Route path="/upload" element={<ReportUpload />} />
       <Route path='/appointment/:doctorId' element={<AppointmentForm />} />
       <Route path='/appointments' element={<DisplayAppointment />} />
-      <Route path='/payment/:appointmentID' element={<PaymentHome />} />
+      <Route path='/payment/doctor/:doctorId' element={<PaymentHome />} />
       <Route path="/post-appointments" element={<PostAppointment />} />
       <Route path="/chat" element={<ChatLayout />}>
         <Route path=":doctorId" element={<ChatBox />} />

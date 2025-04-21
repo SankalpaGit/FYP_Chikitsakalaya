@@ -33,6 +33,9 @@ const AppointmentForm = () => {
     const [successMessage, setSuccessMessage] = useState("");
     const [loading, setLoading] = useState(false);
 
+    // Log doctorId for debugging
+    console.log("DoctorId from params:", doctorId);
+
     // Fetch time slots
     useEffect(() => {
         const fetchTimeSlots = async () => {
@@ -45,9 +48,11 @@ const AppointmentForm = () => {
                     setTimeSlots(response.data.timeSlots);
                 } else {
                     setErrorMessage(response.data.message || "Failed to fetch time slots.");
+                    toast.error(response.data.message || "Failed to fetch time slots.", { autoClose: 3000 });
                 }
             } catch (error) {
                 setErrorMessage("Server error: Could not fetch time slots.");
+                toast.error("Server error: Could not fetch time slots.", { autoClose: 3000 });
             }
         };
         fetchTimeSlots();
@@ -76,6 +81,7 @@ const AppointmentForm = () => {
     const handleConfirmAppointment = async () => {
         if (!selectedDate || !selectedSlot) {
             setErrorMessage("Please select a date and time slot.");
+            toast.error("Please select a date and time slot.", { autoClose: 3000 });
             return;
         }
 
@@ -89,6 +95,7 @@ const AppointmentForm = () => {
 
             if (!selectedSlotData) {
                 setErrorMessage("Invalid time slot selected.");
+                toast.error("Invalid time slot selected.", { autoClose: 3000 });
                 setLoading(false);
                 return;
             }
@@ -104,7 +111,7 @@ const AppointmentForm = () => {
             };
 
             const response = await axios.post(
-                "http://localhost:5000/api/doctor/appointment/create",
+                "http://localhost:5000/api/doctor/appointment/validate",
                 appointmentData,
                 {
                     headers: {
@@ -115,22 +122,24 @@ const AppointmentForm = () => {
             );
 
             if (response.data.success) {
-                const appointmentID = response.data.appointment.id;
-                setSuccessMessage("Appointment booked successfully!");
-                toast.success("Appointment booked successfully!", { autoClose: 3000 });
+                setSuccessMessage("Appointment details validated! Proceeding to payment.");
+                toast.success("Appointment details validated! Redirecting to payment...", { autoClose: 3000 });
                 setSelectedDate("");
                 setSelectedSlot(null);
                 setDescription("");
                 setAppointmentType("physical");
 
                 setTimeout(() => {
-                    navigate(`/payment/${appointmentID}`);
+                    navigate(`/payment/doctor/${doctorId}`, { state: { appointmentData: response.data.data } });
                 }, 2000);
             } else {
-                setErrorMessage(response.data.message || "Failed to book appointment.");
+                setErrorMessage(response.data.message || "Failed to validate appointment.");
+                toast.error(response.data.message || "Failed to validate appointment.", { autoClose: 3000 });
             }
         } catch (error) {
-            setErrorMessage(error.response?.data?.message || "Server error: Could not book appointment.");
+            const errorMsg = error.response?.data?.message || "Server error: Could not validate appointment.";
+            setErrorMessage(errorMsg);
+            toast.error(errorMsg, { autoClose: 3000 });
         }
 
         setLoading(false);
@@ -210,7 +219,7 @@ const AppointmentForm = () => {
                         className="w-full p-3 bg-teal-800 text-white font-semibold rounded-lg hover:bg-teal-900 transition"
                         disabled={loading}
                     >
-                        {loading ? "Booking..." : "Confirm Appointment"}
+                        {loading ? "Validating..." : "Proceed to Payment"}
                     </button>
                 </div>
 
@@ -221,7 +230,7 @@ const AppointmentForm = () => {
                         <li className="flex items-start gap-3"><FaClipboardList className="w-6 h-6 text-orange-600" /> Choose appointment type.</li>
                         <li className="flex items-start gap-3"><IoTimeSharp className="w-6 h-6 text-orange-600" /> Pick an available time slot.</li>
                         <li className="flex items-start gap-3"><ImParagraphCenter className="w-6 h-6 text-orange-600" /> Describe your reason briefly.</li>
-                        <li className="flex items-start gap-3"><GiConfirmed className="w-6 h-6 text-orange-600" /> Hit 'Confirm Appointment' to finalize.</li>
+                        <li className="flex items-start gap-3"><GiConfirmed className="w-6 h-6 text-orange-600" /> Hit 'Proceed to Payment' to continue.</li>
                     </ul>
                 </div>
             </div>
