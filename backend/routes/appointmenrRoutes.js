@@ -1,10 +1,18 @@
 const express = require("express");
-const { Appointment, Patient, Doctor, TimeSlot, Notification } = require("../models");
+const { Appointment, Patient, Doctor, TimeSlot, Notification, DoctorDetail } = require("../models");
 const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const router = express.Router();
 
-router.post("/doctor/appointment/create", async (req, res) => {
+const formatTime = (timeStr) => {
+    const [hour, minute] = timeStr.split(':');
+    const h = parseInt(hour);
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const hr = h % 12 === 0 ? 12 : h % 12;
+    return `${hr}:${minute} ${ampm}`;
+};
+
+router.post("/doctor/appointment/validate", async (req, res) => {
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
         return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
@@ -25,7 +33,6 @@ router.post("/doctor/appointment/create", async (req, res) => {
 
     try {
         const { doctorId, date, StartTime, EndTime, appointmentType, description, hospitalAffiliation } = req.body;
-        const patientId = req.user.id;
 
         if (!doctorId || !date || !StartTime || !EndTime || !appointmentType || !description) {
             return res.status(400).json({ success: false, message: "All fields are required." });
@@ -52,9 +59,38 @@ router.post("/doctor/appointment/create", async (req, res) => {
             });
         }
 
-        const doctor = await Doctor.findByPk(doctorId);
+        const doctor = await Doctor.findByPk(doctorId, {
+            include: [{
+                model: DoctorDetail,
+                as: "doctorDetails",
+                attributes: ['consultationFee'],
+                where: { consultationFee: { [Op.ne]: null } }, // Only include records with non-null consultationFee
+                required: false, // Allow doctor to be returned even if no valid DoctorDetail exists
+            }],
+        });
         if (!doctor) {
             return res.status(404).json({ success: false, message: "Doctor not found" });
+        }
+
+        console.log("Doctor:", doctor.toJSON());
+        console.log("DoctorDetails:", doctor.doctorDetails?.map(detail => detail.toJSON()));
+        console.log("ConsultationFee:", doctor.doctorDetails?.[0]?.consultationFee);
+
+        if (!doctor.doctorDetails || doctor.doctorDetails.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Doctor profile incomplete: No valid details available",
+            });
+        }
+
+        // Select the first DoctorDetail with a valid consultationFee
+        const doctorDetail = doctor.doctorDetails[0];
+        const consultationFee = doctorDetail?.consultationFee;
+        if (consultationFee == null || isNaN(consultationFee) || consultationFee < 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Valid consultation fee not available for this doctor",
+            });
         }
 
         const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
@@ -95,36 +131,26 @@ router.post("/doctor/appointment/create", async (req, res) => {
             return res.status(409).json({ success: false, message: "Time slot already booked" });
         }
 
-        const newAppointment = await Appointment.create({
-            doctorId,
-            patientId,
-            date,
-            StartTime,
-            EndTime,
-            appointmentType,
-            description,
-            hospitalAffiliation: appointmentType === 'physical' ? hospitalAffiliation : null,
-            isComplete: false,
-            isCancelled: false,
-        });
-
-        await Notification.create({
-            patientId,
-            appointmentId: newAppointment.id,
-            message: `Appointment confirmed for ${new Date(date).toLocaleDateString()} at ${formatTime(StartTime)} ${appointmentType === 'physical' ? `at ${hospitalAffiliation}` : ''}`,
-            type: 'confirmation',
-        });
-
-        return res.status(201).json({
+        return res.status(200).json({
             success: true,
-            message: "Appointment booked successfully",
-            appointment: newAppointment,
+            message: "Appointment details validated",
+            data: {
+                doctorId,
+                patientId: req.user.id,
+                date,
+                StartTime,
+                EndTime,
+                appointmentType,
+                description,
+                hospitalAffiliation: appointmentType === 'physical' ? hospitalAffiliation : null,
+                consultationFee,
+            },
         });
     } catch (err) {
         console.error("Server Error:", err);
         return res.status(500).json({
             success: false,
-            message: "Server error: Could not create appointment",
+            message: "Server error: Could not validate appointment",
             error: err.message,
         });
     }
@@ -208,13 +234,5 @@ router.patch("/notifications/:id/read", async (req, res) => {
         });
     }
 });
-
-const formatTime = (timeStr) => {
-    const [hour, minute] = timeStr.split(':');
-    const h = parseInt(hour);
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    const hr = h % 12 === 0 ? 12 : h % 12;
-    return `${hr}:${minute} ${ampm}`;
-};
 
 module.exports = router;

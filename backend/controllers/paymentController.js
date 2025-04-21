@@ -1,112 +1,270 @@
-const Stripe = require('stripe');
-const Payment = require('../models/Payment');
-const Appointment = require('../models/Appointment');
-const Doctor = require('../models/Doctor');
-const DoctorDetail = require('../models/DoctorDetail');
-const { createMeetingLink } = require('./createMeetingLinkController');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { Appointment, Payment, Notification, Doctor, DoctorDetail, TimeSlot, Patient, sequelize } = require('../models');
+const { Op } = require('sequelize');
 
-
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
-
-exports.createPaymentIntent = async (req, res) => {
+const createPaymentIntent = async (req, res) => {
     try {
-        console.log("Received request body:", req.body);
-        const { appointmentId } = req.body;
+        const {
+            doctorId,
+            patientId,
+            date,
+            StartTime,
+            EndTime,
+            appointmentType,
+            description,
+            hospitalAffiliation,
+            consultationFee,
+        } = req.body;
 
-
-
-        if (!appointmentId) {
-            return res.status(400).json({ success: false, message: "appointmentId is required" });
+        if (!doctorId || !patientId || !consultationFee) {
+            return res.status(400).json({
+                success: false,
+                message: 'Missing required fields for payment intent.',
+            });
         }
-        console.log("Received appointmentId in backend:", appointmentId);
-
-        const appointment = await Appointment.findOne({
-            where: { id: appointmentId },
-            include: [{
-                model: Doctor,
-                include: [{ model: DoctorDetail, as: "doctorDetails", attributes: ['consultationFee'] }]
-            }]
-        });
-
-        if (!appointment) {
-            console.error("Error: Appointment not found in database!");
-            return res.status(404).json({ success: false, message: "Appointment not found" });
-        }
-
-
-
-        const consultationFees = appointment?.Doctor?.doctorDetails?.map(d => d.consultationFee);
-        console.log("All Consultation Fees:", consultationFees);
-
-        const consultationFee = consultationFees?.[0] || 0; // Take the first one
-        console.log("Selected Consultation Fee:", consultationFee);
-
-
-        console.log("Doctor Details:", appointment.Doctor);
-        console.log("DoctorDetail:", appointment.Doctor?.DoctorDetail);
-
-
-        if (!consultationFee || isNaN(consultationFee)) {
-            console.error("Error: Invalid consultation fee!", consultationFee);
-            return res.status(400).json({ success: false, message: "Invalid consultation fee" });
-        }
-
 
         const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(consultationFee * 100), // Convert to cents
+            amount: Math.round(consultationFee * 100),
             currency: 'usd',
-            metadata: { appointmentId }
+            metadata: {
+                doctorId,
+                patientId,
+                date,
+                StartTime,
+                EndTime,
+                appointmentType,
+                description,
+                hospitalAffiliation: hospitalAffiliation || '',
+                consultationFee: consultationFee.toString(),
+            },
         });
 
-        await Payment.create({
-            appointmentId,
-            amount: consultationFee,
-            paymentStatus: 'pending',
-            paymentMethod: 'stripe'
-        });
-
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             clientSecret: paymentIntent.client_secret,
-            amount: consultationFee
+            amount: consultationFee,
+            paymentIntentId: paymentIntent.id,
         });
-        console.log("Stripe Secret Key:", process.env.STRIPE_SECRET_KEY);
     } catch (error) {
         console.error('Error creating payment intent:', error);
-        res.status(500).json({ success: false, message: "Server error" });
+        return res.status(500).json({
+            success: false,
+            message: 'Server error: Could not create payment intent.',
+            error: error.message,
+        });
     }
 };
 
-// Update Payment Status After Success
-exports.updatePaymentStatus = async (req, res) => {
+const updatePaymentStatus = async (req, res) => {
+    const { paymentIntentId, paymentStatus } = req.body;
+
+    if (!paymentIntentId || !paymentStatus) {
+        return res.status(400).json({
+            success: false,
+            message: 'Payment intent ID and status are required.',
+        });
+    }
+
+    const transaction = await sequelize.transaction();
+
     try {
-        const { appointmentId, paymentStatus } = req.body;
+        const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+        console.log('PaymentIntent retrieved:', paymentIntent);
 
-        const payment = await Payment.findOne({ where: { appointmentId } });
-
-        if (!payment) {
-            return res.status(404).json({ success: false, message: "Payment record not found" });
+        if (paymentIntent.status !== 'succeeded') {
+            await transaction.rollback();
+            return res.status(400).json({
+                success: false,
+                message: 'Payment has not been successfully completed.',
+            });
         }
 
-        payment.paymentStatus = paymentStatus;
-        await payment.save();
+        const {
+            doctorId,
+            patientId,
+            date,
+            StartTime,
+            EndTime,
+            appointmentType,
+            description,
+            hospitalAffiliation,
+            consultationFee,
+        } = paymentIntent.metadata;
 
-        const appointment = await Appointment.findOne({ where: { id: appointmentId } });
+        console.log('PaymentIntent metadata:', paymentIntent.metadata);
 
-        if (!appointment) {
-            return res.status(404).json({ success: false, message: "Appointment not found" });
+        // Validate required metadata
+        if (!doctorId || !patientId || !date || !StartTime || !EndTime || !appointmentType || !consultationFee) {
+            await transaction.rollback();
+            return res.status(400).json({
+                success: false,
+                message: 'Incomplete appointment data in payment intent metadata.',
+            });
         }
 
-        if (paymentStatus === 'paid') {
-            if (appointment.appointmentType === 'online') {
-                const meetingResponse = await createMeetingLink(appointment);
-                return res.status(200).json({ success: true, message: "Payment updated. Link generated and sent.", meetingResponse });
-            }
+        // Verify Doctor and DoctorDetail
+        const doctor = await Doctor.findByPk(doctorId, {
+            include: [{
+                model: DoctorDetail,
+                as: 'doctorDetails',
+                attributes: ['consultationFee'],
+                where: { consultationFee: { [Op.ne]: null } },
+                required: false,
+            }],
+        });
+
+        if (!doctor) {
+            await transaction.rollback();
+            return res.status(404).json({
+                success: false,
+                message: 'Doctor not found.',
+            });
         }
 
-        res.status(200).json({ success: true, message: "Payment status updated" });
+        if (!doctor.doctorDetails || doctor.doctorDetails.length === 0) {
+            await transaction.rollback();
+            return res.status(400).json({
+                success: false,
+                message: 'Doctor profile incomplete: No valid details available.',
+            });
+        }
+
+        const metadataConsultationFee = parseFloat(consultationFee);
+        if (isNaN(metadataConsultationFee) || metadataConsultationFee <= 0) {
+            await transaction.rollback();
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid consultation fee in metadata.',
+            });
+        }
+
+        // Verify TimeSlot
+        const dayOfWeek = new Date(date).toLocaleDateString('en-US', { weekday: 'long' });
+        const timeSlot = await TimeSlot.findOne({
+            where: {
+                doctorId,
+                day: dayOfWeek,
+                startTime: StartTime,
+                endTime: EndTime,
+                appointmentType,
+                hospitalAffiliation: appointmentType === 'physical' ? hospitalAffiliation : null,
+            },
+        });
+
+        if (!timeSlot) {
+            await transaction.rollback();
+            return res.status(400).json({
+                success: false,
+                message: 'Selected time slot is no longer available.',
+            });
+        }
+
+        // Check for conflicting appointments
+        const existingAppointment = await Appointment.findOne({
+            where: {
+                doctorId,
+                date,
+                [Op.or]: [
+                    {
+                        [Op.and]: [
+                            { StartTime: { [Op.lte]: EndTime } },
+                            { EndTime: { [Op.gte]: StartTime } },
+                        ],
+                    },
+                ],
+            },
+        });
+
+        if (existingAppointment) {
+            await transaction.rollback();
+            return res.status(409).json({
+                success: false,
+                message: 'Time slot already booked.',
+            });
+        }
+
+        // Create Appointment
+        const appointment = await Appointment.create({
+            doctorId,
+            patientId,
+            date,
+            StartTime,
+            EndTime,
+            appointmentType,
+            description,
+            hospitalAffiliation: appointmentType === 'physical' ? hospitalAffiliation : null,
+        }, { transaction });
+
+        console.log('Created Appointment:', appointment.toJSON());
+
+        // Create Payment
+        try {
+            const payment = await Payment.create({
+                appointmentId: appointment.id,
+                amount: metadataConsultationFee,
+                paymentStatus,
+                paymentMethod: 'stripe',
+                paymentIntentId,
+            }, { transaction });
+
+            console.log('Created Payment:', payment.toJSON());
+        } catch (paymentError) {
+            console.error('Payment creation failed:', paymentError);
+            await transaction.rollback();
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to create payment record.',
+                error: paymentError.message,
+            });
+        }
+
+        // Verify Patient exists for Notification
+        const patient = await Patient.findByPk(patientId);
+        if (!patient) {
+            await transaction.rollback();
+            return res.status(404).json({
+                success: false,
+                message: 'Patient not found.',
+            });
+        }
+
+        // Create Notification
+        try {
+            const notification = await Notification.create({
+                patientId,
+                appointmentId: appointment.id,
+                message: `Your appointment on ${new Date(date).toLocaleDateString()} from ${StartTime} to ${EndTime} has been confirmed.`,
+                type: 'confirmation',
+                isRead: false,
+            }, { transaction });
+
+            console.log('Created Notification:', notification.toJSON());
+        } catch (notificationError) {
+            console.error('Notification creation failed:', notificationError);
+            await transaction.rollback();
+            return res.status(500).json({
+                success: false,
+                message: 'Failed to create notification record.',
+                error: notificationError.message,
+            });
+        }
+
+        await transaction.commit();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Payment status updated and appointment confirmed.',
+            appointmentId: appointment.id,
+        });
     } catch (error) {
-        console.error("Error updating payment status:", error);
-        res.status(500).json({ success: false, message: "Server error" });
+        console.error('Error updating payment status:', error);
+        await transaction.rollback();
+        return res.status(500).json({
+            success: false,
+            message: 'Server error: Could not update payment status or create appointment.',
+            error: error.message,
+        });
     }
 };
+
+module.exports = { createPaymentIntent, updatePaymentStatus };
