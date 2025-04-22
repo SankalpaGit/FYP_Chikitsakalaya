@@ -190,9 +190,21 @@ const AppointmentList = () => {
                       <td className="px-6 py-4 text-gray-800 font-medium">
                         {appointment.Patient?.firstName} {appointment.Patient?.lastName}
                       </td>
-                      <td className="px-6 py-4 text-gray-600">{appointment.date}</td>
+                      <td className="px-6 py-4 text-gray-600">{new Date(appointment.date).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: '2-digit',
+                      })}</td>
                       <td className="px-6 py-4 text-gray-600">
-                        {appointment.StartTime} - {appointment.EndTime}
+                        {new Date(`${appointment.date}T${appointment.StartTime}`).toLocaleTimeString('en-US', {
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true,
+                        })} - {new Date(`${appointment.date}T${appointment.EndTime}`).toLocaleTimeString('en-US', {
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true,
+                        })}
                       </td>
                       <td className="px-6 py-4 text-gray-600 capitalize">
                         {appointment.appointmentType}

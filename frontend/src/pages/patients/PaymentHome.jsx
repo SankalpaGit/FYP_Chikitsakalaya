@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import PaymentForm from "./PaymentForm";
-
 import PatientLayout from "../../layouts/PatientLayout";
 import axios from "axios";
 import { useParams, useLocation } from "react-router-dom";
