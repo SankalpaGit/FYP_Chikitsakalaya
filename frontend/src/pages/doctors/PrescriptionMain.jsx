@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import DoctorLayout from "../../layouts/DoctorLayout";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { IoMdClose } from "react-icons/io";
+import { FaUser, FaCalendarAlt, FaPills } from "react-icons/fa";
 import axios from "axios";
 
 const PrescriptionMain = () => {
@@ -99,50 +100,76 @@ const PrescriptionMain = () => {
     <DoctorLayout>
       <div className="max-w-6xl mx-auto p-6">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold">Your Prescriptions</h2>
+          <h2 className="text-2xl font-semibold text-gray-800">Your Prescriptions</h2>
           <button
-            className="bg-orange-600 text-white px-4 py-2 rounded-md"
+            className="bg-orange-600 text-white px-4 py-2 rounded-md hover:bg-orange-700 transition duration-200 shadow-sm"
             onClick={() => setShowModal(true)}
           >
             + Add Prescription
           </button>
         </div>
 
-        <div className="overflow-x-auto border rounded-md">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-100 text-left">
-              <tr>
-                <th className="px-4 py-2">Patient</th>
-                <th className="px-4 py-2">Diagnosis</th>
-                <th className="px-4 py-2">Date</th>
-                <th className="px-4 py-2">Medications</th>
-                <th className="px-4 py-2">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {prescriptions.map((p) => (
-                <tr key={p.id} className="border-t">
-                  <td className="px-4 py-2">{p.Appointment?.Patient?.firstName || "N/A"}</td>
-                  <td className="px-4 py-2">{p.diagnosis}</td>
-                  <td className="px-4 py-2">{new Date(p.createdAt).toLocaleDateString()}</td>
-                  <td className="px-4 py-2">
-                    <ul className="list-disc list-inside">
-                      {p.PrescriptionMedicines?.map((med, i) => (
-                        <li key={i}>
-                          {med.medicineName} ({med.dosage}) – {med.frequency} for {med.duration}
-                        </li>
-                      ))}
-                    </ul>
-                  </td>
-                  <td className="px-4 py-2">
-                    <button className="bg-blue-500 text-white px-3 py-1 rounded text-xs">
-                      Refill
-                    </button>
-                  </td>
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full table-auto text-md">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Patient</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Diagnosis</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
+                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Medications</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {prescriptions.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-4 text-center text-gray-500">
+                      No prescriptions found.
+                    </td>
+                  </tr>
+                ) : (
+                  prescriptions.map((p) => (
+                    <tr key={p.id} className="hover:bg-gray-50 transition duration-150 text-lg">
+                      <td className="px-6 py-4 text-gray-800 font-medium">
+                        <div className="flex items-center">
+                          <FaUser className="mr-2 text-teal-500" />
+                          {p.Appointment?.Patient?.firstName || "N/A"} {p.Appointment?.Patient?.lastName || ""}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">{p.diagnosis || "N/A"}</td>
+                      <td className="px-6 py-4 text-gray-600">
+                        <div className="flex items-center">
+                          <FaCalendarAlt className="mr-2 text-teal-500" />
+                          {new Date(p.createdAt).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "2-digit",
+                          })}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-gray-600">
+                        <div className="flex items-start">
+                          <FaPills className="mr-2 text-teal-500 mt-1" />
+                          <ul className="list-disc list-inside">
+                            {p.PrescriptionMedicines?.length > 0 ? (
+                              p.PrescriptionMedicines.map((med, i) => (
+                                <span key={i}>
+                                  {med.medicineName} ({med.dosage}) – {med.frequency} for {med.duration}
+                                </span>
+                              ))
+                            ) : (
+                              <li>No medications</li>
+                            )}
+                          </ul>
+                        </div>
+                      </td>
+                      
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Modal */}
@@ -157,8 +184,6 @@ const PrescriptionMain = () => {
               </button>
 
               <h2 className="text-xl font-semibold mb-4">Create Prescription</h2>
-
-
 
               {/* Patient */}
               <div className="mb-4">
@@ -275,7 +300,6 @@ const PrescriptionMain = () => {
             </div>
           </div>
         )}
-
       </div>
     </DoctorLayout>
   );

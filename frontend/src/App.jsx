@@ -44,6 +44,7 @@ import ReportUpload from "./pages/patients/ReportUpload";
 import Privacy from "./pages/others/Privacy";
 import TermsOfService from "./pages/others/TermsOfService";
 import CheckedPatient from "./pages/doctors/CheckedPatient";
+import Payment from "./pages/doctors/Payment";
 console.log("App Component Loaded");
 
 function App() {
@@ -66,6 +67,7 @@ function App() {
       </Route>
       <Route path="/doctor/prescription" element={<PrescriptionMain />} />
       <Route path="/doctor/appointment/history" element={<CheckedPatient/>} />
+      <Route path="doctor/payment" element={<Payment />} />
 
 
       {/* route setup for admin user */}

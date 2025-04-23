@@ -4,10 +4,12 @@ import {
   FaStethoscope, FaHospital, FaCalendarAlt, FaClock, FaUserMd, FaDollarSign
 } from 'react-icons/fa';
 import { IoIosArrowDown } from 'react-icons/io';
+import { toast } from 'react-toastify';
 import PatientLayout from '../../layouts/PatientLayout';
 
 const DisplayAppointment = () => {
   const [appointments, setAppointments] = useState([]);
+  const [meetingLinks, setMeetingLinks] = useState({});
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState('all');
   const [timeFilter, setTimeFilter] = useState('upcoming');
@@ -17,6 +19,8 @@ const DisplayAppointment = () => {
     const fetchAppointments = async () => {
       if (!token) {
         console.error('No token found.');
+        toast.error('Please log in to view appointments.', { autoClose: 3000 });
+        setLoading(false);
         return;
       }
 
@@ -26,9 +30,36 @@ const DisplayAppointment = () => {
         });
         console.log('Fetched appointments:', response.data.appointments);
 
-        setAppointments(response.data.appointments || []);
+        const appointmentsData = response.data.appointments || [];
+        setAppointments(appointmentsData);
+
+        // Fetch meeting links for online appointments
+        const onlineAppointments = appointmentsData.filter(app => app.appointmentType === 'online' && isUpcoming(app.date));
+        const meetingLinkPromises = onlineAppointments.map(async (app) => {
+          try {
+            const meetingResponse = await axios.get(
+              `http://localhost:5000/api/get-meeting-link/${app.id}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            console.log(`Meeting link for ${app.id}:`, meetingResponse.data);
+            return { id: app.id, meetingLink: meetingResponse.data.data?.meetingLink || meetingResponse.data.meetingLink || null };
+          } catch (error) {
+            console.error(`Error fetching meeting link for appointment ${app.id}:`, error.response?.data || error.message);
+            return { id: app.id, meetingLink: null };
+          }
+        });
+
+        const meetingLinksData = await Promise.all(meetingLinkPromises);
+        const meetingLinksMap = meetingLinksData.reduce((acc, { id, meetingLink }) => ({
+          ...acc,
+          [id]: meetingLink
+        }), {});
+        setMeetingLinks(meetingLinksMap);
+        console.log('Meeting Links Map:', meetingLinksMap);
+
       } catch (error) {
         console.error('Error fetching appointments:', error.response?.data || error.message);
+        toast.error('Failed to fetch appointments.', { autoClose: 3000 });
       } finally {
         setLoading(false);
       }
@@ -46,6 +77,17 @@ const DisplayAppointment = () => {
     const matchTime = timeFilter === 'upcoming' ? isUpcoming(appointment.date) : !isUpcoming(appointment.date);
     return matchType && matchTime;
   });
+
+  const handleJoinConsultation = (appointmentId) => {
+    const meetingLink = meetingLinks[appointmentId];
+    if (meetingLink) {
+      console.log(`Opening meeting link for appointment ${appointmentId}: ${meetingLink}`);
+      window.open(meetingLink, '_blank', 'noopener,noreferrer');
+    } else {
+      console.error(`No meeting link found for appointment ${appointmentId}`);
+      toast.error('Meeting link not available. Please contact support.', { autoClose: 3000 });
+    }
+  };
 
   return (
     <PatientLayout>
@@ -113,7 +155,7 @@ const DisplayAppointment = () => {
                     <img
                       src={profilePic}
                       alt="Doctor"
-                      className="w-40 h-40  rounded-md border-2 border-teal-500 object-cover"
+                      className="w-40 h-40 rounded-md border-2 border-teal-500 object-cover"
                     />
                   </div>
 
@@ -146,8 +188,7 @@ const DisplayAppointment = () => {
                       </div>
                     </div>
 
-
-                    <div className="text-md text-gray-600 ">
+                    <div className="text-md text-gray-600">
                       <div className="flex items-center mb-2 gap-2">
                         <FaCalendarAlt className="mr-1 text-2xl text-teal-500" />
                         <span>
@@ -180,41 +221,41 @@ const DisplayAppointment = () => {
                   </div>
 
                   {/* Right - Actions */}
-<div className="w-1/5 flex flex-col space-y-2 items-end">
-  {appointment.Payment?.paymentStatus === 'paid' ? (
-    <>
-      {isPrevious ? (
-        <button className="px-4 mb-28 py-3 w-8/12 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">
-          Follow-Up
-        </button>
-      ) : (
-        <button className="px-4 mb-28 py-3 w-8/12 bg-red-600 text-white rounded-md hover:bg-red-700 transition">
-          Cancel
-        </button>
-      )}
+                  <div className="w-1/5 flex flex-col space-y-2 items-end">
+                    {appointment.Payment?.paymentStatus === 'paid' ? (
+                      <>
+                        {isPrevious ? (
+                          <button className="px-4 mb-28 py-3 w-8/12 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition">
+                            Follow-Up
+                          </button>
+                        ) : (
+                          <button className="px-4 mb-28 py-3 w-8/12 bg-red-600 text-white rounded-md hover:bg-red-700 transition">
+                            Cancel
+                          </button>
+                        )}
 
-      {isOnline && (
-        <button
-          className={`px-4 py-2 w-full rounded-md transition ${
-            isPrevious
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-500 text-white hover:bg-blue-600'
-          }`}
-          disabled={isPrevious}
-        >
-          Join Consultation
-        </button>
-      )}
-    </>
-  ) : (
-    <a href={`/payment/${appointment.id}`} className="w-full">
-      <button className="px-4 py-2 w-full bg-red-500 text-white rounded-md hover:bg-red-600 transition">
-        Pay Fee
-      </button>
-    </a>
-  )}
-</div>
-
+                        {isOnline && (
+                          <button
+                            onClick={() => handleJoinConsultation(appointment.id)}
+                            className={`px-4 py-2 w-full rounded-md transition ${
+                              isPrevious
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-blue-500 text-white hover:bg-blue-600'
+                            }`}
+                            disabled={isPrevious}
+                          >
+                            Join Consultation
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      <a href={`/payment/${appointment.id}`} className="w-full">
+                        <button className="px-4 py-2 w-full bg-red-500 text-white rounded-md hover:bg-red-600 transition">
+                          Pay Fee
+                        </button>
+                      </a>
+                    )}
+                  </div>
                 </div>
               );
             })}

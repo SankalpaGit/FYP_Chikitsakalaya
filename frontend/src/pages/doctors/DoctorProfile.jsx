@@ -29,7 +29,7 @@ const DoctorProfile = () => {
             {showPopup && (
                 <div className="fixed top-20 right-4 flex items-center justify-center border rounded-md border-gray-200">
                     <div className="bg-white p-6 rounded-lg shadow-lg flex items-center space-x-6">
-                        <p className="text-lg text-gray-600">Please complete your profile, doctor!</p>
+                        <p className="text-lg text-gray-600">Want to edit your profile ?</p>
                         <button
                             className="bg-teal-600 text-white px-3 py-3 rounded-lg text-lg"
                             onClick={() => navigate('/doctor/profile/edit')}
