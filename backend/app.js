@@ -54,7 +54,9 @@ const tasksRoute = require('./routes/toDoListRoutes')
 const OnlinePortalRoute = require('./routes/onlinePortalRoutes')
 const appointmentStatusRoute = require('./routes/appointmentStatusRoutes')
 const prescriptionRoute= require('./routes/prescriptionRoutes')
+const doctorWalletRoute = require('./routes/walletRoutes');
 app.use('/verify-ticket', require('./routes/verifyTicket'));
+
 // configuration of the dotenv variable
 dotenv.config();
 
@@ -96,6 +98,7 @@ app.use('/api', tasksRoute)
 app.use('/api', OnlinePortalRoute)
 app.use('/api', appointmentStatusRoute)
 app.use('/api', prescriptionRoute)
+app.use('/api', doctorWalletRoute); 
 
 // Authenticate and sync models
 sequelize.authenticate()

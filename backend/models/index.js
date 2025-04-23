@@ -15,6 +15,8 @@ const OnlinePortal = require('./OnlinePortal');
 const Prescription = require('./Prescription');
 const PrescriptionMedicine = require('./PrescriptionMedicine');
 const Notification = require('./Notification');
+const DoctorWallet = require('./DoctorWallet');
+const WithdrawalHistory = require('./WithdrawalHistory');
 // ✅ Define Relationships
 
 // Patient → Reports
@@ -73,6 +75,16 @@ Notification.belongsTo(Patient, { foreignKey: 'patientId' });
 Appointment.hasMany(Notification, { foreignKey: 'appointmentId', onDelete: 'CASCADE' });
 Notification.belongsTo(Appointment, { foreignKey: 'appointmentId' });
 
+
+// DoctorWallet associations
+DoctorWallet.belongsTo(Doctor, { foreignKey: 'doctorId' });
+Doctor.hasOne(DoctorWallet, { foreignKey: 'doctorId' });
+
+// WithdrawalHistory associations
+WithdrawalHistory.belongsTo(Doctor, { foreignKey: 'doctorId' });
+WithdrawalHistory.belongsTo(Appointment, { foreignKey: 'appointmentId', constraints: false }); // Nullable
+Doctor.hasMany(WithdrawalHistory, { foreignKey: 'doctorId' });
+
 // ✅ Export Models
 module.exports = {
   sequelize,
@@ -88,4 +100,6 @@ module.exports = {
   Prescription,
   PrescriptionMedicine,
   Notification,
+  TaskList,
+  OnlinePortal,
 };

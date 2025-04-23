@@ -1,10 +1,3 @@
-require('@babel/register')({
-  extensions: ['.js', '.jsx'],
-  only: [
-    /backend/,
-    /frontend\/src/
-  ]
-});
 const { server, io } = require('./app'); // Import server and io from app.js
 const Chat = require('./models/Chat');
 const Appointment = require('./models/Appointment');

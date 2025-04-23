@@ -40,7 +40,7 @@ router.get('/view/appointments', async (req, res) => {
           include: [
               {
                   model: Payment,
-                  attributes: ['paymentStatus']
+                  attributes: ['paymentStatus', 'amount']
               },
               {
                   model: Patient,

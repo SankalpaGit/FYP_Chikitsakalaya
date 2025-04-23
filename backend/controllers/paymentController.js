@@ -1,6 +1,7 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { Appointment, Payment, Notification, Doctor, DoctorDetail, TimeSlot, Patient, sequelize } = require('../models');
 const { Op } = require('sequelize');
+const { createMeetingLink } = require('./createMeetingLinkController'); // Import the createMeetingLink function
 
 const createPaymentIntent = async (req, res) => {
     try {
@@ -69,7 +70,7 @@ const updatePaymentStatus = async (req, res) => {
 
     try {
         const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
-        console.log('PaymentIntent retrieved:', paymentIntent);
+        // console.log('PaymentIntent retrieved:', paymentIntent);
 
         if (paymentIntent.status !== 'succeeded') {
             await transaction.rollback();
@@ -196,6 +197,31 @@ const updatePaymentStatus = async (req, res) => {
         }, { transaction });
 
         console.log('Created Appointment:', appointment.toJSON());
+
+        // Create Meeting Link for Online Appointments
+        if (appointmentType === 'online') {
+            try {
+                const meetingResult = await createMeetingLink(appointment, transaction);
+                if (!meetingResult.success) {
+                    console.error('Meeting link creation failed:', meetingResult.message);
+                    await transaction.rollback();
+                    return res.status(500).json({
+                        success: false,
+                        message: 'Failed to create meeting link.',
+                        error: meetingResult.message,
+                    });
+                }
+                console.log('Created Meeting Link:', meetingResult.meeting.toJSON());
+            } catch (meetingError) {
+                console.error('Meeting link creation error:', meetingError);
+                await transaction.rollback();
+                return res.status(500).json({
+                    success: false,
+                    message: 'Server error: Could not create meeting link.',
+                    error: meetingError.message,
+                });
+            }
+        }
 
         // Create Payment
         try {
