@@ -33,6 +33,7 @@ const Patient = require('./models/Patient');
 const PatientReport = require('./models/PatientReport');
 const TimeSlot = require('./models/TimeSlot');
 const index = require('./models/index');
+const SearchLog = require('./models/SearchLog');
 
 // imports of the all routes file
 const doctorRoutes = require('./routes/doctorRegistrationRoutes'); 
@@ -55,6 +56,7 @@ const OnlinePortalRoute = require('./routes/onlinePortalRoutes')
 const appointmentStatusRoute = require('./routes/appointmentStatusRoutes')
 const prescriptionRoute= require('./routes/prescriptionRoutes')
 const doctorWalletRoute = require('./routes/walletRoutes');
+const searchLogRoute = require('./routes/searchLogRoutes'); // Import the search log route
 app.use('/verify-ticket', require('./routes/verifyTicket'));
 
 // configuration of the dotenv variable
@@ -99,6 +101,7 @@ app.use('/api', OnlinePortalRoute)
 app.use('/api', appointmentStatusRoute)
 app.use('/api', prescriptionRoute)
 app.use('/api', doctorWalletRoute); 
+app.use('/api', searchLogRoute)
 
 // Authenticate and sync models
 sequelize.authenticate()
