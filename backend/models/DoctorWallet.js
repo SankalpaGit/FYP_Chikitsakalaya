@@ -17,7 +17,12 @@ const DoctorWallet = sequelize.define('DoctorWallet', {
         },
     },
     balance: {
-        type: DataTypes.DECIMAL(10, 2), // Changed to DECIMAL for precision
+        type: DataTypes.DECIMAL(10, 2), 
+        allowNull: false,
+        defaultValue: 0.00,
+    },
+    remainBalance: {
+        type: DataTypes.DECIMAL(10, 2), // changes with each withdrawal
         allowNull: false,
         defaultValue: 0.00,
     },

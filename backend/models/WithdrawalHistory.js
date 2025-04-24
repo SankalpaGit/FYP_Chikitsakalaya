@@ -3,7 +3,7 @@ const sequelize = require('../config/database');
 const Doctor = require('./Doctor'); // Import Doctor model
 const Appointment = require('./Appointment'); // Import Appointment model
 
-const WithdrawalHistory = sequelize.define('WithdrawalHistory', {
+const WithdrawalHistory = sequelize.define('withdraw', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
