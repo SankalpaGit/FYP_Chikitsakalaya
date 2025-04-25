@@ -9,7 +9,7 @@ const SearchLog = require('../models/SearchLog');
 router.get('/search/doctors', optionalAuth, async (req, res) => {
   try {
     const user = req.user;
-    const { query, minFee, maxFee, city, state, minExp, maxExp } = req.query;
+    const { query, minFee, maxFee, state, minExp, maxExp } = req.query;
     const whereClause = { isApproved: true };
     const doctorDetailWhere = {};
 
@@ -28,7 +28,6 @@ router.get('/search/doctors', optionalAuth, async (req, res) => {
       if (maxFee) doctorDetailWhere.consultationFee[Op.lte] = parseFloat(maxFee);
     }
 
-    if (city) doctorDetailWhere.city = { [Op.like]: `%${city}%` };
     if (state) doctorDetailWhere.state = { [Op.like]: `%${state}%` };
 
     if (minExp || maxExp) {
@@ -74,11 +73,7 @@ router.get('/search/doctors', optionalAuth, async (req, res) => {
             'speciality',
             'experience',
             'consultationFee',
-            'hospitalAffiliation',
-            'address',
-            'city',
             'state',
-            'zipCode',
             'country',
             'profilePicture',
             'isComplete',
@@ -95,7 +90,7 @@ router.get('/search/doctors', optionalAuth, async (req, res) => {
 
     // Log search for authenticated users
     if (user && user.id) {
-      const searchFilters = { minFee, maxFee, city, state, minExp, maxExp };
+      const searchFilters = { minFee, maxFee, state, minExp, maxExp };
       const logs = doctors.map((doc) => ({
         patientId: user.id,
         doctorId: doc.id,
