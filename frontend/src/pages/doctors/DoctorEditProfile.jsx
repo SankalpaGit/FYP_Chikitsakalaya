@@ -13,11 +13,7 @@ const DoctorEditProfile = () => {
         speciality: "",
         experience: "",
         consultationFee: "",
-        hospitalAffiliation: "",
-        address: "",
-        city: "",
         state: "",
-        zipCode: "",
         country: "",
         profilePicture: "",
     });
@@ -45,11 +41,7 @@ const DoctorEditProfile = () => {
                         speciality: doctor.speciality || "",
                         experience: doctor.experience || "",
                         consultationFee: doctor.consultationFee || "",
-                        hospitalAffiliation: doctor.hospitalAffiliation || "",
-                        address: doctor.address || "",
-                        city: doctor.city || "",
                         state: doctor.state || "",
-                        zipCode: doctor.zipCode || "",
                         country: doctor.country || "",
                         profilePicture: doctor.profilePicture || "",
                     });
@@ -91,11 +83,7 @@ const DoctorEditProfile = () => {
         formData.append("speciality", detailInfo.speciality);
         formData.append("experience", detailInfo.experience);
         formData.append("consultationFee", detailInfo.consultationFee);
-        formData.append("hospitalAffiliation", detailInfo.hospitalAffiliation);
-        formData.append("address", detailInfo.address);
-        formData.append("city", detailInfo.city);
         formData.append("state", detailInfo.state);
-        formData.append("zipCode", detailInfo.zipCode);
         formData.append("country", detailInfo.country);
 
         if (detailInfo.profilePicture instanceof File) {
@@ -191,43 +179,6 @@ const DoctorEditProfile = () => {
                                 placeholder="$50"
                             />
                         </div>
-
-                        <div className="input-card relative">
-                            <label className="text-sm font-medium text-gray-700">Hospital Affiliation</label>
-                            <input
-                                type="text"
-                                name="hospitalAffiliation"
-                                value={detailInfo.hospitalAffiliation}
-                                onChange={handleDetailChange}
-                                className="border border-gray-200 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-teal-500"
-                                placeholder="City Hospital"
-                            />
-                        </div>
-
-                        <div className="input-card relative">
-                            <label className="text-sm font-medium text-gray-700">Address</label>
-                            <input
-                                type="text"
-                                name="address"
-                                value={detailInfo.address}
-                                onChange={handleDetailChange}
-                                className="border border-gray-200 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-teal-500"
-                                placeholder="123 Main St"
-                            />
-                        </div>
-
-                        <div className="input-card relative">
-                            <label className="text-sm font-medium text-gray-700">City</label>
-                            <input
-                                type="text"
-                                name="city"
-                                value={detailInfo.city}
-                                onChange={handleDetailChange}
-                                className="border border-gray-200 rounded-lg px-3 py-2 w-full focus:outline-none focus:border-teal-500"
-                                placeholder="New York"
-                            />
-                        </div>
-
                         <div className="input-card relative">
                             <label className="text-sm font-medium text-gray-700">Province</label>
                             <input

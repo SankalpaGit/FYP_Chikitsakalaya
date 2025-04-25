@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { FaHospital, FaUserMd, FaClipboardList, FaFlag, FaAddressCard, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
-import { CiHospital1 } from "react-icons/ci";
 import { GrUserExpert } from "react-icons/gr";
 import { useNavigate } from "react-router-dom";
 
@@ -50,14 +49,12 @@ const DisplaySearched = ({ searchResults }) => {
                                         {doctor.firstName} {doctor.lastName}
                                     </p>
                                     <p className='text-gray-700 font-semibold'>{doctorDetails.speciality}</p>
-                                    <div className='flex items-center mt-5'>
+                                    <div className='flex items-center mt-5 gap-2'>
+                                        <span className='font-semibold text-teal-600'>charge</span>
                                         <p className='text-orange-600 font-bold text-xl'>Rs {doctorDetails.consultationFee}</p>
                                         <span className='ml-2 font-semibold text-gray-500'>per hour</span>
                                     </div>
-                                    <div className='flex items-center mt-8 text-gray-700'>
-                                        <FaHospital className='text-orange-600 mr-2 text-2xl' />
-                                        <p>{doctorDetails.hospitalAffiliation}</p>
-                                    </div>
+                                    
                                 </div>
                                 <div className='w-2/12 flex flex-col items-center h-44'>
                                     <button
@@ -111,22 +108,17 @@ const DisplaySearched = ({ searchResults }) => {
                                                 <p className="font-semibold text-gray-700">Email :</p>
                                                 <p className="text-gray-500 ml-3">{doctor.email}</p>
                                             </div>
-                                            <div className="h-0.5 w-full bg-gray-300"></div>
-                                            <div className="flex items-center">
-                                                <CiHospital1 className="text-gray-600 mr-3" />
-                                                <p className="font-semibold text-gray-700">Hospital Address :</p>
-                                                <p className="text-gray-500 ml-3">{doctorDetails.address}</p>
-                                            </div>
                                             <div className="flex items-center">
                                                 <FaMapMarkerAlt className="text-gray-600 mr-3" />
                                                 <p className="font-semibold text-gray-700">District, Province :</p>
-                                                <p className="text-gray-500 ml-3">{doctorDetails.city}, {doctorDetails.state}</p>
+                                                <p className="text-gray-500 ml-3"> {doctorDetails.state}</p>
                                             </div>
                                             <div className="flex items-center">
                                                 <FaFlag className="text-gray-600 mr-3" />
                                                 <p className="font-semibold text-gray-700">Country :</p>
                                                 <p className="text-gray-500 ml-3">{doctorDetails.country}</p>
                                             </div>
+                                            
                                         </div>
                                     )}
 
