@@ -17,6 +17,7 @@ const PrescriptionMedicine = require('./PrescriptionMedicine');
 const Notification = require('./Notification');
 const DoctorWallet = require('./DoctorWallet');
 const WithdrawalHistory = require('./WithdrawalHistory');
+const FollowUp = require('./FollowUp'); // Assuming you have a FollowUp model
 // ✅ Define Relationships
 
 // Patient → Reports
@@ -35,6 +36,10 @@ TimeSlot.belongsTo(Doctor, { foreignKey: 'doctorId' });
 // Doctor → Appointment
 Doctor.hasMany(Appointment, { foreignKey: 'doctorId' });
 Appointment.belongsTo(Doctor, { foreignKey: 'doctorId' });
+
+// Appointment → FollowUp
+Appointment.hasMany(FollowUp, { foreignKey: 'appointmentId', onDelete: 'CASCADE' });
+FollowUp.belongsTo(Appointment, { foreignKey: 'appointmentId' });
 
 // Doctor → Tasks
 Doctor.hasMany(TaskList, { foreignKey: 'doctorId' ,  onDelete: "CASCADE"});
