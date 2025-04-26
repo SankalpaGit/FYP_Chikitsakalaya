@@ -44,17 +44,7 @@ const AdminNavbar = () => {
 
         {/* Right Section: Notification and Profile */}
         <div className="flex items-center space-x-8">
-          <div className="relative cursor-pointer">
-            <FaBell className="text-3xl text-gray-600" onClick={toggleNotificationPopup} />
-            <span className="absolute top-0 right-0 bg-red-500 text-xs text-white rounded-full px-1">
-              {notifications.length}
-            </span>
-            <NotificationModel
-              isOpen={isNotificationOpen}
-              onClose={toggleNotificationPopup}
-              notifications={notifications}
-            />
-          </div>
+          
 
           <div className="relative">
             <FaUserCircle

@@ -5,9 +5,14 @@ const Patient = require('../models/Patient');
 const router = express.Router();
 
 // Register Route (Registration API)
-router.post('/register', async (req, res) => { 
-  const { email, password, firstName, lastName } = req.body;
+router.post('/register', async (req, res) => {
+  const { email, password, firstName, lastName, isAcceptingTerms } = req.body;
   try {
+    // Check if terms are accepted
+    if (!isAcceptingTerms) {
+      return res.status(400).json({ message: 'You must accept the terms and conditions' });
+    }
+
     // Check if email already exists
     const existingUser = await Patient.findOne({ where: { email } });
     if (existingUser) return res.status(400).json({ message: 'Email already in use' });
@@ -21,6 +26,7 @@ router.post('/register', async (req, res) => {
       password: hashedPassword,
       firstName,
       lastName,
+      isAcceptingTerms: true, // Set to true since it's validated
       isVerified: true, // Automatically mark user as verified (no email verification)
       isProfileComplete: false,
     });
@@ -42,7 +48,7 @@ router.post('/login', async (req, res) => {
 
     // Compare password
     const isMatch = await bcrypt.compare(password, patient.password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
+    if (!isMatch) return res.status(400).json({ message: 'Invalid gmail or password ' });
 
     // Generate JWT
     const token = jwt.sign({ id: patient.id }, process.env.JWT_SECRET, { expiresIn: '1h' });

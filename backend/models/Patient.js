@@ -16,6 +16,10 @@ const Patient = sequelize.define('Patient', {
     type: DataTypes.STRING,
     allowNull: true, // Set to null if using OAuth only
   },
+  isAcceptingTerms: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
   googleId: {
     type: DataTypes.STRING,
     allowNull: true, // Only populated if logged in via Google OAuth

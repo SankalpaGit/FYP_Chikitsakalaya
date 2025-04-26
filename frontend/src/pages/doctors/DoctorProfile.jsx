@@ -63,15 +63,15 @@ const DoctorProfile = () => {
         if (doctorData && !doctorData.isComplete) {
             const toastTimer = setTimeout(() => {
                 toast.warning(
-                    <div className="flex items-center space-x-4 w-full">
+                    <div className="flex items-center w-full justify-between">
                         <p className="text-yellow-700 font-medium">
-                            Your profile is incomplete. Please update your details.
+                            Your profile is incomplete
                         </p>
                         <button
-                            className="bg-teal-600 text-white px-3 py-1 rounded-lg hover:bg-teal-700 transition duration-300"
+                            className="bg-teal-600 text-white  rounded-lg hover:bg-teal-700 transition duration-300"
                             onClick={() => navigate('/doctor/profile/edit')}
                         >
-                            Complete Profile
+                            Complete
                         </button>
                     </div>,
                     {

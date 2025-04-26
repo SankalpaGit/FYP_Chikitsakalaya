@@ -14,7 +14,7 @@ const DoctorUser = () => {
             try {
                 setLoading(true);
                 const response = await axios.get('http://localhost:5000/api/accepted/doctors/all');
-                setDoctors(response.data.data); // Ensure only the array is set
+                setDoctors(response.data.data); 
                 console.log(response);
                 
             } catch (err) {
@@ -39,10 +39,9 @@ const DoctorUser = () => {
                     <thead>
                         <tr className="bg-gray-200 text-gray-600">
                             <th className="w-1/12 px-4 py-2 border border-gray-300">ID</th>
+                            <th className="w-3/12 px-4 py-2 border border-gray-300">Name</th>
                             <th className="w-2/12 px-4 py-2 border border-gray-300">Email</th>
                             <th className="w-2/12 px-4 py-2 border border-gray-300">License Number</th>
-                            <th className="w-3/12 px-4 py-2 border border-gray-300">Speciality</th>
-                            <th className="w-3/12 px-4 py-2 border border-gray-300">Date Approved</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -50,12 +49,10 @@ const DoctorUser = () => {
                             doctors.map((doctor, index) => (
                                 <tr key={doctor.id} className="text-center">
                                     <td className="border px-4 py-2">{index + 1}</td>
+                                    <td className="border pz-4 py-2">{doctor.firstName} {doctor.lastName}</td>
                                     <td className="border px-4 py-2">{doctor.email}</td>
                                     <td className="border px-4 py-2">{doctor.licenseNumber}</td>
-                                    <td className="border px-4 py-2">{doctor.doctorDetail.speciality}</td>
-                                    <td className="border px-4 py-2">
-                                        {new Date(doctor.updatedAt).toLocaleDateString()}
-                                    </td>
+                                    
                                 </tr>
                             ))
                         ) : (

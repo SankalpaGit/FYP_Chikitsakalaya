@@ -7,14 +7,8 @@ router.get('/accepted/doctors/all', async (req, res) => {
     try {
         const doctors = await Doctor.findAll({
             where: { isApproved: true },
-            attributes: ['id', 'firstName', 'lastName', 'email', 'licenseNumber', 'certificate', 'createdAt', 'updatedAt'],
-            include: [
-                {
-                    model: DoctorDetail,
-                    as: 'doctorDetails',
-                    attributes: ['speciality', 'experience', 'consultationFee', 'hospitalAffiliation', 'address', 'city', 'state', 'zipCode', 'country', 'profilePicture', 'isComplete']
-                }
-            ]
+            attributes: ['id', 'firstName', 'lastName', 'email', 'licenseNumber', 'certificate'],
+
         });
 
         // Group doctors by ID and select the one with the most recent updatedAt

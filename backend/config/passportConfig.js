@@ -18,7 +18,9 @@ passport.use(new GoogleStrategy({
           email: profile.emails[0].value,
           firstName: profile.name.givenName,
           lastName: profile.name.familyName,
+          isAcceptingTerms: true,
           isVerified: true,
+          isProfileComplete: false,
         });
       }
       done(null, patient);

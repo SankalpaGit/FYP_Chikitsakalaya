@@ -204,7 +204,6 @@ router.get('/doctors/all', async (req, res) => {
   }
 });
 
-
 // POST route to login doctor
 router.post('/doctor/login', async (req, res) => {
   const { email, password } = req.body;
@@ -221,7 +220,7 @@ router.post('/doctor/login', async (req, res) => {
     const isMatch = await bcrypt.compare(password, doctor.password);
 
     if (!isMatch) {
-      return res.status(400).json({ error: 'Invalid credentials' });
+      return res.status(400).json({ error: 'Invalid gmail or password' });
     }
 
     // If the password matches, generate JWT token

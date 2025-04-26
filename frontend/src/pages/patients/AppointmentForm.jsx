@@ -60,23 +60,38 @@ const AppointmentForm = () => {
 
     // Filter slots by date
     useEffect(() => {
-        if (selectedDate) {
-            const dayOfWeek = new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long' });
-            const filtered = timeSlots.filter(slot =>
-                slot.day === dayOfWeek && slot.appointmentType === appointmentType
-            );
+    if (selectedDate) {
+        const dayOfWeek = new Date(selectedDate).toLocaleDateString('en-US', { weekday: 'long' });
+        const today = new Date().toISOString().split('T')[0];
+        const currentTime = new Date();
 
-            if (filtered.length > 0) {
-                setAvailableSlots(filtered);
-                setErrorMessage("");
-            } else {
-                setAvailableSlots([]);
-                setErrorMessage("Sorry, no slots available for this date and type.");
+        const filtered = timeSlots.filter(slot => {
+            const isCorrectDayAndType = slot.day === dayOfWeek && slot.appointmentType === appointmentType;
+
+            // If the selected date is today, filter out past time slots
+            if (selectedDate === today && isCorrectDayAndType) {
+                const [hour, minute] = slot.startTime.split(':');
+                const slotTime = new Date(selectedDate);
+                slotTime.setHours(parseInt(hour), parseInt(minute), 0, 0);
+
+                // Only include slots that are in the future
+                return slotTime > currentTime;
             }
 
-            setSelectedSlot(null);
+            return isCorrectDayAndType;
+        });
+
+        if (filtered.length > 0) {
+            setAvailableSlots(filtered);
+            setErrorMessage("");
+        } else {
+            setAvailableSlots([]);
+            setErrorMessage("Sorry, no slots available for this date and type.");
         }
-    }, [selectedDate, timeSlots]);
+
+        setSelectedSlot(null);
+    }
+}, [selectedDate, timeSlots, appointmentType]);
 
     const handleConfirmAppointment = async () => {
         if (!selectedDate || !selectedSlot) {

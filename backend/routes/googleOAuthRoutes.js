@@ -34,6 +34,7 @@ router.get('/user', authenticateToken, async (req, res) => {
       email: patient.email,
       firstName: patient.firstName,
       lastName: patient.lastName,
+      isAcceptingTerms: patient.isAcceptingTerms,
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
