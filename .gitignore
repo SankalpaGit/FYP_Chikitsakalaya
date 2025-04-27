@@ -4,6 +4,18 @@
 /backend/package-lock.json
 /backend/package.json
 
+# Ignore django related files
+venv/
+ai_model/ai_model/__pycache__/
+ai_model/ai_model/__init__.py
+ai_model/ai_model/asgi.py
+ai_model/ai_model/wsgi.py
+
+ai_model/recommendation/migrations/
+ai_model/recommendation/__init__.py
+ai_model/recommendation/__pycache__/
+
+
 /frontend/node_modules
 frontend/.env
 /backend/node_modules

@@ -1,4 +1,5 @@
 const express = require("express");
+const sequelize = require("sequelize");
 const { Appointment, Patient, Doctor, TimeSlot, Notification, DoctorDetail} = require("../models");
 const FollowUp = require("../models/FollowUp");
 const jwt = require("jsonwebtoken");

@@ -89,7 +89,7 @@ const CreateBlog = () => {
             placeholder="Enter Blog Title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
             required
           />
 
@@ -135,7 +135,7 @@ const CreateBlog = () => {
           {/* Publish Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"
+            className="w-full bg-orange-600 text-white p-3 rounded-lg hover:bg-orange-700 transition flex items-center justify-center gap-2"
           >
             <FiSend size={20} />
             {blogID ? "Update Blog" : "Publish"}

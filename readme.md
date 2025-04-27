@@ -21,3 +21,59 @@ Chikitssakalya is a comprehensive doctor appointment system designed to simplify
 
 - Node.js (v14 or above)
 - MySQL
+
+### 1. Clone the Repository and Install Dependencies
+
+```bash
+git clone https://github.com/your-username/chikitsakalaya.git
+cd chikitsakalaya
+```
+# Backend Setup
+cd backend
+npm install
+
+# Frontend Setup
+cd ../frontend
+npm install
+
+# Create a .env file inside backend/ with the following content:
+PORT=5000
+DB_HOST=localhost
+DB_USER=your_mysql_user
+DB_PASSWORD=your_mysql_password
+DB_DATABASE=chikitsakalaya
+
+# Running the Project
+cd backend
+npm run dev
+
+cd frontend
+npm run dev
+
+
+# 🖥️ Accessing the Application
+Frontend (React App): http://localhost:5173
+
+Backend (API Server): http://localhost:5000
+
+# Folder structure
+
+chikitsakalaya/
+├── backend/
+│   ├── controllers/
+│   ├── routes/
+│   ├── models/
+│   ├── config/
+│   └── app.js
+|   └── server.js
+├── frontend/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   └── App.js
+│   ├── public/
+│   └── package.json
+├── database.sql (optional)
+├── README.md
+└── package.json

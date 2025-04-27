@@ -46,7 +46,7 @@ const DisplayAppointment = () => {
         setAppointments(appointmentsData);
 
         // Fetch follow-up counts for previous appointments
-        const previousAppointments = appointmentsData.filter(app => !isUpcoming(app.date));
+        const previousAppointments = appointmentsData.filter(app => !isUpcoming(app.date, app.EndTime));
         const followUpCountPromises = previousAppointments.map(async (app) => {
           try {
             const countResponse = await axios.get(
@@ -69,7 +69,7 @@ const DisplayAppointment = () => {
         console.log('Follow-Up Counts Map:', followUpCountsMap);
 
         // Fetch meeting links for online appointments
-        const onlineAppointments = appointmentsData.filter(app => app.appointmentType === 'online' && isUpcoming(app.date));
+        const onlineAppointments = appointmentsData.filter(app => app.appointmentType === 'online' && isUpcoming(app.date, app.EndTime));
         const meetingLinkPromises = onlineAppointments.map(async (app) => {
           try {
             const meetingResponse = await axios.get(
@@ -102,8 +102,10 @@ const DisplayAppointment = () => {
     fetchAppointments();
   }, [token]);
 
-  const isUpcoming = (appointmentDate) => {
-    return new Date(appointmentDate) >= new Date(new Date().setHours(0, 0, 0, 0));
+  const isUpcoming = (appointmentDate, endTime) => {
+    const now = new Date();
+    const appointmentEnd = new Date(`${appointmentDate}T${endTime}`);
+    return appointmentEnd >= now;
   };
 
   const isToday = (appointmentDate) => {
@@ -208,7 +210,7 @@ const DisplayAppointment = () => {
 
   const filteredAppointments = appointments.filter((appointment) => {
     const matchType = typeFilter === 'all' || appointment.appointmentType === typeFilter;
-    const matchTime = timeFilter === 'upcoming' ? isUpcoming(appointment.date) : !isUpcoming(appointment.date);
+    const matchTime = timeFilter === 'upcoming' ? isUpcoming(appointment.date, appointment.EndTime) : !isUpcoming(appointment.date, appointment.EndTime);
     return matchType && matchTime && !appointment.isCancelled;
   });
 
@@ -265,7 +267,7 @@ const DisplayAppointment = () => {
                 ? `http://localhost:5000/${details.profilePicture.replace(/\\/g, '/')}`
                 : 'default-avatar.png';
 
-              const isPrevious = !isUpcoming(appointment.date);
+              const isPrevious = !isUpcoming(appointment.date, appointment.EndTime);
               const isOnline = appointment.appointmentType === 'online';
               const isAppointmentToday = isToday(appointment.date);
               const canRequestFollowUp = followUpCounts[appointment.id] < 2;
@@ -408,7 +410,7 @@ const DisplayAppointment = () => {
                 <label className="block text-sm font-medium text-gray-700">Date</label>
                 <input
                   type="date"
-                  name="releasedDate"
+                  name="requestedDate"
                   value={formData.requestedDate}
                   onChange={handleFormChange}
                   min={new Date().toISOString().split('T')[0]} // Prevent past dates
