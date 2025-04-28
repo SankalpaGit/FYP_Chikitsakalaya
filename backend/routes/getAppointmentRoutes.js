@@ -79,7 +79,6 @@ router.get('/view/appointments/patient', async (req, res) => {
       const appointments = await Appointment.findAll({
           where: {
               patientId: decoded.id,
-              isComplete: false,
               isCancelled: false
           },
           attributes: ['id', 'date', 'StartTime', 'EndTime', 'appointmentType', 'description', 'hospitalAffiliation'],

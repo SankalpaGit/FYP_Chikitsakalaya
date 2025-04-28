@@ -5,9 +5,9 @@ const Appointment = require('./Appointment'); // Assuming you have an Appointmen
 
 const FollowUp = sequelize.define('FollowUp', {
   id: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.UUID,
+    defaultValue: DataTypes.UUIDV4,
     primaryKey: true,
-    autoIncrement: true,
   },
   appointmentId: {
     type: DataTypes.UUID,
@@ -16,19 +16,6 @@ const FollowUp = sequelize.define('FollowUp', {
       model: Appointment,
       key: 'id',
     },
-  },
-  status: {
-    type: DataTypes.ENUM('pending', 'approved', 'rejected'),
-    defaultValue: 'pending',
-    allowNull: false,
-  },
-  requestDescription: {
-    type: DataTypes.TEXT,
-    allowNull: true, // Optional description from patient
-  },
-  responseMessage: {
-    type: DataTypes.TEXT,
-    allowNull: true, // Doctor's response (e.g., rejection reason)
   },
   requestedDate: {
     type: DataTypes.DATEONLY,
@@ -42,13 +29,22 @@ const FollowUp = sequelize.define('FollowUp', {
     type: DataTypes.STRING,
     allowNull: false, // e.g., "10:30"
   },
-  appointmentType: {
+   followUPType: {
     type: DataTypes.ENUM('online', 'physical'),
     allowNull: false,
   },
-  hospitalAffiliation: {
-    type: DataTypes.STRING,
-    allowNull: true, 
+  requestDescription: {
+    type: DataTypes.TEXT,
+    allowNull: true, // Optional description from patient
+  },
+  status: {
+    type: DataTypes.ENUM('pending', 'approved', 'rejected'),
+    defaultValue: 'pending',
+    allowNull: false,
+  },
+  responseMessage: {
+    type: DataTypes.TEXT,
+    allowNull: true, // Doctor's response (e.g., rejection reason)
   },
 }, {
   timestamps: true,

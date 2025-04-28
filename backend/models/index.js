@@ -17,7 +17,7 @@ const PrescriptionMedicine = require('./PrescriptionMedicine');
 const Notification = require('./Notification');
 const DoctorWallet = require('./DoctorWallet');
 const WithdrawalHistory = require('./WithdrawalHistory');
-const FollowUp = require('./FollowUp'); // Assuming you have a FollowUp model
+const FollowUp = require('./FollowUp'); 
 // ✅ Define Relationships
 
 // Patient → Reports

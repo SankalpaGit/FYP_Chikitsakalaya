@@ -1,173 +1,149 @@
-const express = require("express");
-const sequelize = require("sequelize");
-const { Appointment, Patient, Doctor, TimeSlot, Notification, DoctorDetail} = require("../models");
-const FollowUp = require("../models/FollowUp");
+const express = require('express');
 const jwt = require("jsonwebtoken");
-const { Op } = require("sequelize");
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { createMeetingLink } = require('../controllers/createMeetingLinkController');
 const router = express.Router();
+const { Appointment, Patient, Doctor } = require('../models'); // Adjust path to your models
+const FollowUp = require('../models/FollowUp');
+const verifyToken = require('../middlewares/authMiddleware'); // Adjust path to your middleware
 
-// Helper function from your original code
-const formatTime = (timeStr) => {
-    const [hour, minute] = timeStr.split(':');
-    const h = parseInt(hour);
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    const hr = h % 12 === 0 ? 12 : h % 12;
-    return `${hr}:${minute} ${ampm}`;
-};
-
-// Patient: Request a follow-up
-router.post("/appointments/:id/followup", async (req, res) => {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-        return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
-    }
-
-    let decoded;
-    try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
-    } catch (err) {
-        return res.status(403).json({ success: false, message: "Invalid or expired token" });
-    }
-
-    const transaction = await sequelize.transaction();
+// POST 
+router.post('/appointments/:appointmentId/followup', async (req, res) => {
+    const { appointmentId } = req.params;
+    const {
+        requestedDate,
+        requestedStartTime,
+        requestedEndTime,
+        appointmentType,
+        requestDescription,
+    } = req.body;
 
     try {
-        const { requestedDate, requestedStartTime, requestedEndTime, appointmentType, hospitalAffiliation, requestDescription } = req.body;
-
         // Validate required fields
         if (!requestedDate || !requestedStartTime || !requestedEndTime || !appointmentType) {
-            await transaction.rollback();
-            return res.status(400).json({ success: false, message: "Date, start time, end time, and appointment type are required" });
+            return res.status(400).json({
+                message: 'All required fields must be provided.',
+                formMessage: 'Please fill in all required fields'
+            });
         }
 
+        // Validate appointmentType
         if (!['online', 'physical'].includes(appointmentType)) {
-            await transaction.rollback();
-            return res.status(400).json({ success: false, message: "Invalid appointment type" });
+            return res.status(400).json({
+                message: 'Invalid appointment type. Must be "online" or "physical".',
+                formMessage: 'Please select a valid appointment type (online or physical)'
+            });
         }
 
-        if (appointmentType === 'physical' && !hospitalAffiliation) {
-            await transaction.rollback();
-            return res.status(400).json({ success: false, message: "Hospital affiliation is required for physical appointments" });
-        }
-
-        // Validate date
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const followUpDate = new Date(requestedDate);
-        if (followUpDate < today) {
-            await transaction.rollback();
-            return res.status(400).json({ success: false, message: "Cannot request follow-up for past dates" });
-        }
-
-        // Find the appointment
-        const appointment = await Appointment.findOne({
-            where: { id: req.params.id, patientId: decoded.id },
-            include: [
-                { 
-                    model: Doctor, 
-                    as: 'doctor', 
-                    include: [{ model: DoctorDetail, as: 'doctorDetails', attributes: ['consultationFee'] }] 
-                }
-            ],
-        });
-
+        // Check if the appointment exists
+        const appointment = await Appointment.findByPk(appointmentId);
         if (!appointment) {
-            await transaction.rollback();
-            return res.status(404).json({ success: false, message: "Appointment not found or not authorized" });
+            return res.status(404).json({
+                message: 'Appointment not found.',
+                formMessage: 'The specified appointment does not exist'
+            });
         }
 
-        // Check if appointment is completed
-        const appointmentDate = new Date(appointment.date);
-        if (appointmentDate >= today) {
-            await transaction.rollback();
-            return res.status(400).json({ success: false, message: "Follow-up can only be requested for completed appointments" });
-        }
-
-        // Check follow-up limit
-        const followUpCount = await FollowUp.count({
-            where: { appointmentId: req.params.id, status: 'approved' },
-        });
-
+        // Check follow-up request count
+        const followUpCount = await FollowUp.count({ where: { appointmentId } });
         if (followUpCount >= 2) {
-            await transaction.rollback();
-            return res.status(400).json({ success: false, message: "Maximum of two follow-ups reached for this appointment" });
-        }
-
-        // Validate time slot
-        const dayOfWeek = followUpDate.toLocaleDateString('en-US', { weekday: 'long' });
-        const timeSlot = await TimeSlot.findOne({
-            where: {
-                doctorId: appointment.doctorId,
-                day: dayOfWeek,
-                startTime: requestedStartTime,
-                endTime: requestedEndTime,
-                appointmentType,
-                hospitalAffiliation: appointmentType === 'physical' ? hospitalAffiliation : null,
-            },
-        });
-
-        if (!timeSlot) {
-            await transaction.rollback();
-            return res.status(400).json({ success: false, message: "Selected time slot is not available" });
+            return res.status(400).json({
+                message: 'Maximum follow-up request limit reached.',
+                formMessage: 'This appointment already has the maximum of 2 follow-up requests'
+            });
         }
 
         // Create follow-up request
         const followUp = await FollowUp.create({
-            appointmentId: req.params.id,
-            status: 'pending',
-            requestDescription,
+            appointmentId,
             requestedDate,
             requestedStartTime,
             requestedEndTime,
-            appointmentType,
-            hospitalAffiliation: appointmentType === 'physical' ? hospitalAffiliation : null,
-        }, { transaction });
-
-        // Notify patient
-        await Notification.create({
-            patientId: decoded.id,
-            appointmentId: req.params.id,
-            message: `Your follow-up request for ${followUpDate.toLocaleDateString()} from ${formatTime(requestedStartTime)} to ${formatTime(requestedEndTime)} has been sent.`,
-            type: 'followup_request',
-            isRead: false,
-        }, { transaction });
-
-        // Notify doctor (assuming Notification model supports doctorId)
-        await Notification.create({
-            patientId: null,
-            doctorId: appointment.doctorId,
-            appointmentId: req.params.id,
-            message: `New follow-up request from patient for ${followUpDate.toLocaleDateString()} from ${formatTime(requestedStartTime)} to ${formatTime(requestedEndTime)}.`,
-            type: 'followup_request',
-            isRead: false,
-        }, { transaction });
-
-        await transaction.commit();
-
-        return res.status(200).json({
-            success: true,
-            message: "Follow-up request sent successfully",
-            followUp,
+            followUPType: appointmentType,
+            requestDescription: requestDescription || null,
+            status: 'pending',
+            responseMessage: null,
         });
-    } catch (err) {
-        console.error("Server Error:", err);
-        await transaction.rollback();
+
+        return res.status(201).json({
+            message: 'Follow-up request created successfully.',
+            formMessage: {
+                text: 'Follow-up request submitted successfully!',
+                timeout: 5000 // 5 seconds timeout for the success message
+            },
+            data: followUp,
+        });
+    } catch (error) {
         return res.status(500).json({
-            success: false,
-            message: "Server error: Could not create follow-up request",
-            error: err.message,
+            message: 'An error occurred while creating the follow-up request.',
+            formMessage: 'An error occurred. Please try again later.',
+            error: error.message,
         });
     }
 });
 
-// Doctor: Approve or reject follow-up
-router.patch("/followups/:id/status", async (req, res) => {
-    const token = req.headers.authorization?.split(" ")[1];
+// GET for patient
+router.get('/patient', async (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
-        return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
+        return res.status(401).json({ message: 'Unauthorized access. Token is missing.' });
+    }
+    let decoded;
+    try {
+
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+    } catch (err) {
+        return res.status(403).json({ message: 'Invalid or expired token.' });
+    }
+
+    try {
+        const patient = await Patient.findByPk(req.user.id);
+        if (!patient) {
+            return res.status(404).json({ message: 'Patient not found.' });
+        }
+        const followUps = await FollowUp.findAll({
+            attributes: [
+                'requestedDate',
+                'followUPType',
+                'requestedStartTime',
+                'requestedEndTime',
+                'requestDescription',
+                'responseMessage',
+                'status'
+            ],
+            include: [
+                {
+                    model: Appointment,
+                    required: true,
+                    attributes: ['doctorId'], // 👈 load doctorId!
+                    where: { patientId: req.user.id },
+                    include: [
+                        {
+                            model: Doctor,
+                            attributes: ['firstName', 'lastName'],
+                            required: true
+                        }
+                    ]
+                }
+            ]
+        });
+        
+        return res.status(200).json({
+            message: 'Follow-up requests retrieved successfully.',
+            data: followUps,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: 'An error occurred while fetching follow-up requests.',
+            error: error.message,
+        });
+    }
+});
+
+// GET for doctor
+router.get('/doctor', async (req, res) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'Unauthorized access. Token is missing.' });
     }
 
     let decoded;
@@ -175,185 +151,100 @@ router.patch("/followups/:id/status", async (req, res) => {
         decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
     } catch (err) {
-        return res.status(403).json({ success: false, message: "Invalid or expired token" });
+        return res.status(403).json({ message: 'Invalid or expired token.' });
     }
 
-    const transaction = await sequelize.transaction();
-
     try {
-        const { status, responseMessage } = req.body;
-
-        if (!['approved', 'rejected'].includes(status)) {
-            await transaction.rollback();
-            return res.status(400).json({ success: false, message: "Status must be 'approved' or 'rejected'" });
+        const doctor = await Doctor.findByPk(req.user.doctorId);
+        if (!doctor) {
+            return res.status(404).json({ message: 'Doctor not found.' });
         }
 
-        // Find the follow-up request
-        const followUp = await FollowUp.findOne({
-            where: { id: req.params.id },
-            include: [
-                { 
-                    model: Appointment, 
-                    as: 'appointment', 
-                    include: [
-                        { 
-                            model: Doctor, 
-                            as: 'doctor', 
-                            include: [{ model: DoctorDetail, as: 'doctorDetails', attributes: ['consultationFee'] }] 
-                        },
-                        { model: Patient, as: 'patient' }
-                    ] 
-                },
+        const followUps = await FollowUp.findAll({
+            attributes: [
+                'requestedDate',
+                'followUPType',
+                'requestedStartTime',
+                'requestedEndTime',
+                'requestDescription',
+                'responseMessage',
+                'status'
             ],
+            include: [
+                {
+                    model: Appointment,
+                    required: true,
+                    attributes: ['patientId'], // Load patientId instead
+                    where: { doctorId: req.user.doctorId }, // Important filtering!
+                    include: [
+                        {
+                            model: Patient,
+                            attributes: ['firstName', 'lastName'],
+                            required: true
+                        }
+                    ]
+                }
+            ]
+        });
+
+        return res.status(200).json({
+            message: 'Follow-up requests retrieved successfully.',
+            data: followUps,
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            message: 'An error occurred while fetching follow-up requests.',
+            error: error.message,
+        });
+    }
+});
+
+// Accept a follow-up
+router.post('/followups/:id/accept', async (req, res) => {
+    const { id } = req.params;
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+        return res.status(401).json({ message: 'Unauthorized access. Token is missing.' });
+    }
+    let decoded;
+    try {
+        decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+    } catch (err) {   
+        return res.status(403).json({ message: 'Invalid or expired token.' });
+    }
+
+    try {
+        const followUp = await FollowUp.findByPk(id, {
+            include: {
+                model: Appointment,
+                where: { doctorId: req.user.doctorId }
+            }
         });
 
         if (!followUp) {
-            await transaction.rollback();
-            return res.status(404).json({ success: false, message: "Follow-up request not found" });
+            return res.status(404).json({ message: 'Follow-up request not found.' });
         }
 
-        // Verify doctor
-        if (followUp.appointment.doctorId !== decoded.id) {
-            await transaction.rollback();
-            return res.status(403).json({ success: false, message: "Not authorized to manage this follow-up" });
-        }
+        followUp.status = 'approved';
+        followUp.responseMessage = null;
+        await followUp.save();
 
-        if (followUp.status !== 'pending') {
-            await transaction.rollback();
-            return res.status(400).json({ success: false, message: "Follow-up request is no longer pending" });
-        }
-
-        followUp.status = status;
-        followUp.responseMessage = responseMessage || null;
-        await followUp.save({ transaction });
-
-        if (status === 'rejected') {
-            // Notify patient
-            await Notification.create({
-                patientId: followUp.appointment.patientId,
-                appointmentId: followUp.appointmentId,
-                message: `Your follow-up request for ${new Date(followUp.requestedDate).toLocaleDateString()} was rejected. ${responseMessage || ''}`,
-                type: 'followup_rejected',
-                isRead: false,
-            }, { transaction });
-
-            await transaction.commit();
-            return res.status(200).json({
-                success: true,
-                message: "Follow-up request rejected",
-                followUp,
-            });
-        }
-
-        // For approved follow-ups, create a new appointment
-        const doctorDetail = followUp.appointment.doctor.doctorDetails?.[0];
-        const consultationFee = doctorDetail?.consultationFee;
-
-        if (!doctorDetail || consultationFee == null || isNaN(consultationFee) || consultationFee < 0) {
-            await transaction.rollback();
-            return res.status(400).json({ success: false, message: "Valid consultation fee not available" });
-        }
-
-        // Check for conflicting appointments
-        const conflictingAppointment = await Appointment.findOne({
-            where: {
-                doctorId: followUp.appointment.doctorId,
-                date: followUp.requestedDate,
-                [Op.or]: [
-                    {
-                        [Op.and]: [
-                            { StartTime: { [Op.lte]: followUp.requestedEndTime } },
-                            { EndTime: { [Op.gte]: followUp.requestedStartTime } },
-                        ],
-                    },
-                ],
-            },
-        });
-
-        if (conflictingAppointment) {
-            await transaction.rollback();
-            return res.status(409).json({ success: false, message: "Time slot already booked" });
-        }
-
-        // Create new appointment
-        const newAppointment = await Appointment.create({
-            doctorId: followUp.appointment.doctorId,
-            patientId: followUp.appointment.patientId,
-            date: followUp.requestedDate,
-            StartTime: followUp.requestedStartTime,
-            EndTime: followUp.requestedEndTime,
-            appointmentType: followUp.appointmentType,
-            description: followUp.requestDescription || 'Follow-up appointment',
-            hospitalAffiliation: followUp.hospitalAffiliation,
-        }, { transaction });
-
-        // Create meeting link for online appointments
-        if (followUp.appointmentType === 'online') {
-            const meetingResult = await createMeetingLink(newAppointment, transaction);
-            if (!meetingResult.success) {
-                await transaction.rollback();
-                return res.status(500).json({
-                    success: false,
-                    message: "Failed to create meeting link",
-                    error: meetingResult.message,
-                });
-            }
-        }
-
-        // Notify patient (payment required)
-        await Notification.create({
-            patientId: followUp.appointment.patientId,
-            appointmentId: newAppointment.id,
-            message: `Your follow-up request for ${new Date(followUp.requestedDate).toLocaleDateString()} from ${formatTime(followUp.requestedStartTime)} to ${formatTime(followUp.requestedEndTime)} was approved. Please complete the payment to confirm.`,
-            type: 'followup_approved',
-            isRead: false,
-        }, { transaction });
-
-        await transaction.commit();
-
-        // Create payment intent
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: Math.round(consultationFee * 100),
-            currency: 'usd',
-            metadata: {
-                doctorId: followUp.appointment.doctorId,
-                patientId: followUp.appointment.patientId,
-                date: followUp.requestedDate,
-                StartTime: followUp.requestedStartTime,
-                EndTime: followUp.requestedEndTime,
-                appointmentType: followUp.appointmentType,
-                description: followUp.requestDescription || '',
-                hospitalAffiliation: followUp.hospitalAffiliation || '',
-                consultationFee: consultationFee.toString(),
-                appointmentId: newAppointment.id,
-            },
-        });
-
-        return res.status(200).json({
-            success: true,
-            message: "Follow-up request approved, payment required",
-            followUp,
-            newAppointment,
-            clientSecret: paymentIntent.client_secret,
-            amount: consultationFee,
-            paymentIntentId: paymentIntent.id,
-        });
-    } catch (err) {
-        console.error("Server Error:", err);
-        await transaction.rollback();
-        return res.status(500).json({
-            success: false,
-            message: "Server error: Could not update follow-up status",
-            error: err.message,
-        });
+        return res.status(200).json({ message: 'Follow-up request accepted successfully.' });
+    } catch (error) {
+       
+        return res.status(500).json({ message: 'Failed to accept follow-up.', error: error.message });
     }
 });
 
-// Get count of approved follow-ups for an appointment
-router.get("/appointments/:id/followups/count", async (req, res) => {
-    const token = req.headers.authorization?.split(" ")[1];
+// Reject a follow-up
+router.post('/followups/:id/reject', async (req, res) => {
+    const { id } = req.params;
+    const { responseMessage } = req.body;
+    const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
-        return res.status(401).json({ success: false, message: "Unauthorized: No token provided" });
+        return res.status(401).json({ message: 'Unauthorized access. Token is missing.' });
     }
 
     let decoded;
@@ -361,35 +252,30 @@ router.get("/appointments/:id/followups/count", async (req, res) => {
         decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
     } catch (err) {
-        return res.status(403).json({ success: false, message: "Invalid or expired token" });
+       
+        return res.status(403).json({ message: 'Invalid or expired token.' });
     }
 
     try {
-        // Verify the appointment belongs to the patient
-        const appointment = await Appointment.findOne({
-            where: { id: req.params.id, patientId: decoded.id },
+        const followUp = await FollowUp.findByPk(id, {
+            include: {
+                model: Appointment,
+                where: { doctorId: req.user.doctorId }
+            }
         });
 
-        if (!appointment) {
-            return res.status(404).json({ success: false, message: "Appointment not found or not authorized" });
+        if (!followUp) {
+            return res.status(404).json({ message: 'Follow-up request not found.' });
         }
 
-        // Count approved follow-ups
-        const followUpCount = await FollowUp.count({
-            where: { appointmentId: req.params.id, status: 'approved' },
-        });
+        followUp.status = 'rejected';
+        followUp.responseMessage = responseMessage || 'Rejected without specific reason.';
+        await followUp.save();
 
-        return res.status(200).json({
-            success: true,
-            count: followUpCount,
-        });
-    } catch (err) {
-        console.error("Server Error:", err);
-        return res.status(500).json({
-            success: false,
-            message: "Server error: Could not fetch follow-up count",
-            error: err.message,
-        });
+        return res.status(200).json({ message: 'Follow-up request rejected successfully.' });
+    } catch (error) {
+       
+        return res.status(500).json({ message: 'Failed to reject follow-up.', error: error.message });
     }
 });
 
