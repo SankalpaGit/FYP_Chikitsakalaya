@@ -29,12 +29,16 @@ git clone https://github.com/your-username/chikitsakalaya.git
 cd chikitsakalaya
 ```
 # Backend Setup
+```bash
 cd backend
 npm install
+```
 
 # Frontend Setup
+```bash
 cd ../frontend
 npm install
+```
 
 # Create a .env file inside backend/ with the following content:
 PORT=5000
@@ -44,12 +48,14 @@ DB_PASSWORD=your_mysql_password
 DB_DATABASE=chikitsakalaya
 
 # Running the Project
+```bash
 cd backend
 npm run dev
-
+```
+```bash
 cd frontend
 npm run dev
-
+```
 
 # 🖥️ Accessing the Application
 Frontend (React App): http://localhost:5173
@@ -60,20 +66,21 @@ Backend (API Server): http://localhost:5000
 
 chikitsakalaya/
 ├── backend/
-│   ├── controllers/
-│   ├── routes/
-│   ├── models/
 │   ├── config/
-│   └── app.js
-|   └── server.js
+│   ├── controllers/
+│   ├── models/
+│   ├── routes/
+│   ├── app.js
+│   └── server.js
 ├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   └── App.js
 │   ├── public/
-│   └── package.json
-├── database.sql (optional)
+│   └── src/
+│       ├── components/
+│       ├── pages/
+│       ├── layouts/
+│       ├── hook/
+│       ├── services/
+│       └── App.jsx
+├── package.json
 ├── README.md
 └── package.json

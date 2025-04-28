@@ -45,6 +45,8 @@ import Privacy from "./pages/others/Privacy";
 import TermsOfService from "./pages/others/TermsOfService";
 import CheckedPatient from "./pages/doctors/CheckedPatient";
 import Payment from "./pages/doctors/Payment";
+import DoctorFollowUpPage from "./pages/doctors/DoctorFollowUpPage";
+import PatientFollowUpPage from "./pages/patients/PatientFollowUpPage";
 console.log("App Component Loaded");
 
 function App() {
@@ -68,6 +70,7 @@ function App() {
       <Route path="/doctor/prescription" element={<PrescriptionMain />} />
       <Route path="/doctor/appointment/history" element={<CheckedPatient/>} />
       <Route path="doctor/payment" element={<Payment />} />
+      <Route path="/doctor/followup" element={<DoctorFollowUpPage />} />
 
 
       {/* route setup for admin user */}
@@ -103,6 +106,7 @@ function App() {
         <Route path=":doctorId" element={<ChatBox />} />
       </Route>
       <Route path="/prescription" element={<Prescription />} />
+      <Route path="/followup" element={<PatientFollowUpPage />} />
 
 
       {/* Project Related*/}

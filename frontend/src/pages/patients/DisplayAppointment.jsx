@@ -25,6 +25,7 @@ const DisplayAppointment = () => {
     requestDescription: '',
   });
   const [formLoading, setFormLoading] = useState(false);
+  const [formMessage, setFormMessage] = useState(null); // New state for form messages
   const token = localStorage.getItem('token');
 
   useEffect(() => {
@@ -149,12 +150,14 @@ const DisplayAppointment = () => {
       hospitalAffiliation: '',
       requestDescription: '',
     });
+    setFormMessage(null); // Reset form message
     setIsModalOpen(true);
   };
 
   const handleModalClose = () => {
     setIsModalOpen(false);
     setSelectedAppointment(null);
+    setFormMessage(null);
   };
 
   const handleFormChange = (e) => {
@@ -171,11 +174,13 @@ const DisplayAppointment = () => {
 
     // Client-side validation
     if (!formData.requestedDate || !formData.requestedStartTime || !formData.requestedEndTime || !formData.appointmentType) {
-      toast.error('Please fill in all required fields.', { autoClose: 3000 });
+      setFormMessage({ text: 'Please fill in all required fields', type: 'error' });
+      setTimeout(() => setFormMessage(null), 3000); // Clear after 3 seconds
       return;
     }
     if (formData.appointmentType === 'physical' && !formData.hospitalAffiliation) {
-      toast.error('Hospital affiliation is required for physical appointments.', { autoClose: 3000 });
+      setFormMessage({ text: 'Hospital affiliation is required for physical appointments', type: 'error' });
+      setTimeout(() => setFormMessage(null), 3000); // Clear after 3 seconds
       return;
     }
 
@@ -187,11 +192,29 @@ const DisplayAppointment = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       console.log('Follow-up request response:', response.data);
-      toast.success('Follow-up request sent successfully!', { autoClose: 3000 });
-      handleModalClose();
+
+      // Display success message with timeout from response
+      const messageTimeout = response.data.formMessage?.timeout || 3000; // Use server timeout or default to 3s
+      setFormMessage({ 
+        text: response.data.formMessage?.text || 'Follow-up request sent successfully!', 
+        type: 'success' 
+      });
+      
+      // Update follow-up count for the appointment
+      setFollowUpCounts((prev) => ({
+        ...prev,
+        [selectedAppointment.id]: (prev[selectedAppointment.id] || 0) + 1,
+      }));
+
+      // Close modal after timeout
+      setTimeout(() => {
+        handleModalClose();
+      }, messageTimeout);
     } catch (error) {
       console.error('Error submitting follow-up request:', error.response?.data || error.message);
-      toast.error(error.response?.data?.message || 'Failed to send follow-up request.', { autoClose: 3000 });
+      const errorMessage = error.response?.data?.formMessage || 'Failed to send follow-up request.';
+      setFormMessage({ text: errorMessage, type: 'error' });
+      setTimeout(() => setFormMessage(null), 3000); // Clear error after 3 seconds
     } finally {
       setFormLoading(false);
     }
@@ -405,6 +428,16 @@ const DisplayAppointment = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <h2 className="text-2xl font-bold text-gray-800 mb-4">Request Follow-Up</h2>
+            {/* Form Message Display */}
+            {formMessage && (
+              <div
+                className={`mb-4 p-3 rounded-md text-center ${
+                  formMessage.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                }`}
+              >
+                {formMessage.text}
+              </div>
+            )}
             <form onSubmit={handleFormSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Date</label>
@@ -481,13 +514,16 @@ const DisplayAppointment = () => {
                   type="button"
                   onClick={handleModalClose}
                   className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition"
+                  disabled={formLoading || (formMessage?.type === 'success')} // Disable during success message
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={formLoading}
-                  className={`px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition ${formLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={formLoading || (formMessage?.type === 'success')} // Disable during success message
+                  className={`px-4 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-700 transition ${
+                    formLoading || (formMessage?.type === 'success') ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
                   {formLoading ? 'Submitting...' : 'Submit Request'}
                 </button>

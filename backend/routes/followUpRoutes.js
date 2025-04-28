@@ -126,7 +126,7 @@ router.get('/patient', async (req, res) => {
                 }
             ]
         });
-        
+
         return res.status(200).json({
             message: 'Follow-up requests retrieved successfully.',
             data: followUps,
@@ -162,6 +162,7 @@ router.get('/doctor', async (req, res) => {
 
         const followUps = await FollowUp.findAll({
             attributes: [
+                'id',
                 'requestedDate',
                 'followUPType',
                 'requestedStartTime',
@@ -200,28 +201,25 @@ router.get('/doctor', async (req, res) => {
     }
 });
 
-// Accept a follow-up
 router.post('/followups/:id/accept', async (req, res) => {
     const { id } = req.params;
     const token = req.headers.authorization?.split(' ')[1];
     if (!token) {
         return res.status(401).json({ message: 'Unauthorized access. Token is missing.' });
     }
-    let decoded;
-    try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded;
-    } catch (err) {   
-        return res.status(403).json({ message: 'Invalid or expired token.' });
-    }
 
     try {
-        const followUp = await FollowUp.findByPk(id, {
-            include: {
-                model: Appointment,
-                where: { doctorId: req.user.doctorId }
-            }
-        });
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+
+        const followUp = await FollowUp.findByPk(id, { include: Appointment });
+
+        if (!followUp) return res.status(404).json({ message: 'Follow-up not found.' });
+
+        if (followUp.Appointment.doctorId !== req.user.doctorId) {
+            return res.status(403).json({ message: 'You are not authorized to accept this follow-up.' });
+        }
+
 
         if (!followUp) {
             return res.status(404).json({ message: 'Follow-up request not found.' });
@@ -233,7 +231,6 @@ router.post('/followups/:id/accept', async (req, res) => {
 
         return res.status(200).json({ message: 'Follow-up request accepted successfully.' });
     } catch (error) {
-       
         return res.status(500).json({ message: 'Failed to accept follow-up.', error: error.message });
     }
 });
@@ -247,34 +244,25 @@ router.post('/followups/:id/reject', async (req, res) => {
         return res.status(401).json({ message: 'Unauthorized access. Token is missing.' });
     }
 
-    let decoded;
     try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
-    } catch (err) {
-       
-        return res.status(403).json({ message: 'Invalid or expired token.' });
-    }
 
-    try {
-        const followUp = await FollowUp.findByPk(id, {
-            include: {
-                model: Appointment,
-                where: { doctorId: req.user.doctorId }
-            }
-        });
+        const followUp = await FollowUp.findByPk(id, { include: Appointment });
 
-        if (!followUp) {
-            return res.status(404).json({ message: 'Follow-up request not found.' });
+        if (!followUp) return res.status(404).json({ message: 'Follow-up not found.' });
+
+        if (followUp.Appointment.doctorId !== req.user.doctorId) {
+            return res.status(403).json({ message: 'You are not authorized to accept this follow-up.' });
         }
 
+
         followUp.status = 'rejected';
-        followUp.responseMessage = responseMessage || 'Rejected without specific reason.';
+        followUp.responseMessage = responseMessage || 'No reason provided.';
         await followUp.save();
 
         return res.status(200).json({ message: 'Follow-up request rejected successfully.' });
     } catch (error) {
-       
         return res.status(500).json({ message: 'Failed to reject follow-up.', error: error.message });
     }
 });
