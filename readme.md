@@ -64,6 +64,7 @@ Backend (API Server): http://localhost:5000
 
 # Folder structure
 
+```bash
 chikitsakalaya/
 ├── backend/
 │   ├── config/
@@ -84,3 +85,4 @@ chikitsakalaya/
 ├── package.json
 ├── README.md
 └── package.json
+```

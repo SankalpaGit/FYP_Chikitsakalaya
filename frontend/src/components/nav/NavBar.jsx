@@ -130,6 +130,7 @@ const NavBar = () => {
             <a href="/chat" className="text-gray-800 hover:text-teal-700">Chat</a>
             <a href="/post-appointments" className="text-gray-800 hover:text-teal-700">Token</a>
             <a href="/prescription" className="text-gray-800 hover:text-teal-700">Prescription</a>
+            <a href="/followup" className="text-gray-800 hover:text-teal-700">followup</a>
             <div className="relative" ref={notificationRef}>
               <FaBell
                 className="text-teal-700 hover:text-teal-600 text-3xl cursor-pointer"

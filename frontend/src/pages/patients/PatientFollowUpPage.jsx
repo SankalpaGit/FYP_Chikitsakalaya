@@ -37,7 +37,7 @@ const PatientFollowUpPage = () => {
   return (
     <PatientLayout>
       <div className="w-11/12 mx-auto py-5 mb-5">
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">My Follow-Up Requests</h1>
+        <h1 className="text-3xl font-bold text-gray-600 mb-6">My Follow-Up Requests</h1>
 
         {loading ? (
           <div className="text-center text-lg text-gray-500 py-10">Loading follow-ups...</div>
