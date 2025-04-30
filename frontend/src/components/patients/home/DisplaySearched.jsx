@@ -26,7 +26,7 @@ const DisplaySearched = ({ searchResults }) => {
     };
 
     return (
-        <div className='w-8/12 bg-white shadow-lg border-2 rounded-2xl border-gray-300 px-6 py-6 h-fit'>
+        <div className='w-9/12 m-auto bg-white shadow-lg border-2 rounded-2xl border-gray-300 px-6 py-6 h-fit'>
             {searchResults?.length > 0 ? (
                 searchResults.map((doctor) => {
                     const doctorDetails = doctor.doctorDetails?.[0] || {};  // Access the first element of doctorDetails array

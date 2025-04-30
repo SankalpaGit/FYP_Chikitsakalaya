@@ -63,29 +63,7 @@ const AdminSidebar = () => {
               <span className={`${!isOpen && 'hidden'}`}>Blog</span>
             </Link>
           </li>
-          <li className="text-white flex items-center px-4 py-2 hover:bg-teal-600 cursor-pointer" onClick={toggleOffersDropdown}>
-            <FaTags className="mr-4" />
-            <span className={`${!isOpen && 'hidden'}`}>Offers</span>
-            {isOpen && <FaCaretDown className={`ml-auto transition-transform ${isOffersDropdownOpen ? 'rotate-180' : ''}`} />}
-          </li>
-          {isOffersDropdownOpen && isOpen && (
-            <ul className="ml-8 space-y-2">
-              <li className="text-white flex items-center px-4 py-2 hover:bg-teal-600 cursor-pointer">
-                <span>Patient Offers</span>
-              </li>
-              <li className="text-white flex items-center px-4 py-2 hover:bg-teal-600 cursor-pointer">
-                <span>Doctor Offers</span>
-              </li>
-            </ul>
-          )}
-          <li className="text-white flex items-center px-4 py-2 hover:bg-teal-600 cursor-pointer">
-            <FaCalendarCheck className="mr-4" />
-            <span className={`${!isOpen && 'hidden'}`}>Appointments</span>
-          </li>
-          <li className="text-white flex items-center px-4 py-2 hover:bg-teal-600 cursor-pointer">
-            <FaMoneyBillAlt className="mr-4" />
-            <span className={`${!isOpen && 'hidden'}`}>Payments</span>
-          </li>
+       
           <li className="text-white flex items-center px-4 py-2 hover:bg-teal-600 cursor-pointer">
             <FaCommentAlt className="mr-4" />
             <span className={`${!isOpen && 'hidden'}`}>Feedback</span>

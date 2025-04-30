@@ -23,7 +23,7 @@ def recommend_doctors(patient_id, speciality_limit=2, doctor_limit=5):
     with connection.cursor() as cursor:
         for speciality in top_specialities:
             query = f"""
-                SELECT d.id, d.firstName, d.lastName, dd.speciality, dd.country, dd.state
+                SELECT d.id, d.firstName, d.lastName, dd.speciality, dd.country, dd.state, dd.profilePicture, dd.consultationFee
                 FROM Doctors d
                 JOIN DoctorDetails dd ON d.id = dd.doctorId
                 WHERE dd.speciality LIKE %s
@@ -40,6 +40,8 @@ def recommend_doctors(patient_id, speciality_limit=2, doctor_limit=5):
                     'speciality': row[3],
                     'country': row[4],
                     'state': row[5],
+                    'profilePicture': row[6],
+                    'consultationFee': row[7],
                 }
                 doctors.append(doctor)
 

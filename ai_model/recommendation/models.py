@@ -12,5 +12,5 @@ class SearchLog(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'SearchLogs'  # <-- tell Django to use Node.js table
+        db_table = 'searchlogs'  # <-- tell Django to use Node.js table
         managed = False          # <-- Django will NOT create/drop/migrate this table

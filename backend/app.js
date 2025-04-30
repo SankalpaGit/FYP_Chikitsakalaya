@@ -58,6 +58,7 @@ const prescriptionRoute= require('./routes/prescriptionRoutes')
 const doctorWalletRoute = require('./routes/walletRoutes');
 const searchLogRoute = require('./routes/searchLogRoutes'); 
 const followUpRoute = require('./routes/followUpRoutes'); // Import the follow-up route
+const doctorDashboardRoutes = require('./routes/doctorDashboardRoutes');
 app.use('/verify-ticket', require('./routes/verifyTicket'));
 
 // configuration of the dotenv variable
@@ -103,6 +104,8 @@ app.use('/api', appointmentStatusRoute)
 app.use('/api', prescriptionRoute)
 app.use('/api', doctorWalletRoute); 
 app.use('/api', searchLogRoute)
+
+app.use('/api/doctor', doctorDashboardRoutes);
 app.use('/api', followUpRoute); // Use the follow-up route
 
 // Authenticate and sync models

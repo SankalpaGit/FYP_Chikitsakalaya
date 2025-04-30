@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import PatientLayout from '../../layouts/PatientLayout';
 import HeroSection from '../../components/patients/home/HeroSection';
 import HCW from '../../components/patients/home/HCW';
-import FilterSearched from '../../components/patients/home/FilterSearched';
 import DisplaySearched from '../../components/patients/home/DisplaySearched';
 import { FaStethoscope, FaUserMd, FaHeartbeat, FaTooth, FaEye, FaBrain, FaLungs, FaBone, FaBaby, FaXRay } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import Recommendation from '../../components/Recommendation';
 
 const departments = [
   { name: 'General Medicine', icon: <FaStethoscope />, path: '/general' },
@@ -64,7 +64,6 @@ const HomePage = ({ user, setUser }) => {
         <div className="flex w-10/12 bg-white m-auto py-5 mt-2 gap-6 justify-between">
           {searchResults.length > 0 ? (
             <>
-              <FilterSearched />
               <DisplaySearched searchResults={searchResults} />
             </>
           ) : (
@@ -76,7 +75,7 @@ const HomePage = ({ user, setUser }) => {
           )}
         </div>
       )}
-
+      <Recommendation />
       <HCW />
 
       <div className="relative w-full flex flex-col items-center p-8 bg-teal-50">
@@ -109,6 +108,8 @@ const HomePage = ({ user, setUser }) => {
           </button>
         </div>
       </div>
+
+
 
     </PatientLayout>
   );
